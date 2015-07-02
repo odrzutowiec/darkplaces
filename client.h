@@ -1130,16 +1130,15 @@ typedef struct client_state_s
 	// whether the replay should allow a jump at the first sequence
 	qboolean movement_replay_canjump;
 
-	// previous gun angles (for leaning effects)
-	vec3_t gunangles_prev;
-	vec3_t gunangles_highpass;
-	vec3_t gunangles_adjustment_lowpass;
-	vec3_t gunangles_adjustment_highpass;
-	// previous gun angles (for leaning effects)
-	vec3_t gunorg_prev;
-	vec3_t gunorg_highpass;
-	vec3_t gunorg_adjustment_lowpass;
-	vec3_t gunorg_adjustment_highpass;
+	// used by weapon following effect (cl_followmodel)
+	vec3_t vel_prev;
+	vec3_t acc_average;
+
+	// used by weapon leaning effect (cl_leanmodel)
+	vec3_t viewangles_prev;
+	vec3_t viewangles_vel_prev;
+	vec3_t viewangles_vel_average;
+	vec3_t viewangles_acc_average;
 
 // pitch drifting vars
 	float idealpitch;

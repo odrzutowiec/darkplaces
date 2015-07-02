@@ -50,28 +50,12 @@ cvar_t cl_bobmodel_up = {CVAR_SAVE, "cl_bobmodel_up", "0.06", "gun bobbing upwar
 cvar_t cl_bobmodel_speed = {CVAR_SAVE, "cl_bobmodel_speed", "7", "gun bobbing speed"};
 
 cvar_t cl_leanmodel = {CVAR_SAVE, "cl_leanmodel", "0", "enables gun leaning"};
-cvar_t cl_leanmodel_side_speed = {CVAR_SAVE, "cl_leanmodel_side_speed", "0.7", "gun leaning sideways speed"};
-cvar_t cl_leanmodel_side_limit = {CVAR_SAVE, "cl_leanmodel_side_limit", "35", "gun leaning sideways limit"};
-cvar_t cl_leanmodel_side_highpass1 = {CVAR_SAVE, "cl_leanmodel_side_highpass1", "30", "gun leaning sideways pre-highpass in 1/s"};
-cvar_t cl_leanmodel_side_highpass = {CVAR_SAVE, "cl_leanmodel_side_highpass", "3", "gun leaning sideways highpass in 1/s"};
-cvar_t cl_leanmodel_side_lowpass = {CVAR_SAVE, "cl_leanmodel_side_lowpass", "20", "gun leaning sideways lowpass in 1/s"};
-cvar_t cl_leanmodel_up_speed = {CVAR_SAVE, "cl_leanmodel_up_speed", "0.65", "gun leaning upward speed"};
-cvar_t cl_leanmodel_up_limit = {CVAR_SAVE, "cl_leanmodel_up_limit", "50", "gun leaning upward limit"};
-cvar_t cl_leanmodel_up_highpass1 = {CVAR_SAVE, "cl_leanmodel_up_highpass1", "5", "gun leaning upward pre-highpass in 1/s"};
-cvar_t cl_leanmodel_up_highpass = {CVAR_SAVE, "cl_leanmodel_up_highpass", "15", "gun leaning upward highpass in 1/s"};
-cvar_t cl_leanmodel_up_lowpass = {CVAR_SAVE, "cl_leanmodel_up_lowpass", "20", "gun leaning upward lowpass in 1/s"};
+cvar_t cl_leanmodel_scale = {CVAR_SAVE, "cl_leanmodel_scale", "5.5", "gun leaning scale"};
+cvar_t cl_leanmodel_averagingtime = {CVAR_SAVE, "cl_leanmodel_averagingtime", "0.15", "gun leaning averaging time"};
 
 cvar_t cl_followmodel = {CVAR_SAVE, "cl_followmodel", "0", "enables gun following"};
-cvar_t cl_followmodel_side_speed = {CVAR_SAVE, "cl_followmodel_side_speed", "0.25", "gun following sideways speed"};
-cvar_t cl_followmodel_side_limit = {CVAR_SAVE, "cl_followmodel_side_limit", "6", "gun following sideways limit"};
-cvar_t cl_followmodel_side_highpass1 = {CVAR_SAVE, "cl_followmodel_side_highpass1", "30", "gun following sideways pre-highpass in 1/s"};
-cvar_t cl_followmodel_side_highpass = {CVAR_SAVE, "cl_followmodel_side_highpass", "5", "gun following sideways highpass in 1/s"};
-cvar_t cl_followmodel_side_lowpass = {CVAR_SAVE, "cl_followmodel_side_lowpass", "10", "gun following sideways lowpass in 1/s"};
-cvar_t cl_followmodel_up_speed = {CVAR_SAVE, "cl_followmodel_up_speed", "0.5", "gun following upward speed"};
-cvar_t cl_followmodel_up_limit = {CVAR_SAVE, "cl_followmodel_up_limit", "5", "gun following upward limit"};
-cvar_t cl_followmodel_up_highpass1 = {CVAR_SAVE, "cl_followmodel_up_highpass1", "60", "gun following upward pre-highpass in 1/s"};
-cvar_t cl_followmodel_up_highpass = {CVAR_SAVE, "cl_followmodel_up_highpass", "2", "gun following upward highpass in 1/s"};
-cvar_t cl_followmodel_up_lowpass = {CVAR_SAVE, "cl_followmodel_up_lowpass", "10", "gun following upward lowpass in 1/s"};
+cvar_t cl_followmodel_scale = {CVAR_SAVE, "cl_followmodel_scale", "6", "gun following scale"};
+cvar_t cl_followmodel_averagingtime = {CVAR_SAVE, "cl_followmodel_averagingtime", "0.15", "gun following averaging time"};
 
 cvar_t cl_viewmodel_scale = {0, "cl_viewmodel_scale", "1", "changes size of gun model, lower values prevent poking into walls but cause strange artifacts on lighting and especially r_stereo/vid_stereobuffer options where the size of the gun becomes visible"};
 
@@ -387,24 +371,8 @@ static vec3_t eyeboxmaxs = { 16,  16,  32};
 
 static vec_t lowpass(vec_t value, vec_t frac, vec_t *store)
 {
-	frac = bound(0, frac, 1);
+	frac = 1 - exp(-frac);
 	return (*store = *store * (1 - frac) + value * frac);
-}
-
-static vec_t lowpass_limited(vec_t value, vec_t frac, vec_t limit, vec_t *store)
-{
-	lowpass(value, frac, store);
-	return (*store = bound(value - limit, *store, value + limit));
-}
-
-static vec_t highpass(vec_t value, vec_t frac, vec_t *store)
-{
-	return value - lowpass(value, frac, store);
-}
-
-static vec_t highpass_limited(vec_t value, vec_t frac, vec_t limit, vec_t *store)
-{
-	return value - lowpass_limited(value, frac, limit, store);
 }
 
 static void lowpass3(vec3_t value, vec_t fracx, vec_t fracy, vec_t fracz, vec3_t store, vec3_t out)
@@ -414,33 +382,17 @@ static void lowpass3(vec3_t value, vec_t fracx, vec_t fracy, vec_t fracz, vec3_t
 	out[2] = lowpass(value[2], fracz, &store[2]);
 }
 
-static void highpass3(vec3_t value, vec_t fracx, vec_t fracy, vec_t fracz, vec3_t store, vec3_t out)
-{
-	out[0] = highpass(value[0], fracx, &store[0]);
-	out[1] = highpass(value[1], fracy, &store[1]);
-	out[2] = highpass(value[2], fracz, &store[2]);
-}
-
-static void highpass3_limited(vec3_t value, vec_t fracx, vec_t limitx, vec_t fracy, vec_t limity, vec_t fracz, vec_t limitz, vec3_t store, vec3_t out)
-{
-	out[0] = highpass_limited(value[0], fracx, limitx, &store[0]);
-	out[1] = highpass_limited(value[1], fracy, limity, &store[1]);
-	out[2] = highpass_limited(value[2], fracz, limitz, &store[2]);
-}
-
 /*
  * State:
  *   cl.bob2_smooth
  *   cl.bobfall_speed
  *   cl.bobfall_swing
- *   cl.gunangles_adjustment_highpass
- *   cl.gunangles_adjustment_lowpass
- *   cl.gunangles_highpass
- *   cl.gunangles_prev
- *   cl.gunorg_adjustment_highpass
- *   cl.gunorg_adjustment_lowpass
- *   cl.gunorg_highpass
- *   cl.gunorg_prev
+ *   cl.vel_prev
+ *   cl.cl.acc_average
+ *   cl.viewangles_prev
+ *   cl.cl.viewangles_vel_prev
+ *   cl.cl.viewangles_vel_average
+ *   cl.cl.viewangles_acc_average
  *   cl.hitgroundtime
  *   cl.lastongroundtime
  *   cl.oldongrounbd
@@ -659,53 +611,60 @@ void V_CalcRefdefUsing (const matrix4x4_t *entrendermatrix, const vec3_t clviewa
 				double xyspeed, bob, bobfall;
 				float cycle;
 				vec_t frametime;
+				vec_t vel[3], acc[3], offset[3];
+				VectorClear(offset);
 
 				frametime = (cl.time - cl.calcrefdef_prevtime) * cl.movevars_timescale;
 
-				// 1. if we teleported, clear the frametime... the lowpass will recover the previous value then
-				if(teleported)
+				if(cl_followmodel.value && cl_followmodel_scale.value > 0)
 				{
-					// try to fix the first highpass; result is NOT
-					// perfect! TODO find a better fix
-					VectorCopy(viewangles, cl.gunangles_prev);
-					VectorCopy(vieworg, cl.gunorg_prev);
+					if(teleported)
+						VectorCopy(clvelocity, cl.vel_prev);
+
+					VectorSubtract(clvelocity, cl.vel_prev, acc);
+					VectorM((1 / max(0.0001, frametime)) * (0.0254 / 9.80665), acc, acc);
+
+					VectorCopy(clvelocity, cl.vel_prev);
+
+					lowpass3(acc, frametime / cl_followmodel_averagingtime.value, frametime / cl_followmodel_averagingtime.value, frametime / cl_followmodel_averagingtime.value, cl.acc_average, cl.acc_average);
+
+					offset[0] = -cl.acc_average[0] / 30 * cl_followmodel_scale.value;
+					offset[1] = -cl.acc_average[1] / 30 * cl_followmodel_scale.value;
+					offset[2] = -cl.acc_average[2] / 30 * cl_followmodel_scale.value;
+					if(fabs(offset[0]) < 0.001) offset[0] = 0;
+					if(fabs(offset[1]) < 0.001) offset[1] = 0;
+					if(fabs(offset[2]) < 0.001) offset[2] = 0;
 				}
 
-				// 2. for the gun origin, only keep the high frequency (non-DC) parts, which is "somewhat like velocity"
-				VectorAdd(cl.gunorg_highpass, cl.gunorg_prev, cl.gunorg_highpass);
-				highpass3_limited(vieworg, frametime*cl_followmodel_side_highpass1.value, cl_followmodel_side_limit.value, frametime*cl_followmodel_side_highpass1.value, cl_followmodel_side_limit.value, frametime*cl_followmodel_up_highpass1.value, cl_followmodel_up_limit.value, cl.gunorg_highpass, gunorg);
-				VectorCopy(vieworg, cl.gunorg_prev);
-				VectorSubtract(cl.gunorg_highpass, cl.gunorg_prev, cl.gunorg_highpass);
+				VectorAdd(vieworg, offset, gunorg);
+				VectorClear(offset);
 
-				// in the highpass, we _store_ the DIFFERENCE to the actual view angles...
-				VectorAdd(cl.gunangles_highpass, cl.gunangles_prev, cl.gunangles_highpass);
-				cl.gunangles_highpass[PITCH] += 360 * floor((viewangles[PITCH] - cl.gunangles_highpass[PITCH]) / 360 + 0.5);
-				cl.gunangles_highpass[YAW] += 360 * floor((viewangles[YAW] - cl.gunangles_highpass[YAW]) / 360 + 0.5);
-				cl.gunangles_highpass[ROLL] += 360 * floor((viewangles[ROLL] - cl.gunangles_highpass[ROLL]) / 360 + 0.5);
-				highpass3_limited(viewangles, frametime*cl_leanmodel_up_highpass1.value, cl_leanmodel_up_limit.value, frametime*cl_leanmodel_side_highpass1.value, cl_leanmodel_side_limit.value, 0, 0, cl.gunangles_highpass, gunangles);
-				VectorCopy(viewangles, cl.gunangles_prev);
-				VectorSubtract(cl.gunangles_highpass, cl.gunangles_prev, cl.gunangles_highpass);
+				if(cl_leanmodel.value && cl_leanmodel_scale.value > 0)
+				{
+					if(teleported)
+						VectorCopy(viewangles, cl.viewangles_prev);
 
-				// 3. calculate the RAW adjustment vectors
-				gunorg[0] *= (cl_followmodel.value ? -cl_followmodel_side_speed.value : 0);
-				gunorg[1] *= (cl_followmodel.value ? -cl_followmodel_side_speed.value : 0);
-				gunorg[2] *= (cl_followmodel.value ? -cl_followmodel_up_speed.value : 0);
+					VectorSubtract(viewangles, cl.viewangles_prev, vel);
+					if(vel[0] > 180) vel[0] -= 360; if(vel[0] < -180) vel[0] += 360;
+					if(vel[1] > 180) vel[1] -= 360; if(vel[1] < -180) vel[1] += 360;
+					VectorM((1 / max(0.0001, frametime) * (0.0254 / 9.80665)), vel, vel);
 
-				gunangles[PITCH] *= (cl_leanmodel.value ? -cl_leanmodel_up_speed.value : 0);
-				gunangles[YAW] *= (cl_leanmodel.value ? -cl_leanmodel_side_speed.value : 0);
-				gunangles[ROLL] = 0;
+					lowpass3(vel, frametime / 0.3, frametime / 0.3, 0, cl.viewangles_vel_average, cl.viewangles_vel_average);
+					VectorSubtract(cl.viewangles_vel_average, cl.viewangles_vel_prev, acc);
+					VectorM((1 / max(0.0001, frametime)), acc, acc);
 
-				// 4. perform highpass/lowpass on the adjustment vectors (turning velocity into acceleration!)
-				//    trick: we must do the lowpass LAST, so the lowpass vector IS the final vector!
-				highpass3(gunorg, frametime*cl_followmodel_side_highpass.value, frametime*cl_followmodel_side_highpass.value, frametime*cl_followmodel_up_highpass.value, cl.gunorg_adjustment_highpass, gunorg);
-				lowpass3(gunorg, frametime*cl_followmodel_side_lowpass.value, frametime*cl_followmodel_side_lowpass.value, frametime*cl_followmodel_up_lowpass.value, cl.gunorg_adjustment_lowpass, gunorg);
-				// we assume here: PITCH = 0, YAW = 1, ROLL = 2
-				highpass3(gunangles, frametime*cl_leanmodel_up_highpass.value, frametime*cl_leanmodel_side_highpass.value, 0, cl.gunangles_adjustment_highpass, gunangles);
-				lowpass3(gunangles, frametime*cl_leanmodel_up_lowpass.value, frametime*cl_leanmodel_side_lowpass.value, 0, cl.gunangles_adjustment_lowpass, gunangles);
+					VectorCopy(viewangles, cl.viewangles_prev);
+					VectorCopy(cl.viewangles_vel_average, cl.viewangles_vel_prev);
 
-				// 5. use the adjusted vectors
-				VectorAdd(vieworg, gunorg, gunorg);
-				VectorAdd(viewangles, gunangles, gunangles);
+					lowpass3(acc, frametime / cl_leanmodel_averagingtime.value, frametime / cl_leanmodel_averagingtime.value, 0, cl.viewangles_acc_average, cl.viewangles_acc_average);
+
+					offset[0] = -cl.viewangles_acc_average[0] / 3 * cl_leanmodel_scale.value;
+					offset[1] = -cl.viewangles_acc_average[1] / 3 * cl_leanmodel_scale.value;
+					if(fabs(offset[0]) < 0.001) offset[0] = 0;
+					if(fabs(offset[1]) < 0.001) offset[1] = 0;
+				}
+
+				VectorAdd(viewangles, offset, gunangles);
 
 				// bounded XY speed, used by several effects below
 				xyspeed = bound (0, sqrt(clvelocity[0]*clvelocity[0] + clvelocity[1]*clvelocity[1]), 400);
@@ -1097,28 +1056,12 @@ void V_Init (void)
 	Cvar_RegisterVariable (&cl_bobmodel_speed);
 
 	Cvar_RegisterVariable (&cl_leanmodel);
-	Cvar_RegisterVariable (&cl_leanmodel_side_speed);
-	Cvar_RegisterVariable (&cl_leanmodel_side_limit);
-	Cvar_RegisterVariable (&cl_leanmodel_side_highpass1);
-	Cvar_RegisterVariable (&cl_leanmodel_side_lowpass);
-	Cvar_RegisterVariable (&cl_leanmodel_side_highpass);
-	Cvar_RegisterVariable (&cl_leanmodel_up_speed);
-	Cvar_RegisterVariable (&cl_leanmodel_up_limit);
-	Cvar_RegisterVariable (&cl_leanmodel_up_highpass1);
-	Cvar_RegisterVariable (&cl_leanmodel_up_lowpass);
-	Cvar_RegisterVariable (&cl_leanmodel_up_highpass);
+	Cvar_RegisterVariable (&cl_leanmodel_scale);
+	Cvar_RegisterVariable (&cl_leanmodel_averagingtime);
 
 	Cvar_RegisterVariable (&cl_followmodel);
-	Cvar_RegisterVariable (&cl_followmodel_side_speed);
-	Cvar_RegisterVariable (&cl_followmodel_side_limit);
-	Cvar_RegisterVariable (&cl_followmodel_side_highpass1);
-	Cvar_RegisterVariable (&cl_followmodel_side_lowpass);
-	Cvar_RegisterVariable (&cl_followmodel_side_highpass);
-	Cvar_RegisterVariable (&cl_followmodel_up_speed);
-	Cvar_RegisterVariable (&cl_followmodel_up_limit);
-	Cvar_RegisterVariable (&cl_followmodel_up_highpass1);
-	Cvar_RegisterVariable (&cl_followmodel_up_lowpass);
-	Cvar_RegisterVariable (&cl_followmodel_up_highpass);
+	Cvar_RegisterVariable (&cl_followmodel_scale);
+	Cvar_RegisterVariable (&cl_followmodel_averagingtime);
 
 	Cvar_RegisterVariable (&cl_viewmodel_scale);
 
@@ -1127,7 +1070,7 @@ void V_Init (void)
 	Cvar_RegisterVariable (&v_kickpitch);
 
 	Cvar_RegisterVariable (&cl_stairsmoothspeed);
-	
+
 	Cvar_RegisterVariable (&cl_smoothviewheight);
 
 	Cvar_RegisterVariable (&chase_back);
