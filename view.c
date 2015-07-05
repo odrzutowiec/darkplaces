@@ -611,11 +611,11 @@ void V_CalcRefdefUsing (const matrix4x4_t *entrendermatrix, const vec3_t clviewa
 				double xyspeed, bob, bobfall;
 				float cycle;
 				vec_t frametime;
-				vec_t vel[3], acc[3], offset[3];
-				VectorClear(offset);
+				vec3_t vel, acc, offset;
 
 				frametime = (cl.time - cl.calcrefdef_prevtime) * cl.movevars_timescale;
 
+				VectorClear(offset);
 				if(cl_followmodel.value && cl_followmodel_scale.value > 0)
 				{
 					if(teleported)
@@ -637,18 +637,17 @@ void V_CalcRefdefUsing (const matrix4x4_t *entrendermatrix, const vec3_t clviewa
 				}
 
 				VectorAdd(vieworg, offset, gunorg);
-				VectorClear(offset);
 
+				VectorClear(offset);
 				if(cl_leanmodel.value && cl_leanmodel_scale.value > 0)
 				{
-					if(teleported)
-						VectorCopy(viewangles, cl.viewangles_prev);
-
 					VectorSubtract(viewangles, cl.viewangles_prev, vel);
 					if(vel[0] > 180) vel[0] -= 360; if(vel[0] < -180) vel[0] += 360;
 					if(vel[1] > 180) vel[1] -= 360; if(vel[1] < -180) vel[1] += 360;
 					VectorM((1 / max(0.0001, frametime) * (0.0254 / 9.80665)), vel, vel);
 
+					if(teleported)
+						VectorCopy(cl.viewangles_vel_average, vel);
 					lowpass3(vel, frametime / 0.3, frametime / 0.3, 0, cl.viewangles_vel_average, cl.viewangles_vel_average);
 					VectorSubtract(cl.viewangles_vel_average, cl.viewangles_vel_prev, acc);
 					VectorM((1 / max(0.0001, frametime)), acc, acc);
