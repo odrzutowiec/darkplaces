@@ -388,11 +388,11 @@ static void lowpass3(vec3_t value, vec_t fracx, vec_t fracy, vec_t fracz, vec3_t
  *   cl.bobfall_speed
  *   cl.bobfall_swing
  *   cl.vel_prev
- *   cl.cl.acc_average
+ *   cl.acc_average
  *   cl.viewangles_prev
- *   cl.cl.viewangles_vel_prev
- *   cl.cl.viewangles_vel_average
- *   cl.cl.viewangles_acc_average
+ *   cl.viewangles_vel_prev
+ *   cl.viewangles_vel_average
+ *   cl.viewangles_acc_average
  *   cl.hitgroundtime
  *   cl.lastongroundtime
  *   cl.oldongrounbd
@@ -613,9 +613,11 @@ void V_CalcRefdefUsing (const matrix4x4_t *entrendermatrix, const vec3_t clviewa
 				vec_t frametime;
 				vec3_t vel, acc, offset;
 
+				VectorCopy(vieworg, gunorg);
+				VectorCopy(viewangles, gunangles);
+
 				frametime = (cl.time - cl.calcrefdef_prevtime) * cl.movevars_timescale;
 
-				VectorClear(offset);
 				if(cl_followmodel.value && cl_followmodel_scale.value > 0)
 				{
 					if(teleported)
@@ -634,11 +636,9 @@ void V_CalcRefdefUsing (const matrix4x4_t *entrendermatrix, const vec3_t clviewa
 					if(fabs(offset[0]) < 0.001) offset[0] = 0;
 					if(fabs(offset[1]) < 0.001) offset[1] = 0;
 					if(fabs(offset[2]) < 0.001) offset[2] = 0;
+					VectorAdd(vieworg, offset, gunorg);
 				}
 
-				VectorAdd(vieworg, offset, gunorg);
-
-				VectorClear(offset);
 				if(cl_leanmodel.value && cl_leanmodel_scale.value > 0)
 				{
 					VectorSubtract(viewangles, cl.viewangles_prev, vel);
@@ -659,11 +659,12 @@ void V_CalcRefdefUsing (const matrix4x4_t *entrendermatrix, const vec3_t clviewa
 
 					offset[0] = -cl.viewangles_acc_average[0] / 3 * cl_leanmodel_scale.value;
 					offset[1] = -cl.viewangles_acc_average[1] / 3 * cl_leanmodel_scale.value;
+					offset[2] = 0;
 					if(fabs(offset[0]) < 0.001) offset[0] = 0;
 					if(fabs(offset[1]) < 0.001) offset[1] = 0;
-				}
 
-				VectorAdd(viewangles, offset, gunangles);
+					VectorAdd(viewangles, offset, gunangles);
+				}
 
 				// bounded XY speed, used by several effects below
 				xyspeed = bound (0, sqrt(clvelocity[0]*clvelocity[0] + clvelocity[1]*clvelocity[1]), 400);
