@@ -697,12 +697,12 @@ void V_CalcRefdefUsing (const matrix4x4_t *entrendermatrix, const vec3_t clviewa
 					VectorSubtract(cl.gunangles_highpass, cl.gunangles_prev, cl.gunangles_highpass);
 
 					// 3. calculate the RAW adjustment vectors
-					gunorg[0] *= (cl_followmodel.value ? -cl_followmodel_side_speed.value : 0);
-					gunorg[1] *= (cl_followmodel.value ? -cl_followmodel_side_speed.value : 0);
-					gunorg[2] *= (cl_followmodel.value ? -cl_followmodel_up_speed.value : 0);
+					gunorg[0] *= -cl_followmodel_side_speed.value;
+					gunorg[1] *= -cl_followmodel_side_speed.value;
+					gunorg[2] *= -cl_followmodel_up_speed.value;
 
-					gunangles[PITCH] *= (cl_leanmodel.value ? -cl_leanmodel_up_speed.value : 0);
-					gunangles[YAW] *= (cl_leanmodel.value ? -cl_leanmodel_side_speed.value : 0);
+					gunangles[PITCH] *= -cl_leanmodel_up_speed.value;
+					gunangles[YAW] *= -cl_leanmodel_side_speed.value;
 					gunangles[ROLL] = 0;
 
 					// 4. perform highpass/lowpass on the adjustment vectors (turning velocity into acceleration!)
