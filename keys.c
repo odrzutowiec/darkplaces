@@ -1318,6 +1318,7 @@ Key_SetBinding (int keynum, int bindmap, const char *binding)
 {
 	char *newbinding;
 	size_t l;
+	qboolean was_bound;
 
 	if (keynum == -1 || keynum >= MAX_KEYS)
 		return false;
@@ -1325,17 +1326,30 @@ Key_SetBinding (int keynum, int bindmap, const char *binding)
 		return false;
 
 // free old bindings
+	was_bound = false;
 	if (keybindings[bindmap][keynum]) {
 		Z_Free (keybindings[bindmap][keynum]);
 		keybindings[bindmap][keynum] = NULL;
+		was_bound = true;
 	}
-	if(!binding[0]) // make "" binds be removed --blub
+	if (!binding[0] && !was_bound) // make "" binds be removed --blub
 		return true;
 // allocate memory for new binding
-	l = strlen (binding);
-	newbinding = (char *)Z_Malloc (l + 1);
-	memcpy (newbinding, binding, l + 1);
-	newbinding[l] = 0;
+	if (!binding[0])
+	{
+		// key was bound, bind it to the special string " " so that it gets
+		// saved as "unbind key" by saveconfig in the user config
+		newbinding = (char *)Z_Malloc (2);
+		newbinding[0] = ' ';
+		newbinding[1] = '\0';
+	}
+	else
+	{
+		l = strlen (binding);
+		newbinding = (char *)Z_Malloc (l + 1);
+		memcpy (newbinding, binding, l + 1);
+		newbinding[l] = 0;
+	}
 	keybindings[bindmap][keynum] = newbinding;
 	return true;
 }
@@ -1415,7 +1429,7 @@ Key_In_Bind_f (void)
 	}
 
 	if (c == 3) {
-		if (keybindings[m][b])
+		if (keybindings[m][b] && strcmp(keybindings[m][b], " "))
 			Con_Printf("\"%s\" = \"%s\"\n", Cmd_Argv (2), keybindings[m][b]);
 		else
 			Con_Printf("\"%s\" is not bound\n", Cmd_Argv (2));
@@ -1504,7 +1518,7 @@ Key_PrintBindList(int j)
 	for (i = 0; i < (int)(sizeof(keybindings[0])/sizeof(keybindings[0][0])); i++)
 	{
 		p = keybindings[j][i];
-		if (p)
+		if (p && strcmp(p, " "))
 		{
 			Cmd_QuoteString(bindbuf, sizeof(bindbuf), p, "\"\\", false);
 			if (j == 0)
@@ -1562,7 +1576,7 @@ Key_Bind_f (void)
 	}
 
 	if (c == 2) {
-		if (keybindings[0][b])
+		if (keybindings[0][b] && strcmp(keybindings[0][b], " "))
 			Con_Printf("\"%s\" = \"%s\"\n", Cmd_Argv (1), keybindings[0][b]);
 		else
 			Con_Printf("\"%s\" is not bound\n", Cmd_Argv (1));
@@ -1600,11 +1614,21 @@ Key_WriteBindings (qfile_t *f)
 			p = keybindings[j][i];
 			if (p)
 			{
-				Cmd_QuoteString(bindbuf, sizeof(bindbuf), p, "\"\\", false); // don't need to escape $ because cvars are not expanded inside bind
-				if (j == 0)
-					FS_Printf(f, "bind %s \"%s\"\n", Key_KeynumToString (i, tinystr, sizeof(tinystr)), bindbuf);
+				if (!strcmp(p, " "))
+				{
+					if (j == 0)
+						FS_Printf(f, "unbind %s\n", Key_KeynumToString(i, tinystr, sizeof(tinystr)));
+					else
+						FS_Printf(f, "in_unbind %d %s\n", j, Key_KeynumToString(i, tinystr, sizeof(tinystr)));
+				}
 				else
-					FS_Printf(f, "in_bind %d %s \"%s\"\n", j, Key_KeynumToString (i, tinystr, sizeof(tinystr)), bindbuf);
+				{
+					Cmd_QuoteString(bindbuf, sizeof(bindbuf), p, "\"\\", false); // don't need to escape $ because cvars are not expanded inside bind
+					if (j == 0)
+						FS_Printf(f, "bind %s \"%s\"\n", Key_KeynumToString (i, tinystr, sizeof(tinystr)), bindbuf);
+					else
+						FS_Printf(f, "in_bind %d %s \"%s\"\n", j, Key_KeynumToString (i, tinystr, sizeof(tinystr)), bindbuf);
+				}
 			}
 		}
 	}
@@ -1625,11 +1649,13 @@ Key_Init (void)
 	Cmd_AddCommand ("in_bind", Key_In_Bind_f, "binds a command to the specified key in the selected bindmap");
 	Cmd_AddCommand ("in_unbind", Key_In_Unbind_f, "removes command on the specified key in the selected bindmap");
 	Cmd_AddCommand ("in_bindlist", Key_In_BindList_f, "bindlist: displays bound keys for all bindmaps, or the given bindmap");
+
 	Cmd_AddCommand ("in_bindmap", Key_In_Bindmap_f, "selects active foreground and background (used only if a key is not bound in the foreground) bindmaps for typing");
 
 	Cmd_AddCommand ("bind", Key_Bind_f, "binds a command to the specified key in bindmap 0");
 	Cmd_AddCommand ("unbind", Key_Unbind_f, "removes a command on the specified key in bindmap 0");
-	Cmd_AddCommand ("bindlist", Key_BindList_f, "bindlist: displays bound keys for bindmap 0 bindmaps");
+	Cmd_AddCommand ("bindlist", Key_BindList_f, "bindlist: displays bound keys for bindmap 0");
+
 	Cmd_AddCommand ("unbindall", Key_Unbindall_f, "removes all commands from all keys in all bindmaps (leaving only shift-escape and escape)");
 
 	Cmd_AddCommand ("history", Key_History_f, "prints the history of executed commands (history X prints the last X entries, history -c clears the whole history)");
@@ -1657,7 +1683,7 @@ const char *Key_GetBind (int key, int bindmap)
 	else
 	{
 		bind = keybindings[key_bmap][key];
-		if (!bind)
+		if (!bind || !strcmp(bind, " "))
 			bind = keybindings[key_bmap2][key];
 	}
 	return bind;
@@ -1757,7 +1783,7 @@ Key_Event (int key, int ascii, qboolean down)
 
 	// get key binding
 	bind = keybindings[key_bmap][key];
-	if (!bind)
+	if (!bind || !strcmp(bind, " "))
 		bind = keybindings[key_bmap2][key];
 
 	if (developer_insane.integer)
