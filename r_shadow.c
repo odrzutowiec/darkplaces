@@ -1829,7 +1829,6 @@ static void R_Shadow_BounceGrid_GenerateSettings(r_shadow_bouncegrid_settings_t 
 	settings->rng_type                      = r_shadow_bouncegrid_rng_type.integer;
 	settings->rng_seed                      = r_shadow_bouncegrid_rng_seed.integer;
 	settings->bounceminimumintensity2       = bounceminimumintensity * bounceminimumintensity;
-	settings->bounceminimumintensity2       = bounceminimumintensity * bounceminimumintensity;
 	settings->normalizevectors              = r_shadow_bouncegrid_normalizevectors.integer != 0;
 
 	// bound the values for sanity
