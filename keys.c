@@ -726,6 +726,11 @@ Key_Console (int key, int unicode)
 		break;
 	}
 
+	// Don't allow shortcuts with Ctrl+Alt because on Windows they can be used
+	// as the AltGr key (which generates Ctrl+Alt) to type special characters
+	if (keydown[K_CTRL] && keydown[K_ALT])
+		goto add_char;
+
 	if ((key == 'v' && keydown[K_CTRL]) || ((key == K_INS || key == K_KP_INS) && keydown[K_SHIFT]))
 	{
 		char *cbd, *p;
@@ -1153,6 +1158,8 @@ Key_Console (int key, int unicode)
 			key_linepos = (int)strlen(key_line);
 		return;
 	}
+
+	add_char:
 
 	// non printable
 	if (unicode < 32)
