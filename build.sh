@@ -8,6 +8,11 @@
 # Copyright (C) 2019 David Knapp                                #
 #---------------------------------------------------------------#
 
+if [ ! "$BASH_VERSION" ]; then
+	echo "This script requires bash."
+	exit 1
+fi
+
 # Make sure the environment is sane before continuing.
 check_env() {
 	# Some checks here.
