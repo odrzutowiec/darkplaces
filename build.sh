@@ -16,6 +16,11 @@ fi
 # Make sure the environment is sane before continuing.
 check_env() {
 	# Some checks here.
+	if [ "$(id -u)" == 0 ]; then
+		printf "\e[31mThis script cannot be run as root.\e[0m\n\n"
+		exit 1
+	fi
+
 	if [[ ! -d $(pwd)/engine/ || ! -d $(pwd)/game/ ]]; then
 		printf "\e[31mThis script can't find anything at all. Either you need to put the build files\nback this instant, or somehow you grabbed this file from some random source that\ndidn't include the stuff that it actually needs. In either case, you should\nprobably stop what you're doing as you might hurt yourself...\e[0m\n\n"
 		exit 1
