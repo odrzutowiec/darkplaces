@@ -138,7 +138,7 @@ print_help() {
 	printf -- "--yes		do not prompt to delete if --reset flag is used\n"
 	printf -- "--help		print this message\n\n"
 
-	# This printf is formatted this way for alignment purposes.	
+	# This printf is formatted this way for alignment purposes.
 	printf "\
 PROJECT should point to a directory in ./game that contains a config.cmake\n\
 file. If left blank, you will be prompted to enter one. If you provide an\n\
