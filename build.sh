@@ -106,7 +106,7 @@ get_build_config() {
 		printf "Please specify a directory containing a valid config.cmake, relative to the\n'projects' subdirectory.\n\n"
 	fi
 
-	while [ ! $finished ]; do
+	while true; do
 		if [ $build_config ]; then
 			if [ ! -f ./game/${build_config}/config.cmake ]; then
 				if [ ! -d ./game/${build_config}/ ]; then
