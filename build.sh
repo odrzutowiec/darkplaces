@@ -8,6 +8,9 @@
 # Copyright (C) 2019 David Knapp                                #
 #---------------------------------------------------------------#
 
+# This script will only work with bash.
+# Putting this at the top so it will cleanly check for bash and exit before
+# parsing the rest of the script and vomiting syntax errors.
 if [ ! "$BASH_VERSION" ]; then
 	echo "This script requires bash."
 	exit 1
@@ -41,7 +44,7 @@ check_env() {
 	# Create user-specific config file from template that's not tracked by git.
 	if [ ! -f ./config.sh ]; then
 		cp ./.config.sh ./config.sh
-		printf "\e[33mThis appears to be the first time you're running this script. We copied a file \"config.sh\" which will allow you to configure the generator and extra CMake options. You might want to edit it before continuing.\e[0m\n\n"
+		printf "\e[33mThis appears to be the first time you're running this script. We've created a file 'config.sh' which will allow you to configure the generator and extra CMake options. You might want to edit it before continuing.\e[0m\n\n"
 	fi
 }
 
@@ -50,9 +53,9 @@ begin_config() {
 	cmake_build_cmd="cmake --build $build_dir -- -j $BUILD_THREADS"
 	cmake_cmd="cmake ./engine -G\"$CMAKE_GEN\" -B$build_dir -DBUILD_CONFIG=$build_config $CMAKE_OPTIONS"
 
-	printf "\n\nRunning CMake...\n\n"
+	printf "Running CMake...\n\n"
 
-	printf "Using \"${build_config}\" build config.\n\n"
+	printf "Using '${build_config}' build config.\n\n"
 
 	# Try to configure. If that's successful and --build was specified, then 
 	# try that too.
