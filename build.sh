@@ -24,7 +24,8 @@ check_env() {
 		exit 1
 	fi
 
-	if [[ ! -d $(pwd)/engine/ || ! -d $(pwd)/game/ ]]; then
+	# Obviously we need the stuff this script is meant to work with...
+	if [[ ! -d $(pwd)/engine/ || ! -d $(pwd)/game/ || ! -f $(pwd)/engine/CMakeLists.txt ]]; then
 		printf "\e[31mThis script can't find anything at all. Either you need to put the build files\nback this instant, or somehow you grabbed this file from some random source that\ndidn't include the stuff that it actually needs. In either case, you should\nprobably stop what you're doing as you might hurt yourself...\e[0m\n\n"
 		exit 1
 	fi
