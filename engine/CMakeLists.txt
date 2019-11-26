@@ -60,7 +60,6 @@ if(UNIX AND NOT APPLE)
 		set(FREEBSD TRUE) # CMAKE PLEASE.
 	elseif(${CMAKE_SYSTEM_NAME} STREQUAL "SunOS")
 		set(SUN_OS TRUE) # Can I stop now?
-		message("Detected Solaris/illumos")
 	endif()
 elseif(APPLE)
 	set(DARWIN TRUE)

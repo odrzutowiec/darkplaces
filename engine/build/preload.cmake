@@ -1,10 +1,5 @@
-if(BUILD_CONFIG STREQUAL "")
-	set(BUILD_CONFIG "default")
-	message(WARNING "No BUILD_CONFIG specified. Using 'default'. Specify -DBUILD_CONFIG to the name of the directory containing your build config if you wish to use a different one.")
+if(PROJ_DIR STREQUAL "")
+	message(FATAL "No PROJ_DIR specified. Specify -DPROJ_DIR to the the directory containing your build config. If you got here from the build script, it's broken again.")
 endif()
-
-set(PROJ_DIR "${HP_DIR}/../game/${BUILD_CONFIG}")
-
-set(CMAKE_BUILD_DIRECTORY "${PROJ_DIR}")
 
 include("${PROJ_DIR}/config.cmake")
