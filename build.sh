@@ -187,7 +187,7 @@ check_env()
 	
 	if (( failed )); then
 		perror "The script failed to initialize. Please check the output for more information.\n\n"
-		exit 1
+		phelp 1
 	fi
 	printf "Found cmake\n"
 	printf "Initialized!\n\n"
