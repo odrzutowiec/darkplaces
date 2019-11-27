@@ -221,15 +221,15 @@ option_cache_read()
 
 option_cache_write()
 {
-	if ! [ -s "$cache_file" ]; then
-		printf "#!/bin/bash\n" > "$cache_file"
-	fi
-	
-	#cat $cache_file
-	
-	reset_cache 0
-	
-	printf "
+	if (( ! cache_changed )); then
+		if (( ! option_cache_off )); then
+			if ! [ -s "$cache_file" ]; then
+				printf "#!/bin/bash\n" > "$cache_file"
+			fi
+
+			reset_cache 0
+
+			printf "
 cache_${option_project}_project_dir=\"${option_project_dir}\"
 cache_${option_project}_build_dir=\"${option_build_dir}\"
 cache_${option_project}_threads=\"${option_build_threads}\"
@@ -237,6 +237,18 @@ cache_${option_project}_cmake_generator=\"${option_build_cmake_generator}\"
 cache_${option_project}_cmake_options=\"${option_build_cmake_options}\"
 
 " >> "$cache_file"
+
+			printf "
+Your build options for \"$option_project\" has been written to the cache. You
+only have to run '$me --build $option_project' to build the same project again.
+
+You may also use --auto to skip the prompts.
+
+"
+		else
+			pwarn "The cache is disabled. Skipping write.\n\n" 0
+		fi
+	fi
 }
 
 option_cache_check()
@@ -645,44 +657,6 @@ reset_all()
 	reset_build
 	reset_cache
 }
-#------------------------------------------------------------------------------#
-
-# Collect user options
-stage1_start()
-{
-	option_get_cmdline
-}
-
-# Check user options and ask
-stage2_start()
-{
-	option_get_check
-}
-
-# Configure and build
-stage3_start()
-{
-	build_start
-}
-
-# Clean up and write to cache
-stage4_start()
-{
-	if ! (( option_cache_off )); then
-		if (( cache_changed )); then
-			option_cache_write
-			printf "
-Your build options for \"$option_project\" has been written to the cache. You
-only have to run '$me --build $option_project' to build the same project again.
-
-You may also use --auto to skip the prompts.
-
-"
-		fi
-	else
-		pwarn "The cache is disabled. Skipping write.\n\n" 0
-	fi
-}
 
 #------------------------------------------------------------------------------#
 
@@ -736,13 +710,13 @@ declare -g cache_changed=0 # Set to 1 if any options don't match the cache.
 # Make sure the environment is sane first.
 check_env
 
-stage1_start # Get options
+option_get_cmdline
 
-stage2_start # Check options
+option_get_check
 
-stage3_start # Config and compile
+build_start
 
-stage4_start # Cleanup
+option_cache_write
 
 psuccess "The Horsepower Build Wizard has completed the requested operations successfully.\n\n"
 
