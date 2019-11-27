@@ -258,7 +258,7 @@ You may also use --auto to skip the prompts.
 	fi
 }
 
-option_cache_check()
+option_cache_compare()
 {
 	local option=$1
 	local cache=$2
@@ -406,7 +406,7 @@ option_get_check_config()
 			option_project=""
 		fi
 	done
-	option_cache_check "$option_project" "$cache_project"
+	option_cache_compare "$option_project" "$cache_project"
 }
 
 option_get_check_config_dir()
@@ -429,7 +429,7 @@ option_get_check_config_dir()
 	while true; do
 		if [ "$option_project_dir" ]; then
 			if check_exist 'dir' "${option_project_dir}" 0 1 ; then
-				option_cache_check "$option_project_dir" "$cache_project_dir"
+				option_cache_compare "$option_project_dir" "$cache_project_dir"
 				return	# We're good. Proceed.
 			else
 				printf "The directory of the specified project does not exist.\n\n"
@@ -541,7 +541,8 @@ option_get_check_build_threads()
 	if ! (( option_build_threads )); then
 		option_run_build=0
 	fi
-	option_cache_check "$option_build_threads" "$cache_build_threads"
+
+	option_cache_compare "$option_build_threads" "$cache_build_threads"
 }
 
 option_get_check_build_cmake_generator()
@@ -552,7 +553,7 @@ option_get_check_build_cmake_generator()
 		"What CMake generator would you like to use?"	\
 		""	\
 		""
-	option_cache_check "$option_build_cmake_generator" "$cache_build_cmake_generator"
+	option_cache_compare "$option_build_cmake_generator" "$cache_build_cmake_generator"
 }
 
 option_get_check_build_cmake_options()
@@ -567,7 +568,7 @@ option_get_check_build_cmake_options()
 			""	\
 			""
 	fi
-	option_cache_check "$option_build_cmake_options" "$cache_build_cmake_options"
+	option_cache_compare "$option_build_cmake_options" "$cache_build_cmake_options"
 }
 
 #------------------------------------------------------------------------------#
