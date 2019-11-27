@@ -317,8 +317,6 @@ option_get_cmdline()
 			case "${args[$i]}" in
 				"--expert" )
 					option_expert=1 ;;
-				"--build" )
-					option_run_build=1 ;;
 				"--reset-all" )
 					option_run_reset_build=1
 					option_run_reset_cache=1 ;;
@@ -537,9 +535,12 @@ option_get_check_build_threads()
 	option_get_prompt										\
 		option_build_threads								\
 		"$cache_build_threads"								\
-		"How many threads would you like to compile with?"	\
+		"How many threads would you like to compile with? Enter 0 to configure only."	\
 		""	\
 		""
+	if ! (( option_build_threads )); then
+		option_run_build=0
+	fi
 	option_cache_check "$option_build_threads" "$cache_build_threads"
 }
 
@@ -693,14 +694,6 @@ declare -g cache_build_cmake_options=""
 declare -g cache_build_cmake_generator="Unix Makefiles"
 
 ### User options ###
-declare -g option_auto=0
-declare -g option_expert=0
-declare -g option_asroot=0
-
-declare -g option_run_build=0
-declare -g option_run_reset_build=0
-declare -g option_run_reset_cache=0
-declare -g option_cache_off=0
 
 # If any of these don't match the cache, write to it.
 declare -g option_project=""
@@ -709,10 +702,18 @@ declare -g option_build_dir=""
 declare -g option_build_threads=""
 declare -g option_build_cmake_options=""
 declare -g option_build_cmake_generator=""
+declare -g option_auto=0
+declare -g option_expert=0
+declare -g option_asroot=0
+
+# Per-build options
+declare -g option_run_build=1
+declare -g option_run_reset_build=0
+declare -g option_run_reset_cache=0
+declare -g option_cache_off=0
 
 ### Global variables for state tracking ###
 declare -g cache_changed=0 # Set to 1 if any options don't match the cache.
-# declare -g cache_loaded=0
 
 # Make sure the environment is sane first.
 check_env
