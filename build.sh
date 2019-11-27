@@ -31,12 +31,7 @@ perror()
 
 pwarn()
 {
-	local arg=$1
-	local quiet=$2
-	if (( quiet )); then # Quiet
-		return
-	fi
-	printf -- "\e[33m$arg\e[0m"
+	printf -- "\e[33m$1\e[0m"
 }
 
 psuccess()
@@ -88,31 +83,43 @@ check_exist()
 	local required=$3
 	local quiet=$4
 
-	# Nothing specified. Probably checking on a loop and it'll be specified.
+	# If nothing is specified, caller is probably looping and will specify.
 	if ! [ "$arg" ]; then
 		return
 	fi
 
-	if (( required )); then
-		local notfound="\e[31mCould NOT find the required" # Overriding color.
-	else
-		local notfound="Could not find the"
+	local warn=""
+	local withcmd=""
+	if [ "$mode" == "cmd" ]; then
+		withcmd="Please install '$arg' and add it to your PATH if this isn't done automatically.\n\n"
 	fi
-	
+
+	if (( required )); then
+		local notfound='perror "Could NOT find the required'
+	else
+		local notfound='pwarn "Could not find the'
+	fi
+
+	if ! (( quiet )); then
+		# eval safety: anything after notfound is quoted and should be printed
+		# literally. Escaped double quote at the end to finish notfound.
+		local warn="${notfound} ${mode} '${arg}'. ${withcmd}\n\n\""
+	fi
+
 	case $mode in
 		"file" )
 			if [ ! -f "$arg" ]; then
-				pwarn "$notfound file '$arg'\n\n" "$quiet"
+				eval "${warn}"
 				return 1
 			fi ;;
 		"dir" )
 			if [ ! -d "$arg" ]; then
-				pwarn "$notfound directory '$arg'\n\n" "$quiet"
+				eval "${warn}"
 				return 1
 			fi ;;
 		"cmd" )
 			if ! command -v "$arg" >/dev/null; then
-				pwarn "$notfound command '$arg'. Please install '$arg' and add it to your PATH if this isn't done automatically.\n\n" "$quiet"
+				eval "${warn}"
 				return 1
 			fi ;;
 	esac
@@ -126,7 +133,7 @@ check_empty()
 
 	if ! check_exist "dir" "${arg}" 0 0 ; then
 		if command -v ls -A "${arg}" >/dev/null; then
-			pwarn "The specified directory '$arg' is NOT empty.\n\n" 0
+			pwarn "The specified directory '$arg' is NOT empty.\n\n"
 			return 1
 		fi
 	fi
@@ -151,13 +158,13 @@ check_env()
 			perror "This script cannot be run as root. Use --jackass to override\n\n"
 			failed+=1
 		else
-			pwarn "Running as root as you requested. Welcome to Jackass!\n\n" 0
+			pwarn "Running as root as you requested. Welcome to Jackass!\n\n"
 		fi
 	fi
 
 	if [[ $- == *i* ]]; then
 		option_auto=1
-		pwarn "Shell is non-interactive. Prompts cannot be answered. --auto enabled.\n\n" 0
+		pwarn "Shell is non-interactive. Prompts cannot be answered. --auto enabled.\n\n"
 	else
 		printf "Shell is interactive\n"
 	fi
@@ -246,7 +253,7 @@ You may also use --auto to skip the prompts.
 
 "
 		else
-			pwarn "The cache is disabled. Skipping write.\n\n" 0
+			pwarn "The cache is disabled. Skipping write.\n\n"
 		fi
 	fi
 }
@@ -322,7 +329,7 @@ option_get_cmdline()
 				#	"--list" )
 					#option_cache_list=1 ;;
 				"--auto" )
-					pwarn "--auto is set. Prompts will not appear.\n\n" 0
+					pwarn "--auto is set. Prompts will not appear.\n\n"
 					option_auto=1 ;;
 				"--build-dir="* )
 					option_build_dir=${args[$i]##--build-dir=} ;;
@@ -342,7 +349,7 @@ option_get_cmdline()
 				"--help" )
 					phelp 0 ;;
 				* )
-					pwarn "Unknown option '${args[$i]}'\n\n" 0
+					pwarn "Unknown option '${args[$i]}'\n\n"
 					phelp 1 ;;
 			esac
 		# Last arg should be the build config, but not the first arg.
@@ -358,7 +365,7 @@ option_get_check()
 {
 	if (( option_auto )) && (( option_expert )); then
 		option_expert=0
-		pwarn "Expert mode is useless in auto mode. Ignoring.\n\n" 0
+		pwarn "Expert mode is useless in auto mode. Ignoring.\n\n"
 	fi
 
 	option_get_check_config
@@ -366,7 +373,7 @@ option_get_check()
 	if ! (( option_cache_off )); then
 		option_cache_read
 	else
-		pwarn "The cache is disabled. Skipping read.\n\n" 0
+		pwarn "The cache is disabled. Skipping read.\n\n"
 	fi
 
 	if (( option_run_reset_build )); then
@@ -395,7 +402,7 @@ option_get_check_config()
 			"" \
 			""
 		if [ "${option_project}" == "default" ]; then
-			pwarn "H-hey...! Get your own project! That's the template. You can't use that!\n\n" 0
+			pwarn "H-hey...! Get your own project! That's the template. You can't use that!\n\n"
 			option_project=""
 		fi
 	done
@@ -438,13 +445,13 @@ option_get_check_config_dir()
 						continue
 					fi
 				else
-					pwarn "The parent directory is also not writable or doesn't exist. Cannot create a new\nproject from the template here." 0
+					pwarn "The parent directory is also not writable or doesn't exist. Cannot create a new\nproject from the template here."
 				fi
 			fi
 		else
-			pwarn "No config directory has been specified.\n\n" 0
+			pwarn "No config directory has been specified.\n\n"
 			if ! (( option_expert )); then
-				pwarn "But --expert isn't set. Something is wrong with your configuration, or there's a bug in the script.\n\n" 0
+				pwarn "But --expert isn't set. Something is wrong with your configuration, or there's a bug in the script.\n\n"
 			fi
 		fi
 	
@@ -483,7 +490,7 @@ option_get_check_build_dir()
 			if check_exist 'dir' "$option_build_dir" 0 1 ; then # Exists
 				# Check if writable. Permissions change.
 				if ! [ -w "$option_build_dir" ]; then
-					pwarn "The directory '$option_build_dir' is NOT writable.\n\n" 0
+					pwarn "The directory '$option_build_dir' is NOT writable.\n\n"
 					notwritable=1
 					ask=1
 				fi
@@ -502,7 +509,7 @@ option_get_check_build_dir()
 					fi
 				fi
 			else
-				pwarn "Build directory doesn't exist. CMake will create the directory for you.\n\n" 0
+				pwarn "Build directory doesn't exist. CMake will create the directory for you.\n\n"
 			fi
 		else
 			ask=1
@@ -612,10 +619,10 @@ reset_build()
 {
 	local status
 	if ! [ "$cache_build_dir" ]; then
-		pwarn "--reset-build: No build directory found for '$option_project'\n\n" 0
+		pwarn "--reset-build: No build directory found for '$option_project'\n\n"
 	else
 		if ! [ -d "$cache_build_dir" ]; then
-			pwarn "--reset-build: The build directory of '$option_project' doesn't exist. Nothing to delete.\n\n" 0
+			pwarn "--reset-build: The build directory of '$option_project' doesn't exist. Nothing to delete.\n\n"
 		else
 			if ! rm -rfv "$cache_build_dir" ; then
 				perror "--reset-build: Failed to delete build files under '$cache_build_dir'\n\n"
@@ -636,7 +643,7 @@ reset_cache()
 	local cache_new=""
 
 	if ! [ -f "$cache_file" ]; then
-		pwarn "The build cache doesn't exist. Nothing to reset or delete.\n\n" 0
+		pwarn "The build cache doesn't exist. Nothing to reset or delete.\n\n"
 	else
 		if ! (( whole )); then
 			# The spaces in this awk line are extremely important or the
@@ -647,7 +654,7 @@ reset_cache()
 			[ -n "$cache_new" ] && echo "${cache_new}" > $cache_file || perror "Your cache file is corrupt or there is a bug in the script. The cache, upon reset, is supposed to at least include a shebang but is completely blank.\n\n"
 		else
 			rm -fv "$cache_file"
-			pwarn "Deleted build cache." 0
+			pwarn "Deleted build cache."
 		fi
 	fi
 }
