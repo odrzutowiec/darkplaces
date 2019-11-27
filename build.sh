@@ -338,6 +338,8 @@ option_get_cmdline()
 					printf "option config is $option_project" ;;
 				"--threads="* )
 					option_build_threads=${args[$i]##--threads=} ;;
+				"--j"* )
+					option_build_threads=${args[$i]##--j} ;;
 				"--generator="* )
 					option_build_cmake_generator=${args[$i]##--generator=} ;;
 				"--cmake-options="* )
