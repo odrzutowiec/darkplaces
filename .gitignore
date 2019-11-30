@@ -35,5 +35,5 @@ Makefile
 !/game/default/config.cmake
 !/game/default/src
 /.csettings/
-.buildcache
+/.cache
 

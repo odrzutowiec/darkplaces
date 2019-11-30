@@ -1,52 +1,35 @@
 #!/bin/bash
 
-### Horsepower/Darkplaces Build Script ###
-
 #---------------------------------------------------------------#
+# FILE: build.sh (Horsepower/Darkplaces Build Script)			#
 # AUTHOR: David Knapp (Cloudwalk)                               #
 # LICENSE: GPL2.0 or later                                      #
 # Copyright (C) 2019 David Knapp                                #
 #---------------------------------------------------------------#
-
-### DESCRIPTION ###
-# Stage 1 will take user input and set variables based on user input.
-# Stage 2 will validate user input, check if directories exist, etc...
-# Stage 3 will run the build system based on user input.
-
-# This script will only work with bash.
-# Putting this at the top so it will cleanly check for bash and exit before
-# parsing the rest of the script and vomiting syntax errors.
 if [ -z "${BASH_VERSION:-}" ]; then
 	echo "This script requires bash."
 	exit 1
 fi
-
 #------------------------------------------------------------------------------#
-
 ### HELPER FUNCTIONS ###
-perror()
-{
-	printf -- "\e[31m$1\e[0m"
+perror() {
+	printf -- "\e[31m%b\e[0m" "$1"
 }
 
-pwarn()
-{
-	printf -- "\e[33m$1\e[0m"
+pwarn() {
+	printf -- "\e[33m%b\e[0m" "$1"
 }
 
-psuccess()
-{
-	printf -- "\e[32m$1\e[0m"
+psuccess() {
+	printf -- "\e[32m%b\e[0m" "$1"
 }
 
-phelp()
-{
+phelp() {
 	printf "
-Usage: $me [OPTIONS] <PROJECT>
+Usage: %s [OPTIONS] <PROJECT>
 
 Options
-    --build             compile the specified project
-    --threads=          set how many threads to compile with
+    --threads= | --jN   set how many threads to compile with
     --generator=        cmake generator to use. Run 'cmake --help' for a list
     --cmake-options=    pass additional options to cmake
     --config-dir=       override the location of the config.cmake file
@@ -55,7 +38,7 @@ Options
     --reset-build       delete all project build files only
     --reset-cache       delete the cache only
     --expert            display prompts for every single option
-    --nocache			do not read from, or write to the cache
+    --nocache           do not read from, or write to the cache
     --auto              do not display any prompts, even with --reset
     --help              print this message then exit
 
@@ -71,228 +54,121 @@ the script with PROJECT, and optionally --build, and it will configure and/or
 build PROJECT with the cached settings automatically.
 
 This script will run in auto mode if ran from a non-interactive shell.
-"
-	
-	exit "$1"
-}
-
-check_exist()
-{
-	local mode=$1
-	local arg=$2
-	local required=$3
-	local quiet=$4
-
-	# If nothing is specified, caller is probably looping and will specify.
-	if ! [ "$arg" ]; then
-		return
-	fi
-
-	local warn=""
-	local withcmd=""
-	if [ "$mode" == "cmd" ]; then
-		withcmd="Please install '$arg' and add it to your PATH if this isn't done automatically.\n\n"
-	fi
-
-	if (( required )); then
-		local notfound='perror "Could NOT find the required'
-	else
-		local notfound='pwarn "Could not find the'
-	fi
-
-	if ! (( quiet )); then
-		# eval safety: anything after notfound is quoted and should be printed
-		# literally. Escaped double quote at the end to finish notfound.
-		local warn="${notfound} ${mode} '${arg}'. ${withcmd}\n\n\""
-	fi
-
-	case $mode in
-		"file" )
-			if [ ! -f "$arg" ]; then
-				eval "${warn}"
-				return 1
-			fi ;;
-		"dir" )
-			if [ ! -d "$arg" ]; then
-				eval "${warn}"
-				return 1
-			fi ;;
-		"cmd" )
-			if ! command -v "$arg" >/dev/null; then
-				eval "${warn}"
-				return 1
-			fi ;;
-	esac
-	
-	return 0
+" "$me"; exit "$1"
 }
 
 check_empty()
 {
-	local arg=$1
-
-	if ! check_exist "dir" "${arg}" 0 0 ; then
-		if command -v ls -A "${arg}" >/dev/null; then
-			pwarn "The specified directory '$arg' is NOT empty.\n\n"
-			return 1
-		fi
-	fi
-	# Directory doesn't have to exist to reach this point but that's okay
-	# because CMake will mkdir for us.
-	return 0
+	if command -v ls -A "$1" >/dev/null; then return 1; fi
 }
-
-### STAGE 1 ###
 #------------------------------------------------------------------------------#
-
-# Make sure the environment is sane before continuing.
-check_env()
-{
+check_env() { # Make sure the environment is sane before continuing.
 	local failed=0
-	
-	local reqdir=("$(pwd)/engine" "$(pwd)/game" "$(pwd)/game/default")
-	local reqfile=("$(pwd)/.config.sh" "${reqdir[0]}/CMakeLists.txt" "${reqdir[2]}/config.cmake")
 
-	if [ "$(id -u)" == 0 ]; then
+	if ! (( "$(id -u)" )); then
 		if (( ! option_asroot )); then
-			perror "This script cannot be run as root. Use --jackass to override\n\n"
+			perror "*** This script cannot be run as root. Use --jackass to override\n\n"
 			failed+=1
-		else
-			pwarn "Running as root as you requested. Welcome to Jackass!\n\n"
-		fi
+		else pwarn "* Running as root as you requested. Welcome to Jackass!\n\n"; fi
 	fi
 
 	if [[ $- == *i* ]]; then
 		option_auto=1
-		pwarn "Shell is non-interactive. Prompts cannot be answered. --auto enabled.\n\n"
-	else
-		printf "Shell is interactive\n"
+		pwarn "* Shell is non-interactive. Prompts are impossible/pointless. --auto enabled.\n\n"
 	fi
 
-	for i in "${reqdir[@]}"; do
-		check_exist "dir" "$i" 1 0
-		failed+=$?
-		printf "Found directory '$i'\n"
-	done
 
-	for i in "${reqfile[@]}"; do
-		check_exist "file" "$i" 1 0
-		failed+=$?
-		printf "Found file '$i'\n"
-	done
+	if [ ! -d "$(pwd)/engine" ]; then perror "*** Required directory '\"$(pwd)\"/engine' was not found.\n" ; failed+=1; fi
+	if [ ! -d "$(pwd)/game" ] || [ ! -w "$(pwd)/game" ]; then perror "*** Required directory '\"$(pwd)\"/game' was not found or is not writable.\n" ; failed+=1; fi
+	if [ ! -d "$(pwd)/game/default" ]; then perror "*** Required directory '\"$(pwd)\"/game/default' was not found.\n"; failed+=1; fi
+	if [ ! -f "$(pwd)/engine/CMakeLists.txt" ]; then perror "*** Required file '\"$(pwd)\"/engine/CMakeLists.txt' was not found.\n"; failed+=1; fi
+	if [ ! -f "$(pwd)/game/default/config.cmake" ]; then perror "*** Required file '\"$(pwd)\"/game/default/config.cmake' was not found.\n"; failed+=1; fi
 
-	# Make sure CMake actually exists...
-	check_exist "cmd" "cmake" 1 0
-	failed+=$?
-	
+	if ! command -v cmake >/dev/null; then perror "*** Could not find cmake. Please install it and make sure it's in your PATH.\n"; failed+=1; fi
+
 	if (( failed )); then
-		perror "The script failed to initialize. Please check the output for more information.\n\n"
+		perror "*** The script failed to initialize. Please check the output for more information.\n\n"
 		phelp 1
 	fi
-	printf "Found cmake\n"
-	printf "Initialized!\n\n"
 }
-
 #------------------------------------------------------------------------------#
+option_cache_read() {
+	local cache="$1"
+	cache_file="${cache_dir}/${option_project}"
 
-option_cache_read()
-{
-	# This is disgusting. If anyone has a better idea, feel free to share.
-	
-	# Basically gotta redeclare EVERY option here, and then
-	# check if the cache for the specified
-	# project even exists, because we can't expand variables within variables
-	# unless we use eval, and that's just gross.
-
-	local ecache="cache_${option_project}"
-
-	local -n ecache_project_dir="${ecache}_project_dir"
-	local -n ecache_build_dir="${ecache}_build_dir"
-	local -n ecache_build_threads="${ecache}_threads"
-	local -n ecache_build_cmake_generator="${ecache}_cmake_generator"
-	local -n ecache_build_cmake_options="${ecache}_cmake_options"
-
-	if [ -s "$cache_file" ]; then
-		source "$cache_file"
-		# I don't know what I'm doing anymore. Good luck!
-
-		if grep -q "${ecache}_" "${cache_file}" >/dev/null; then
-			[ -n "${!ecache_project_dir}" ] && cache_project_dir="${ecache_project_dir}"
-			[ -n "${!ecache_build_dir}" ] && cache_build_dir="${ecache_build_dir}"
-			[ -n "${!ecache_build_threads}" ] && cache_build_threads="${ecache_build_threads}"
-			[ -n "${!ecache_build_cmake_generator}" ] && cache_build_cmake_generator="${ecache_build_cmake_generator}"
-			[ -n "${!ecache_build_cmake_options}" ] && cache_build_cmake_options="${ecache_build_cmake_options}"
-		fi
-	fi
-}
-
-option_cache_write()
-{
-	if (( ! cache_changed )); then
-		if (( ! option_cache_off )); then
-			if ! [ -s "$cache_file" ]; then
-				printf "#!/bin/bash\n" > "$cache_file"
-			fi
-
-			reset_cache 0
-
-			printf "
-cache_${option_project}_project_dir=\"${option_project_dir}\"
-cache_${option_project}_build_dir=\"${option_build_dir}\"
-cache_${option_project}_threads=\"${option_build_threads}\"
-cache_${option_project}_cmake_generator=\"${option_build_cmake_generator}\"
-cache_${option_project}_cmake_options=\"${option_build_cmake_options}\"
-
-" >> "$cache_file"
-
-			printf "
-Your build options for \"$option_project\" has been written to the cache. You
-only have to run '$me --build $option_project' to build the same project again.
-
-You may also use --auto to skip the prompts.
-
-"
+	if [ -f "${cache_file}" ]; then
+		if grep -q "cache_" "${cache_file}" ; then
+			source "$cache_file"
+			psuccess "* Loaded cached settings for '$option_project'\n\n"
 		else
-			pwarn "The cache is disabled. Skipping write.\n\n"
+			perror "* Could not load '$option_project' from the cache. Please check if this is a\nvalid cache file.\n\n"
 		fi
-	fi
-}
-
-option_cache_compare()
-{
-	local option=$1
-	local cache=$2
-	
-	if [ "$option" != "$cache" ]; then
+	else
 		cache_changed=1
 	fi
 }
 
-option_cache_list()
-{
-	return
-}
-
-#------------------------------------------------------------------------------#
-
-### Generic prompt function
-option_get_prompt()
-{
-	# Arguments
-	local -n option=$1
-	local default=$2
-	local message=$3
-	local required=$4
-	local error=$5
-
-	local default_text="[$default]"
-	
-	if ! [ "$default" ]; then
-		default_text=""
+option_cache_write() {
+	if [ ! -d "${cache_dir}" ]; then 
+		if [ -f "${cache_dir}" ]; then
+			perror "* The cache directory cannot be created because a file of the same name exists.\nThe cache cannot function. Please rename or delete this file.\n\n"
+			return
+		fi
+		mkdir "${cache_dir}"
 	fi
 
-	# No prompts in auto mode.
-	if (( option_auto )); then
+	if (( cache_changed )); then
+		if (( ! option_cache_off )); then
+			echo "#!/bin/bash
+
+cache_project_dir=\"${option_project_dir}\"
+cache_build_dir=\"${option_build_dir}\"
+cache_build_threads=\"${option_build_threads}\"
+cache_build_cmake_generator=\"${option_build_cmake_generator}\"
+cache_build_cmake_options=\"${option_build_cmake_options}\"
+" > "$cache_file"
+
+			printf "
+Your build options for \"%s\" has been written to the cache. You
+only have to run '%s %s' to build the same project again.
+
+You may also use --auto to skip the prompts.
+
+" "$option_project" "$me" "$option_project"
+		else pwarn "* The cache is disabled. Skipping write.\n\n"; fi
+	fi
+}
+
+option_cache_compare() {
+	local option=$1; local cache=$2
+
+	if ! [ "${option}" = "${cache}" ]; then cache_changed=1; fi
+}
+
+option_cache_list() {
+	local cache_select
+
+	if (( option_auto )) || check_empty ${cache_dir} || [ $option_project ]; then
+		return; fi
+
+	printf "Please select a project, or you can create a new one.\n\n"
+
+	select cache_select in "New Project..." $(for i in ${cache_dir}/*; do basename $i; done); do
+		if [ "$cache_select" == "New Project..." ]; then break
+		else option_project="${cache_select}"; fi
+		printf "\n"
+		break
+	done
+}
+#------------------------------------------------------------------------------#
+option_get_prompt() { # Generic prompt function
+	local -n option=$1;		local default=$2
+	local message=$3;		local required=$4
+	local error=$5;			local default_text="[$default]"
+
+	if ! [ "$default" ]; then default_text=""; fi
+
+	if (( option_auto )); then # No prompts in auto mode.
 		if (( required )); then
 			perror "$error\n"
 			phelp 1
@@ -301,17 +177,15 @@ option_get_prompt()
 			return
 		fi
 	fi
-	
-	printf -- "$message"
-	read -rp " $default_text: " option
+
+	printf -- "%b\n" "$message"
+	read -rp "$default_text: " option
 	option=${option:-$default}
 	printf "\n"
 	return
 }
 
-option_get_cmdline()
-{
-	# Iterate over any args.
+option_get_cmdline() { 	# Iterate over any args.
 	for (( i=0; i<${#args[@]}; i++)); do
 		if [[ "${args[$i]}" == "-"* ]]; then
 			case "${args[$i]}" in
@@ -324,20 +198,18 @@ option_get_cmdline()
 					option_run_reset_build=1 ;;
 				"--reset-cache" )
 					option_run_reset_cache=1 ;;
-				#	"--list" )
-					#option_cache_list=1 ;;
 				"--auto" )
-					pwarn "--auto is set. Prompts will not appear.\n\n"
 					option_auto=1 ;;
 				"--build-dir="* )
 					option_build_dir=${args[$i]##--build-dir=} ;;
 				"--config-dir="* )
-					option_project_dir=${args[$i]##--config-dir=}
-					printf "option config is $option_project" ;;
-				"--threads="* )
-					option_build_threads=${args[$i]##--threads=} ;;
-				"--j"* )
+					option_project_dir=${args[$i]##--config-dir=} ;;
+				"--threads="*[0-9] )
+					option_build_threads=${args[$i]##--threads=} ;;				
+				"--j"*[0-9] )
 					option_build_threads=${args[$i]##--j} ;;
+				"-j"*[0-9] )
+					option_build_threads=${args[$i]##-j} ;;
 				"--generator="* )
 					option_build_cmake_generator=${args[$i]##--generator=} ;;
 				"--cmake-options="* )
@@ -349,41 +221,32 @@ option_get_cmdline()
 				"--help" )
 					phelp 0 ;;
 				* )
-					pwarn "Unknown option '${args[$i]}'\n\n"
+					pwarn "Unknown option '${args[$i]}'\n"
 					phelp 1 ;;
 			esac
 		# Last arg should be the build config, but not the first arg.
-		else
-			option_project=${args[$i]}
-		fi
+		else option_project=${args[$i]}; fi
 	done
 }
-
 #------------------------------------------------------------------------------#
-
-option_get_check()
-{
-	if (( option_auto )) && (( option_expert )); then
-		option_expert=0
-		pwarn "Expert mode is useless in auto mode. Ignoring.\n\n"
+option_get_check() {
+	if (( option_auto )); then
+		pwarn "* --auto is set. Prompts will not appear.\n\n"
+		if (( option_expert )); then
+			option_expert=0
+			pwarn "* Expert mode is useless in auto mode. Ignoring.\n\n"
+		fi
 	fi
 
+	option_cache_list
 	option_get_check_config
 
-	if ! (( option_cache_off )); then
-		option_cache_read
-	else
-		pwarn "The cache is disabled. Skipping read.\n\n"
-	fi
+	if ! (( option_cache_off )); then option_cache_read
+	else pwarn "* The cache is disabled. Skipping read.\n\n"; fi
 
-	if (( option_run_reset_build )); then
-		reset_build
-	fi
+	if (( option_run_reset_build )); then reset_build; fi
+	if (( option_run_reset_cache )); then reset_cache; fi
 	
-	if (( option_run_reset_cache )); then
-		reset_cache
-	fi
-
 	option_get_check_config_dir
 	option_get_check_build_dir
 	option_get_check_build_threads
@@ -391,299 +254,222 @@ option_get_check()
 	option_get_check_build_cmake_options
 }
 
-# If the user didn't give us anything, ask.
-option_get_check_config()
-{
+option_get_check_config() { # If the user didn't give us anything, ask.
 	while ! [ "$option_project" ]; do
-		option_get_prompt	\
-			option_project	\
-			"$cache_project"	\
+		option_get_prompt \
+			option_project \
+			"$cache_project" \
 			"Please specify a name for your project" \
 			"" \
 			""
 		if [ "${option_project}" == "default" ]; then
-			pwarn "H-hey...! Get your own project! That's the template. You can't use that!\n\n"
+			pwarn "* H-hey...! Get your own project! That's the template. You can't use that!\n\n"
 			option_project=""
 		fi
 	done
-	option_cache_compare "$option_project" "$cache_project"
 }
 
-option_get_check_config_dir()
-{
-	local status
+option_get_check_config_dir() {
 	local new_config
-	
-	# Set the default
-	if [ ! "$cache_project_dir" ]; then
-		cache_project_dir="$(pwd)/game/$option_project"
-	fi
+
+	if [ ! "$cache_project_dir" ]; then # Set the default
+		cache_project_dir="$(pwd)/game/$option_project"; fi
 
 	# Don't prompt for this unless something is wrong. Assume the default.
-	if [ ! "$option_project_dir" ]; then
-		if ! (( option_expert )); then
-			option_project_dir="$cache_project_dir"
-		fi
-	fi
+	if [ ! "$option_project_dir" ] && (( ! option_expert )); then
+		option_project_dir="$cache_project_dir"; fi
 
 	while true; do
 		if [ "$option_project_dir" ]; then
-			if check_exist 'dir' "${option_project_dir}" 0 1 ; then
+			if [ -d "${option_project_dir}" ]; then
 				option_cache_compare "$option_project_dir" "$cache_project_dir"
 				return	# We're good. Proceed.
-			else
-				printf "The directory of the specified project does not exist.\n\n"
+			else printf "* The directory of the specified project does not exist.\n\n"
 				if [ -w "$(dirname "$option_project_dir")" ]; then
-					option_get_prompt												\
-						new_config														\
-						"Y"														\
-						"Would you like to create a new project from the template in:\n$option_project_dir?"						\
-						""															\
+					option_get_prompt \
+						new_config \
+						"Y" \
+						"Would you like to create a new project from the template in:\n$option_project_dir?" \
+						"" \
 						""
 					if [[ "$new_config" =~ ^(Y|y)$ ]]; then
 						cp -rv "$config_template" "$option_project_dir"
 						continue
 					fi
+				elif [ -f "${option_project_dir}" ]; then
+					pwarn "* The directory of the specified project is a file. Cannot create a new project\nfrom the template here.\n\n"
 				else
-					pwarn "The parent directory is also not writable or doesn't exist. Cannot create a new\nproject from the template here."
+					pwarn "* The parent directory is also not writable or doesn't exist. Cannot create a new\nproject from the template here.\n\n"
 				fi
 			fi
-		else
-			pwarn "No config directory has been specified.\n\n"
+		else pwarn "* No config directory has been specified.\n\n"
 			if ! (( option_expert )); then
-				pwarn "But --expert isn't set. Something is wrong with your configuration, or there's a bug in the script.\n\n"
+				pwarn "* But --expert isn't set. Something is wrong with your configuration, or there's\na bug in the script.\n\n"
 			fi
 		fi
-	
+		
 		# Get our answer unless --auto is set.
-		option_get_prompt														\
-			option_project_dir													\
-			"$cache_project_dir"																\
-			"Specify the location of '$option_project'. If it doesn't exist, it can be created from a template."	\
-			1																	\
+		option_get_prompt \
+			option_project_dir \
+			"$cache_project_dir" \
+			"Specify the location of '${option_project}'. If it doesn't exist, it can be created\nfrom a template."	\
+			1 \
 			"You must provide a valid project directory with --auto set\n\n"
 	done
 }
 
-option_get_check_build_dir()
-{
-	local status
-	local finished=0
-	local notwritable=0
-	local force=0
-	local ask=0
-	
+option_get_check_build_dir() {
+	local finished=0; local force=0; local ask=0
+
 	if [ ! "$cache_build_dir" ]; then
-		cache_build_dir="$option_project_dir/build"
-	fi
+		cache_build_dir="$option_project_dir/build"; fi
 
 	# Don't prompt for this unless something is wrong. Assume the default.
-	if [ ! "$option_build_dir" ]; then
-		if ! (( option_expert )); then
-			option_build_dir="$cache_build_dir"
-		fi
-	fi
+	if [ ! "$option_build_dir" ] && (( ! option_expert )); then
+		option_build_dir="$cache_build_dir"; fi
 
 	while ! (( finished )); do
 		if [ "$option_build_dir" ]; then
 			# Check if it even exists first.
-			if check_exist 'dir' "$option_build_dir" 0 1 ; then # Exists
+			if [ -d "$option_build_dir" ]; then # Exists
 				# Check if writable. Permissions change.
 				if ! [ -w "$option_build_dir" ]; then
-					pwarn "The directory '$option_build_dir' is NOT writable.\n\n"
-					notwritable=1
+					pwarn "* The directory '$option_build_dir' is NOT writable.\n\n"
 					ask=1
-				fi
-
-				if ! (( notwritable )); then
-					if ! check_empty "$option_build_dir" && [[ $cache_build_dir != "$option_build_dir" ]]; then
-						option_get_prompt												\
-							force														\
-							"y/N"														\
-							"Would you like to build here anyway?"						\
-							1															\
-							"You must specify an empty directory when --auto is set."
-						if ! [[ "$force" =~ ^(Y|y)$ ]]; then
-							ask=1
-						fi
-					fi
+				elif ! check_empty "$option_build_dir" &&
+				[[ $cache_build_dir != "$option_build_dir" ]]; then
+					option_get_prompt \
+						force \
+						"y/N" \
+						"Would you like to build here anyway?" \
+						1 \
+						"You must specify an empty directory when --auto is set."
+					if [[ "$force" =~ ^(Y|y)$ ]]; then ask=1; fi
 				fi
 			else
-				pwarn "Build directory doesn't exist. CMake will create the directory for you.\n\n"
+				pwarn "* Build directory doesn't exist. CMake will create the directory for you.\n\n"
 			fi
-		else
-			ask=1
-		fi
-		
-		# Ask if dir not empty and user not forcing, or if not writable.
+		else ask=1; fi
+
 		if (( ask )); then
-			option_get_prompt													\
-				option_build_dir												\
-				"$cache_build_dir"												\
-				"Please provide an empty and writable directory for the build files"			\
-				1	\
+			option_get_prompt \
+				option_build_dir \
+				"$cache_build_dir" \
+				"Please provide an empty and writable directory for the build files" \
+				1 \
 				"You must provide a valid build directory with --auto set\n\n"
 			ask=0
-		else
-			finished=1
-		fi
+		else finished=1; fi
 	done
 }
 
-option_get_check_build_threads()
-{
-	option_get_prompt										\
-		option_build_threads								\
-		"$cache_build_threads"								\
-		"How many threads would you like to compile with? Enter 0 to configure only."	\
-		""	\
-		""
-	if ! (( option_build_threads )); then
-		option_run_build=0
-	fi
-
+option_get_check_build_threads() {
+	while true; do
+		if [ "$option_build_threads" ]; then
+			if (( ! option_build_threads )); then
+				pwarn "* Threads must be a number, silly!\n\n"
+			elif (( option_build_threads < 0 )); then
+				pwarn "* Threads can't be a negative number, silly!\n\n"
+			else break; fi
+		fi
+		option_get_prompt \
+			option_build_threads \
+			"$cache_build_threads" \
+			"How many threads would you like to compile with? Enter 0 to run the configure\nstep only." \
+			"" \
+			""
+	done
 	option_cache_compare "$option_build_threads" "$cache_build_threads"
 }
 
-option_get_check_build_cmake_generator()
-{
-	option_get_prompt													\
-		option_build_cmake_generator	\
-		"$cache_build_cmake_generator"	\
-		"What CMake generator would you like to use?"	\
-		""	\
-		""
+option_get_check_build_cmake_generator() {
+	if ! [ "$option_build_cmake_generator" ]; then
+		option_get_prompt \
+			option_build_cmake_generator \
+			"$cache_build_cmake_generator" \
+			"What CMake generator would you like to use?" \
+			"" \
+			""
+	fi
 	option_cache_compare "$option_build_cmake_generator" "$cache_build_cmake_generator"
 }
 
-option_get_check_build_cmake_options()
-{
-	if ! (( option_expert )); then
-		return
-	else
-		option_get_prompt	\
-			option_build_cmake_options	\
-			"$cache_build_cmake_options"	\
-			"Specify additional command-line options for CMake"	\
-			""	\
-			""
-	fi
+option_get_check_build_cmake_options() {
+	if ! (( option_expert )); then return; fi
+	option_get_prompt \
+		option_build_cmake_options \
+		"$cache_build_cmake_options" \
+		"Specify additional command-line options for CMake" \
+		"" \
+		""
 	option_cache_compare "$option_build_cmake_options" "$cache_build_cmake_options"
 }
-
 #------------------------------------------------------------------------------#
-
-build_start_config()
-{
+build_start_config() {
 	local cmd_cmake_config="cmake ./engine -G\"${option_build_cmake_generator}\" -B$option_build_dir -DPROJ_DIR=$option_project_dir $option_build_cmake_options"
 
-	printf "Running CMake...\n\n"	
-	
-	printf "Using \"${option_project}\" build config.\n\n"
+	printf "* Running CMake...\n\n"	
+	printf "* Using \"%s\" build config.\n\n" "$option_project"
 
-	# Try to configure. If that's successful and --build was specified, then 
-	# try that too.
-
-	# Get return values.
-	printf "CMake config commandline: $cmd_cmake_config\n\n"
-	if eval "$cmd_cmake_config"; then
-		psuccess "Configure completed successfully.\n"
-	# Everything is broken.
-	else
-		perror "Configure failed. Please check the output for more information.\n"
+	# Try to configure. If that's successful, go ahead and build.
+	printf "* CMake config commandline: %s\n\n" "$cmd_cmake_config"
+	if ! eval "$cmd_cmake_config"; then
+		perror "*** Configure failed. Please check the output for more information.\n\n"
 		exit 1
 	fi
-	return
+	psuccess "* Configure completed successfully.\n\n"
 }
 
-build_start_compile()
-{
+build_start_compile() {
 	local cmd_cmake_build="cmake --build $option_build_dir -- -j $option_build_threads"
-	
-	printf "CMake build commandline: $cmd_cmake_build\n\n"
-	if eval "$cmd_cmake_build"; then
-		psuccess "Build completed successfully.\n"
-	else
-		perror "Build failed, but configure was successful. Please check the output for more information.\n"
+
+	printf "* CMake build commandline: %s\n\n" "$cmd_cmake_build"
+	if ! eval "$cmd_cmake_build"; then
+		perror "* Build failed, but configure was successful. Please check the output for more information.\n\n"
 		exit 1
 	fi
+	psuccess "* Build completed successfully.\n\n"
 }
 
-build_start()
-{
+build_start() {
 	build_start_config
-	if (( option_run_build )); then
-		build_start_compile
-	fi
+	if (( option_build_threads )); then build_start_compile; fi
 }
-
 #------------------------------------------------------------------------------#
-
-reset_build()
-{
-	local status
-	if ! [ "$cache_build_dir" ]; then
-		pwarn "--reset-build: No build directory found for '$option_project'\n\n"
+reset_build() {
+	local reset="Y"
+	if ! [ "$cache_build_dir" ]; then # Not set?
+		pwarn "* --reset-build: No build directory specified for '$option_project'\n\n"
+	elif ! [ -d "$cache_build_dir" ]; then # Doesn't exist?
+		pwarn "* --reset-build: The build directory of '$option_project' doesn't exist. Nothing to delete.\n\n"
 	else
-		if ! [ -d "$cache_build_dir" ]; then
-			pwarn "--reset-build: The build directory of '$option_project' doesn't exist. Nothing to delete.\n\n"
-		else
-			if ! rm -rfv "$cache_build_dir" ; then
-				perror "--reset-build: Failed to delete build files under '$cache_build_dir'\n\n"
+		option_get_prompt \
+			reset \
+			"y/N" \
+			"Do you wish to delete all build files under\n'$cache_build_dir'?"
+			if [[ "$reset" =~ ^(Y|y)$ ]]; then return;
+			elif ! rm -rfv "$cache_build_dir" ; then # Can't delete?
+				perror "*** --reset-build: Failed to delete build files under '$cache_build_dir'\n\n"
 			fi
-		fi
 	fi
 }
 
-# You couldn't pay me to rewrite this.
-reset_cache()
-{
-	# This whole section is a clusterfuck. Complicated awk command to try to rewrite
-	# the cache for a specified project if it's changed, while leaving everything else
-	# alone. It works but if the top of the cache is removed and placed at the
-	# bottom, it adds a space. So, figure out how to fix that?
-	local whole=$1
-	local cache="cache_${option_project}_"
-	local cache_new=""
-
-	if ! [ -f "$cache_file" ]; then
-		pwarn "The build cache doesn't exist. Nothing to reset or delete.\n\n"
-	else
-		if ! (( whole )); then
-			# The spaces in this awk line are extremely important or the
-			# variable won't expand. Do NOT touch this unless you know what
-			# you're doing. Why it works, I don't know. Ask stackoverflow.
-			cache_new="$(awk "!/$cache/ "' { print $0;next }' $cache_file)"
-			echo "${cache_new}"
-			[ -n "$cache_new" ] && echo "${cache_new}" > $cache_file || perror "Your cache file is corrupt or there is a bug in the script. The cache, upon reset, is supposed to at least include a shebang but is completely blank.\n\n"
-		else
-			rm -fv "$cache_file"
-			pwarn "Deleted build cache."
-		fi
-	fi
+reset_cache() { # It resets the cache.
+	rm -rfv "$cache_file" && pwarn "* --reset-cache: Deleted build cache for '$option_project'.\n\n" ||
+	perror "*** --reset-cache: Failed to delete cache for '$option_project'\n\n"
 }
 
-reset_all()
-{
-	reset_build
-	reset_cache
+reset_all() {
+	reset_build; reset_cache
 }
-
 #------------------------------------------------------------------------------#
-
-### Start ###
-
 printf "\n\e[1;34m---Horsepower Build Wizard---\e[0m\n\n"
 
-# Put the args in a proper array so they can be read easier.
-declare -g args=("$@")
-declare -g me=$0
-
-declare -g cache_file
-cache_file="$(pwd)/.buildcache"
-
-declare -g config_template
-config_template="$(pwd)/game/default"
+declare -g args=("$@") # Put cmdline in separate array to be read in functions
+declare -g me=$0 # Script can refer to itself regardless of filename in global scope
+declare -g cache_dir; cache_dir="$(pwd)/.cache"
+declare -g cache_file # Current cache file handle.
+declare -g config_template; config_template="$(pwd)/game/default"
 
 ### Default options ###
 # These are changed by the cache (if it exists) and compared with user input.
@@ -695,7 +481,6 @@ declare -g cache_build_cmake_options=""
 declare -g cache_build_cmake_generator="Unix Makefiles"
 
 ### User options ###
-
 # If any of these don't match the cache, write to it.
 declare -g option_project=""
 declare -g option_project_dir=""
@@ -703,30 +488,21 @@ declare -g option_build_dir=""
 declare -g option_build_threads=""
 declare -g option_build_cmake_options=""
 declare -g option_build_cmake_generator=""
+# Per-build options
 declare -g option_auto=0
 declare -g option_expert=0
 declare -g option_asroot=0
-
-# Per-build options
-declare -g option_run_build=1
 declare -g option_run_reset_build=0
 declare -g option_run_reset_cache=0
 declare -g option_cache_off=0
 
-### Global variables for state tracking ###
+# State tracking variables
 declare -g cache_changed=0 # Set to 1 if any options don't match the cache.
 
-# Make sure the environment is sane first.
-check_env
+check_env				# Make sure the environment is sane first
+option_get_cmdline		# Get input from command-line
+option_get_check		# Check that input and ask for new input
+build_start				# Start build with options
+option_cache_write		# Write to cache
 
-option_get_cmdline
-
-option_get_check
-
-build_start
-
-option_cache_write
-
-psuccess "The Horsepower Build Wizard has completed the requested operations successfully.\n\n"
-
-exit 0
+psuccess "* The Horsepower Build Wizard has completed the requested operations\n successfully.\n\n"
