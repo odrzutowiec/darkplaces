@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #---------------------------------------------------------------#
-# FILE: build.sh (Horsepower/Darkplaces Build Script)			#
+# FILE: build.sh (Horsepower/Darkplaces Build Script)           #
 # AUTHOR: David Knapp (Cloudwalk)                               #
 # LICENSE: GPL2.0 or later                                      #
 # Copyright (C) 2019 David Knapp                                #
