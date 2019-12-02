@@ -2291,10 +2291,9 @@ static void R_Shadow_SetShadowmapParametersForLight(qboolean noselfshadowpass)
 
 static void R_Shadow_RenderMode_ShadowMap(int side, int size, int x, int y)
 {
-	float nearclip, farclip, bias;
+	float nearclip, farclip;
 	r_viewport_t viewport;
 	int flipped;
-	float clearcolor[4];
 
 	if (r_shadow_rendermode != R_SHADOW_RENDERMODE_SHADOWMAP2D)
 	{
@@ -2314,7 +2313,6 @@ static void R_Shadow_RenderMode_ShadowMap(int side, int size, int x, int y)
 
 	nearclip = r_shadow_shadowmapping_nearclip.value / rsurface.rtlight->radius;
 	farclip = 1.0f;
-	bias = r_shadow_shadowmapping_bias.value * nearclip * (1024.0f / size);// * rsurface.rtlight->radius;
 
 	R_Viewport_InitRectSideView(&viewport, &rsurface.rtlight->matrix_lighttoworld, side, size, r_shadow_shadowmapborder, nearclip, farclip, NULL, x, y);
 	R_SetViewport(&viewport);
@@ -2323,7 +2321,6 @@ static void R_Shadow_RenderMode_ShadowMap(int side, int size, int x, int y)
 	r_refdef.view.cullface_front = flipped ? r_shadow_cullface_back : r_shadow_cullface_front;
 	r_refdef.view.cullface_back = flipped ? r_shadow_cullface_front : r_shadow_cullface_back;
 
-	Vector4Set(clearcolor, 1,1,1,1);
 	if (r_shadow_shadowmap2ddepthbuffer)
 		GL_ColorMask(1,1,1,1);
 	else
@@ -4936,7 +4933,7 @@ static void R_Shadow_DrawLightShadowMaps(rtlight_t *rtlight)
 {
 	int i;
 	int numsurfaces;
-	unsigned char *shadowtrispvs, *lighttrispvs, *surfacesides;
+	unsigned char *shadowtrispvs, *surfacesides;
 	int numlightentities;
 	int numlightentities_noselfshadow;
 	int numshadowentities;
@@ -4984,7 +4981,6 @@ static void R_Shadow_DrawLightShadowMaps(rtlight_t *rtlight)
 	shadowentities = rtlight->cached_shadowentities;
 	shadowentities_noselfshadow = rtlight->cached_shadowentities_noselfshadow;
 	shadowtrispvs = rtlight->cached_shadowtrispvs;
-	lighttrispvs = rtlight->cached_lighttrispvs;
 	surfacelist = rtlight->cached_surfacelist;
 
 	// make this the active rtlight for rendering purposes
@@ -5149,19 +5145,10 @@ static void R_Shadow_DrawLight(rtlight_t *rtlight)
 
 	if (castshadows && r_shadow_shadowmode == R_SHADOW_SHADOWMODE_SHADOWMAP2D)
 	{
-		float borderbias;
-		int size;
-		float shadowmapoffsetnoselfshadow = 0;
 		matrix4x4_t radiustolight = rtlight->matrix_worldtolight;
 		Matrix4x4_Abs(&radiustolight);
 
-		size = rtlight->shadowmapatlassidesize;
-		borderbias = r_shadow_shadowmapborder / (float)(size - r_shadow_shadowmapborder);
-
 		//Con_Printf("distance %f lodlinear %i size %i\n", distance, lodlinear, size);
-
-		if (rtlight->cached_numshadowentities_noselfshadow)
-			shadowmapoffsetnoselfshadow = rtlight->shadowmapatlassidesize * 2;
 
 		// render lighting using the depth texture as shadowmap
 		// draw lighting in the unmasked areas
