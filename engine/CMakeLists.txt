@@ -19,6 +19,9 @@
 
 ### BASICS ###
 cmake_minimum_required(VERSION 3.0.2 FATAL_ERROR)
+
+set(PROJ_NAME "horsepower" CACHE STRING "")
+
 project(${PROJ_NAME})
 
 ### VARIABLES ###
