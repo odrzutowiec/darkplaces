@@ -34,9 +34,8 @@ Options
     --cmake-options=    pass additional options to cmake
     --config-dir=       override the location of the config.cmake file
     --build-dir=        override the location cmake will write build files
-    --reset-all         delete all project build files and the cache
-    --reset-build       delete all project build files only
-    --reset-cache       delete the cache only
+    --reset-build       delete build files of PROJECT
+    --reset-cache       delete the cache
     --expert            display prompts for every single option
     --nocache           do not read from, or write to the cache
     --auto              do not display any prompts, even with --reset
@@ -59,7 +58,9 @@ This script will run in auto mode if ran from a non-interactive shell.
 
 check_empty()
 {
-	if command -v ls -A "$1" >/dev/null; then return 1; fi
+	if [ ! -d "$1" ] ||
+	! command -v ls -A "$1" >/dev/null; then return 0; fi
+	return 1
 }
 #------------------------------------------------------------------------------#
 check_env() { # Make sure the environment is sane before continuing.
@@ -93,7 +94,6 @@ check_env() { # Make sure the environment is sane before continuing.
 }
 #------------------------------------------------------------------------------#
 option_cache_read() {
-	local cache="$1"
 	cache_file="${cache_dir}/${option_project}"
 
 	if [ -f "${cache_file}" ]; then
@@ -128,7 +128,7 @@ cache_build_cmake_generator=\"${option_build_cmake_generator}\"
 cache_build_cmake_options=\"${option_build_cmake_options}\"
 " > "$cache_file"
 
-			printf "
+			printf "\
 Your build options for \"%s\" has been written to the cache. You
 only have to run '%s %s' to build the same project again.
 
@@ -148,14 +148,19 @@ option_cache_compare() {
 option_cache_list() {
 	local cache_select
 
-	if (( option_auto )) || check_empty ${cache_dir} || [ $option_project ]; then
+	if (( option_auto )) || check_empty "${cache_dir}" || [ "$option_project" ]; then
 		return; fi
 
-	printf "Please select a project, or you can create a new one.\n\n"
+	printf "Please select a project."
 
-	select cache_select in "New Project..." $(for i in ${cache_dir}/*; do basename $i; done); do
-		if [ "$cache_select" == "New Project..." ]; then break
-		else option_project="${cache_select}"; fi
+	if (( ! option_run_reset_build )); then
+		printf " Leave blank to create a new one."
+	fi
+	
+	printf "\n\n"
+
+	select cache_select in $(for i in "${cache_dir}"/*; do basename "$i"; done); do
+		option_project="${cache_select}"
 		printf "\n"
 		break
 	done
@@ -191,9 +196,6 @@ option_get_cmdline() { 	# Iterate over any args.
 			case "${args[$i]}" in
 				"--expert" )
 					option_expert=1 ;;
-				"--reset-all" )
-					option_run_reset_build=1
-					option_run_reset_cache=1 ;;
 				"--reset-build" )
 					option_run_reset_build=1 ;;
 				"--reset-cache" )
@@ -230,6 +232,8 @@ option_get_cmdline() { 	# Iterate over any args.
 }
 #------------------------------------------------------------------------------#
 option_get_check() {
+	if (( option_run_reset_cache )); then reset_cache; fi
+
 	if (( option_auto )); then
 		pwarn "* --auto is set. Prompts will not appear.\n\n"
 		if (( option_expert )); then
@@ -244,9 +248,8 @@ option_get_check() {
 	if ! (( option_cache_off )); then option_cache_read
 	else pwarn "* The cache is disabled. Skipping read.\n\n"; fi
 
-	if (( option_run_reset_build )); then reset_build; fi
-	if (( option_run_reset_cache )); then reset_cache; fi
-	
+	if (( option_run_reset_build )); then reset_build; exit 0; fi
+
 	option_get_check_config_dir
 	option_get_check_build_dir
 	option_get_check_build_threads
@@ -255,11 +258,13 @@ option_get_check() {
 }
 
 option_get_check_config() { # If the user didn't give us anything, ask.
+	if (( option_run_reset_build )); then pwarn "* Resetting build files...\n\n"; fi
+	
 	while ! [ "$option_project" ]; do
 		option_get_prompt \
 			option_project \
 			"$cache_project" \
-			"Please specify a name for your project" \
+			"Please specify the name of your project" \
 			"" \
 			""
 		if [ "${option_project}" == "default" ]; then
@@ -338,6 +343,7 @@ option_get_check_build_dir() {
 					ask=1
 				elif ! check_empty "$option_build_dir" &&
 				[[ $cache_build_dir != "$option_build_dir" ]]; then
+					pwarn "* The directory '$option_build_dir' is NOT empty.\n\n"
 					option_get_prompt \
 						force \
 						"y/N" \
@@ -406,7 +412,7 @@ option_get_check_build_cmake_options() {
 }
 #------------------------------------------------------------------------------#
 build_start_config() {
-	local cmd_cmake_config="cmake ./engine -G\"${option_build_cmake_generator}\" -B$option_build_dir -DPROJ_DIR=$option_project_dir $option_build_cmake_options"
+	local cmd_cmake_config="cmake ./engine -G\"${option_build_cmake_generator}\" -B$option_build_dir -DPROJ_DIR=$option_project_dir -DPROJ_NAME=$option_project $option_build_cmake_options"
 
 	printf "* Running CMake...\n\n"	
 	printf "* Using \"%s\" build config.\n\n" "$option_project"
@@ -437,30 +443,44 @@ build_start() {
 }
 #------------------------------------------------------------------------------#
 reset_build() {
-	local reset="Y"
+	local reset="Y" # Defaults to Y in case --auto is set
 	if ! [ "$cache_build_dir" ]; then # Not set?
-		pwarn "* --reset-build: No build directory specified for '$option_project'\n\n"
+		pwarn "* --reset-build: No build directory for '$option_project' was specified or\nfound in the cache, or the cache is disabled.\n\n"
 	elif ! [ -d "$cache_build_dir" ]; then # Doesn't exist?
-		pwarn "* --reset-build: The build directory of '$option_project' doesn't exist. Nothing to delete.\n\n"
+		pwarn "* --reset-build: The build directory of '$option_project' doesn't exist.\nNothing to delete.\n\n"
 	else
 		option_get_prompt \
 			reset \
-			"y/N" \
+			"N" \
 			"Do you wish to delete all build files under\n'$cache_build_dir'?"
-			if [[ "$reset" =~ ^(Y|y)$ ]]; then return;
-			elif ! rm -rfv "$cache_build_dir" ; then # Can't delete?
+		if [[ "$reset" =~ ^(N|n)$ ]]; then return;
+		else
+			if ! rm -rfv "$cache_build_dir" ; then # Can't delete?
 				perror "*** --reset-build: Failed to delete build files under '$cache_build_dir'\n\n"
+			else
+				pwarn "* --reset-cache: Deleted the build directory of '$option_config'.\n\n"
 			fi
+		fi
 	fi
 }
 
 reset_cache() { # It resets the cache.
-	rm -rfv "$cache_file" && pwarn "* --reset-cache: Deleted build cache for '$option_project'.\n\n" ||
-	perror "*** --reset-cache: Failed to delete cache for '$option_project'\n\n"
-}
+	local reset="Y" # Defaults to Y in case --auto is set
 
-reset_all() {
-	reset_build; reset_cache
+	if [ -d "$cache_dir" ]; then
+		option_get_prompt \
+			reset \
+			"N" \
+			"Do you wish to delete the entire build cache?"
+		if [[ "$reset" =~ ^(N|n)$ ]]; then return
+		else
+			rm -rfv "$cache_dir"
+			pwarn "* --reset-cache: Deleted the build cache.\n\n"
+		fi
+	else
+		pwarn "* --reset-cache: The build cache doesn't exist. Nothing to delete.\n\n"
+	fi
+	exit 0
 }
 #------------------------------------------------------------------------------#
 printf "\n\e[1;34m---Horsepower Build Wizard---\e[0m\n\n"
