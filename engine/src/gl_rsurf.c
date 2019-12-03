@@ -1412,7 +1412,8 @@ void R_Q1BSP_DrawShadowMap(int side, entity_render_t *ent, const vec3_t relative
 	for (modelsurfacelistindex = 0;modelsurfacelistindex < modelnumsurfaces;modelsurfacelistindex++)
 	{
 		surface = model->data_surfaces + modelsurfacelist[modelsurfacelistindex];
-		if (surfacesides && !(surfacesides[modelsurfacelistindex] && (1 < side)))
+		int bit = 1 << side;
+		if (surfacesides && !(surfacesides[modelsurfacelistindex] & bit))
 			continue;
 		rsurface.texture = R_GetCurrentTexture(surface->texture);
 		if (rsurface.texture->currentmaterialflags & MATERIALFLAG_NOSHADOW)
