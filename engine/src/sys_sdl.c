@@ -69,9 +69,10 @@ void Sys_Error (const char *error, ...)
 
 	Con_Printf ("Engine Error - %s\n", string);
 
-#ifdef WIN32
-	MessageBox(NULL, string, "Engine Error", MB_OK | MB_SETFOREGROUND | MB_ICONSTOP);
-#endif
+	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,
+							"Engine Error",
+							string,
+							NULL);
 
 	Host_Shutdown ();
 	exit (1);
