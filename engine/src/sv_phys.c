@@ -2975,7 +2975,7 @@ void SV_Physics_ClientMove(void)
 		// angle fixing was requested by physics code...
 		// so store the current angles for later use
 		VectorCopy(PRVM_serveredictvector(ent, angles), host_client->fixangle_angles);
-		host_client->fixangle_angles_set = TRUE;
+		host_client->fixangle_angles_set = true;
 
 		// and clear fixangle for the next frame
 		PRVM_serveredictfloat(ent, fixangle) = 0;
@@ -3034,7 +3034,7 @@ static void SV_Physics_ClientEntity_PostThink(prvm_edict_t *ent)
 		// angle fixing was requested by physics code...
 		// so store the current angles for later use
 		VectorCopy(PRVM_serveredictvector(ent, angles), host_client->fixangle_angles);
-		host_client->fixangle_angles_set = TRUE;
+		host_client->fixangle_angles_set = true;
 
 		// and clear fixangle for the next frame
 		PRVM_serveredictfloat(ent, fixangle) = 0;

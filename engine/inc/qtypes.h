@@ -6,18 +6,16 @@
 #undef false
 
 #ifndef __cplusplus
-typedef enum qboolean_e {false, true} qboolean;
+#ifdef _MSC_VER
+typedef enum {false, true} bool;
 #else
-typedef bool qboolean;
+#include <stdbool.h>
 #endif
+#endif
+typedef bool qboolean;
 
 #ifndef NULL
 #define NULL ((void *)0)
-#endif
-
-#ifndef FALSE
-#define FALSE false
-#define TRUE true
 #endif
 
 // up / down
