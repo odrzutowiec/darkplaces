@@ -121,7 +121,6 @@ set(OBJ_COMMON
 	${ENGINE_DIR}/prvm_edict.c
 	${ENGINE_DIR}/prvm_exec.c
 	${ENGINE_DIR}/r_explosion.c
-	${ENGINE_DIR}/r_lerpanim.c
 	${ENGINE_DIR}/r_lightning.c
 	${ENGINE_DIR}/r_modules.c
 	${ENGINE_DIR}/r_shadow.c
