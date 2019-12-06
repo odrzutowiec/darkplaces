@@ -21,6 +21,10 @@
 cmake_minimum_required(VERSION 3.0.2 FATAL_ERROR)
 
 set(PROJ_NAME "horsepower" CACHE STRING "")
+set(PROJ_DIR "" CACHE STRING "")
+
+mark_as_advanced(PROJ_NAME)
+mark_as_advanced(PROJ_DIR)
 
 project(${PROJ_NAME})
 
@@ -42,7 +46,7 @@ execute_process(
 ### CHECKS ###
 
 if(PROJ_DIR STREQUAL "")
-	message(FATAL "No PROJ_DIR specified. Specify -DPROJ_DIR to the the directory containing your build config. If you got here from the build script, it's broken again.")
+	message(FATAL_ERROR "No PROJ_DIR specified. Specify -DPROJ_DIR to the directory containing your build config. If you got here from the build script, it's broken again.")
 endif()
 
 include("${PROJ_DIR}/config.cmake")
