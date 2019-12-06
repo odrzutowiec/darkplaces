@@ -683,6 +683,7 @@ qboolean	Cvar_Command (void)
 	if (Cmd_Argc() == 1)
 	{
 		Con_Printf("\"%s\" is \"%s\" [\"%s\"]\n", v->name, ((v->flags & CVAR_PRIVATE) ? "********"/*hunter2*/ : v->string), v->defstring);
+		Con_Printf("- %s\n", v->description);
 		return true;
 	}
 
