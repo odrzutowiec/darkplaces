@@ -75,7 +75,7 @@ static void Mod_SpriteSetupTexture(texture_t *texture, skinframe_t *skinframe, q
 	else if (skinframe->hasalpha)
 		texture->basematerialflags |= MATERIALFLAG_ALPHA | MATERIALFLAG_BLENDED | MATERIALFLAG_NOSHADOW;
 	texture->currentmaterialflags = texture->basematerialflags;
-	texture->materialshaderpass = texture->shaderpasses[0] = Mod_CreateShaderPass(skinframe);
+	texture->materialshaderpass = texture->shaderpasses[0] = Mod_CreateShaderPass(loadmodel->mempool, skinframe);
 	texture->currentskinframe = skinframe;
 	texture->surfaceflags = 0;
 	texture->supercontents = SUPERCONTENTS_SOLID;
@@ -220,7 +220,7 @@ static void Mod_Sprite_SharedSetup(const unsigned char *datapointer, int version
 						dpsnprintf (name, sizeof(name), "%s_%i", loadmodel->name, i);
 						dpsnprintf (fogname, sizeof(fogname), "%s_%ifog", loadmodel->name, i);
 					}
-					if (!(skinframe = R_SkinFrame_LoadExternal(name, texflags | TEXF_COMPRESS, false)))
+					if (!(skinframe = R_SkinFrame_LoadExternal(name, texflags | TEXF_COMPRESS, false, false)))
 					{
 						unsigned char *pixels = (unsigned char *) Mem_Alloc(loadmodel->mempool, width*height*4);
 						if (version == SPRITE32_VERSION)
@@ -235,7 +235,7 @@ static void Mod_Sprite_SharedSetup(const unsigned char *datapointer, int version
 						}
 						else //if (version == SPRITEHL_VERSION || version == SPRITE_VERSION)
 							Image_Copy8bitBGRA(datapointer, pixels, width*height, palette ? palette : palette_bgra_transparent);
-						skinframe = R_SkinFrame_LoadInternalBGRA(name, texflags, pixels, width, height, false);
+						skinframe = R_SkinFrame_LoadInternalBGRA(name, texflags, pixels, width, height, 0, 0, 0, false);
 						// texflags |= TEXF_COMPRESS;
 						Mem_Free(pixels);
 					}
@@ -277,8 +277,6 @@ void Mod_IDSP_Load(dp_model_t *mod, void *buffer, void *bufferend)
 	loadmodel->DrawSky = NULL;
 	loadmodel->Draw = R_Model_Sprite_Draw;
 	loadmodel->DrawDepth = NULL;
-	loadmodel->CompileShadowVolume = NULL;
-	loadmodel->DrawShadowVolume = NULL;
 	loadmodel->DrawLight = NULL;
 	loadmodel->DrawAddWaterPlanes = NULL;
 
@@ -394,8 +392,6 @@ void Mod_IDS2_Load(dp_model_t *mod, void *buffer, void *bufferend)
 	loadmodel->DrawSky = NULL;
 	loadmodel->Draw = R_Model_Sprite_Draw;
 	loadmodel->DrawDepth = NULL;
-	loadmodel->CompileShadowVolume = NULL;
-	loadmodel->DrawShadowVolume = NULL;
 	loadmodel->DrawLight = NULL;
 	loadmodel->DrawAddWaterPlanes = NULL;
 
@@ -464,7 +460,7 @@ void Mod_IDS2_Load(dp_model_t *mod, void *buffer, void *bufferend)
 		{
 			const dsprite2frame_t *pinframe;
 			pinframe = &pinqsprite->frames[i];
-			if (!(skinframe = R_SkinFrame_LoadExternal(pinframe->name, texflags, false)))
+			if (!(skinframe = R_SkinFrame_LoadExternal(pinframe->name, texflags, false, false)))
 			{
 				Con_Printf("Mod_IDS2_Load: failed to load %s", pinframe->name);
 				skinframe = R_SkinFrame_LoadMissing();

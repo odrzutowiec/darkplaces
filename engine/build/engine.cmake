@@ -63,10 +63,10 @@ set(OBJ_VIDEO_CAPTURE
 set(OBJ_COMMON
 	${ENGINE_DIR}/bih.c
 	${ENGINE_DIR}/builddate.c
+	${ENGINE_DIR}/cd_shared.c
 	${ENGINE_DIR}/crypto.c
 	${ENGINE_DIR}/cl_collision.c
 	${ENGINE_DIR}/cl_demo.c
-	${ENGINE_DIR}/cl_dyntexture.c
 	${ENGINE_DIR}/cl_input.c
 	${ENGINE_DIR}/cl_main.c
 	${ENGINE_DIR}/cl_parse.c
@@ -81,7 +81,6 @@ set(OBJ_COMMON
 	${ENGINE_DIR}/csprogs.c
 	${ENGINE_DIR}/curves.c
 	${ENGINE_DIR}/cvar.c
-	${ENGINE_DIR}/dpsoftrast.c
 	${ENGINE_DIR}/dpvsimpledecode.c
 	${ENGINE_DIR}/filematch.c
 	${ENGINE_DIR}/fractalnoise.c
@@ -155,8 +154,6 @@ set(OBJ_SV
 )
 
 set(OBJ_CL
-	${ENGINE_DIR}/cd_sdl.c
-	${ENGINE_DIR}/cd_shared.c
 	${ENGINE_DIR}/snd_sdl.c
 	${ENGINE_DIR}/sys_sdl.c
 	${ENGINE_DIR}/vid_sdl.c

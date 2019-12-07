@@ -33,12 +33,15 @@
 // indicates the texture will be used as a render target (D3D hint)
 #define TEXF_RENDERTARGET 0x0010000
 // used for checking if textures mismatch
-#define TEXF_IMPORTANTBITS (TEXF_ALPHA | TEXF_MIPMAP | TEXF_RGBMULTIPLYBYALPHA | TEXF_CLAMP | TEXF_FORCENEAREST | TEXF_FORCELINEAR | TEXF_PICMIP | TEXF_COMPRESS | TEXF_COMPARE | TEXF_LOWPRECISION | TEXF_RENDERTARGET)
+#define TEXF_IMPORTANTBITS (TEXF_ALPHA | TEXF_MIPMAP | TEXF_RGBMULTIPLYBYALPHA | TEXF_CLAMP | TEXF_FORCENEAREST | TEXF_FORCELINEAR | TEXF_PICMIP | TEXF_COMPARE | TEXF_LOWPRECISION | TEXF_RENDERTARGET)
 // set as a flag to force the texture to be reloaded
 #define TEXF_FORCE_RELOAD 0x80000000
 
 typedef enum textype_e
 {
+	// placeholder for unused textures in r_rendertarget_t
+	TEXTYPE_UNUSED,
+
 	// 8bit paletted
 	TEXTYPE_PALETTE,
 	// 32bit RGBA
@@ -97,16 +100,6 @@ typedef enum textype_e
 }
 textype_t;
 
-/*
-#ifdef WIN32
-#define SUPPORTD3D
-#define SUPPORTDIRECTX
-#ifdef SUPPORTD3D
-#include <d3d9.h>
-#endif
-#endif
-*/
-
 // contents of this structure are mostly private to gl_textures.c
 typedef struct rtexture_s
 {
@@ -116,25 +109,6 @@ typedef struct rtexture_s
 	qboolean dirty; // indicates that R_RealGetTexture should be called
 	qboolean glisdepthstencil; // indicates that FBO attachment has to be GL_DEPTH_STENCIL_ATTACHMENT
 	int gltexturetypeenum; // used by R_Mesh_TexBind
-	// d3d stuff the backend needs
-	void *d3dtexture;
-	void *d3dsurface;
-#ifdef SUPPORTD3D
-	qboolean d3disrendertargetsurface;
-	qboolean d3disdepthstencilsurface;
-	int d3dformat;
-	int d3dusage;
-	int d3dpool;
-	int d3daddressu;
-	int d3daddressv;
-	int d3daddressw;
-	int d3dmagfilter;
-	int d3dminfilter;
-	int d3dmipfilter;
-	int d3dmaxmiplevelfilter;
-	int d3dmipmaplodbias;
-	int d3dmaxmiplevel;
-#endif
 }
 rtexture_t;
 

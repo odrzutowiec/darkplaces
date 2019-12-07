@@ -38,7 +38,7 @@ cvar_t scr_showturtle = {CVAR_SAVE, "showturtle","0", "show turtle icon when fra
 cvar_t scr_showpause = {CVAR_SAVE, "showpause","1", "show pause icon when game is paused"};
 cvar_t scr_showbrand = {0, "showbrand","0", "shows gfx/brand.tga in a corner of the screen (different values select different positions, including centered)"};
 cvar_t scr_printspeed = {0, "scr_printspeed","0", "speed of intermission printing (episode end texts), a value of 0 disables the slow printing"};
-cvar_t scr_loadingscreen_background = {0, "scr_loadingscreen_background","0", "show the last visible background during loading screen (costs one screenful of video memory)"};
+cvar_t scr_loadingscreen_background = {0, "scr_loadingscreen_background","1", "show the last visible background during loading screen (costs one screenful of video memory)"};
 cvar_t scr_loadingscreen_scale = {0, "scr_loadingscreen_scale","1", "scale factor of the background"};
 cvar_t scr_loadingscreen_scale_base = {0, "scr_loadingscreen_scale_base","0", "0 = console pixels, 1 = video pixels"};
 cvar_t scr_loadingscreen_scale_limit = {0, "scr_loadingscreen_scale_limit","0", "0 = no limit, 1 = until first edge hits screen edge, 2 = until last edge hits screen edge, 3 = until width hits screen width, 4 = until height hits screen height"};
@@ -49,7 +49,8 @@ cvar_t scr_loadingscreen_barcolor = {0, "scr_loadingscreen_barcolor", "0 0 1", "
 cvar_t scr_loadingscreen_barheight = {0, "scr_loadingscreen_barheight", "8", "the height of the loadingscreen progress bar"};
 cvar_t scr_loadingscreen_maxfps = {0, "scr_loadingscreen_maxfps", "10", "restrict maximal FPS for loading screen so it will not update very often (this will make lesser loading times on a maps loading large number of models)"};
 cvar_t scr_infobar_height = {0, "scr_infobar_height", "8", "the height of the infobar items"};
-cvar_t vid_conwidth = {CVAR_SAVE, "vid_conwidth", "640", "virtual width of 2D graphics system"};
+cvar_t vid_conwidthauto = { CVAR_SAVE, "vid_conwidthauto", "1", "automatically update vid_conwidth to match aspect ratio" };
+cvar_t vid_conwidth = {CVAR_SAVE, "vid_conwidth", "640", "virtual width of 2D graphics system (note: changes may be overwritten, see vid_conwidthauto)"};
 cvar_t vid_conheight = {CVAR_SAVE, "vid_conheight", "480", "virtual height of 2D graphics system"};
 cvar_t vid_pixelheight = {CVAR_SAVE, "vid_pixelheight", "1", "adjusts vertical field of vision to account for non-square pixels (1280x1024 on a CRT monitor for example)"};
 cvar_t scr_screenshot_jpeg = {CVAR_SAVE, "scr_screenshot_jpeg","1", "save jpeg instead of targa"};
@@ -112,7 +113,6 @@ cvar_t r_speeds_graph_maxdefault = {CVAR_SAVE, "r_speeds_graph_maxdefault", "100
 
 
 
-extern cvar_t v_glslgamma;
 extern cvar_t sbar_info_pos;
 extern cvar_t r_fog_clear;
 
@@ -253,14 +253,12 @@ static void SCR_CheckDrawCenterString (void)
 static void SCR_DrawNetGraph_DrawGraph (int graphx, int graphy, int graphwidth, int graphheight, float graphscale, int graphlimit, const char *label, float textsize, int packetcounter, netgraphitem_t *netgraph)
 {
 	netgraphitem_t *graph;
-	int j, x, y, numlines;
+	int j, x, y;
 	int totalbytes = 0;
 	char bytesstring[128];
 	float g[NETGRAPH_PACKETS][7];
 	float *a;
 	float *b;
-	r_vertexgeneric_t vertex[(NETGRAPH_PACKETS+2)*6*2];
-	r_vertexgeneric_t *v;
 	DrawQ_Fill(graphx, graphy, graphwidth, graphheight + textsize * 2, 0, 0, 0, 0.5, 0);
 	// draw the bar graph itself
 	memset(g, 0, sizeof(g));
@@ -300,38 +298,18 @@ static void SCR_DrawNetGraph_DrawGraph (int graphx, int graphy, int graphwidth, 
 		g[j][6] = bound(0.0f, g[j][6], 1.0f);
 	}
 	// render the lines for the graph
-	numlines = 0;
-	v = vertex;
 	for (j = 0;j < NETGRAPH_PACKETS;j++)
 	{
 		a = g[j];
 		b = g[(j+1)%NETGRAPH_PACKETS];
 		if (a[0] < 0.0f || b[0] > 1.0f || b[0] < a[0])
 			continue;
-		VectorSet(v->vertex3f, graphx + graphwidth * a[0], graphy + graphheight * a[2], 0.0f);Vector4Set(v->color4f, 1.0f, 1.0f, 0.0f, 1.0f);Vector2Set(v->texcoord2f, 0.0f, 0.0f);v++;
-		VectorSet(v->vertex3f, graphx + graphwidth * b[0], graphy + graphheight * b[2], 0.0f);Vector4Set(v->color4f, 1.0f, 1.0f, 0.0f, 1.0f);Vector2Set(v->texcoord2f, 0.0f, 0.0f);v++;
-
-		VectorSet(v->vertex3f, graphx + graphwidth * a[0], graphy + graphheight * a[1], 0.0f);Vector4Set(v->color4f, 1.0f, 0.0f, 0.0f, 1.0f);Vector2Set(v->texcoord2f, 0.0f, 0.0f);v++;
-		VectorSet(v->vertex3f, graphx + graphwidth * b[0], graphy + graphheight * b[1], 0.0f);Vector4Set(v->color4f, 1.0f, 0.0f, 0.0f, 1.0f);Vector2Set(v->texcoord2f, 0.0f, 0.0f);v++;
-
-		VectorSet(v->vertex3f, graphx + graphwidth * a[0], graphy + graphheight * a[5], 0.0f);Vector4Set(v->color4f, 0.0f, 1.0f, 0.0f, 1.0f);Vector2Set(v->texcoord2f, 0.0f, 0.0f);v++;
-		VectorSet(v->vertex3f, graphx + graphwidth * b[0], graphy + graphheight * b[5], 0.0f);Vector4Set(v->color4f, 0.0f, 1.0f, 0.0f, 1.0f);Vector2Set(v->texcoord2f, 0.0f, 0.0f);v++;
-
-		VectorSet(v->vertex3f, graphx + graphwidth * a[0], graphy + graphheight * a[4], 0.0f);Vector4Set(v->color4f, 1.0f, 1.0f, 1.0f, 1.0f);Vector2Set(v->texcoord2f, 0.0f, 0.0f);v++;
-		VectorSet(v->vertex3f, graphx + graphwidth * b[0], graphy + graphheight * b[4], 0.0f);Vector4Set(v->color4f, 1.0f, 1.0f, 1.0f, 1.0f);Vector2Set(v->texcoord2f, 0.0f, 0.0f);v++;
-
-		VectorSet(v->vertex3f, graphx + graphwidth * a[0], graphy + graphheight * a[3], 0.0f);Vector4Set(v->color4f, 1.0f, 0.5f, 0.0f, 1.0f);Vector2Set(v->texcoord2f, 0.0f, 0.0f);v++;
-		VectorSet(v->vertex3f, graphx + graphwidth * b[0], graphy + graphheight * b[3], 0.0f);Vector4Set(v->color4f, 1.0f, 0.5f, 0.0f, 1.0f);Vector2Set(v->texcoord2f, 0.0f, 0.0f);v++;
-
-		VectorSet(v->vertex3f, graphx + graphwidth * a[0], graphy + graphheight * a[6], 0.0f);Vector4Set(v->color4f, 0.0f, 0.0f, 1.0f, 1.0f);Vector2Set(v->texcoord2f, 0.0f, 0.0f);v++;
-		VectorSet(v->vertex3f, graphx + graphwidth * b[0], graphy + graphheight * b[6], 0.0f);Vector4Set(v->color4f, 0.0f, 0.0f, 1.0f, 1.0f);Vector2Set(v->texcoord2f, 0.0f, 0.0f);v++;
-
-		numlines += 6;
-	}
-	if (numlines > 0)
-	{
-		R_Mesh_PrepareVertices_Generic(numlines*2, vertex, NULL, 0);
-		DrawQ_Lines(0.0f, numlines, 0, false);
+		DrawQ_Line(1, graphx + graphwidth * a[0], graphy + graphheight * a[2], graphx + graphwidth * b[0], graphy + graphheight * b[2], 1.0f, 1.0f, 1.0f, 1.0f, 0);
+		DrawQ_Line(1, graphx + graphwidth * a[0], graphy + graphheight * a[1], graphx + graphwidth * b[0], graphy + graphheight * b[1], 1.0f, 0.0f, 0.0f, 1.0f, 0);
+		DrawQ_Line(1, graphx + graphwidth * a[0], graphy + graphheight * a[5], graphx + graphwidth * b[0], graphy + graphheight * b[5], 0.0f, 1.0f, 0.0f, 1.0f, 0);
+		DrawQ_Line(1, graphx + graphwidth * a[0], graphy + graphheight * a[4], graphx + graphwidth * b[0], graphy + graphheight * b[4], 1.0f, 1.0f, 1.0f, 1.0f, 0);
+		DrawQ_Line(1, graphx + graphwidth * a[0], graphy + graphheight * a[3], graphx + graphwidth * b[0], graphy + graphheight * b[3], 1.0f, 0.5f, 0.0f, 1.0f, 0);
+		DrawQ_Line(1, graphx + graphwidth * a[0], graphy + graphheight * a[6], graphx + graphwidth * b[0], graphy + graphheight * b[6], 0.0f, 0.0f, 1.0f, 1.0f, 0);
 	}
 	x = graphx;
 	y = graphy + graphheight;
@@ -458,7 +436,7 @@ static void SCR_DrawPause (void)
 		return;
 
 	pic = Draw_CachePic ("gfx/pause");
-	DrawQ_Pic ((vid_conwidth.integer - pic->width)/2, (vid_conheight.integer - pic->height)/2, pic, 0, 0, 1, 1, 1, 1, 0);
+	DrawQ_Pic ((vid_conwidth.integer - Draw_GetPicWidth(pic))/2, (vid_conheight.integer - Draw_GetPicHeight(pic))/2, pic, 0, 0, 1, 1, 1, 1, 0);
 }
 
 /*
@@ -480,26 +458,26 @@ static void SCR_DrawBrand (void)
 	{
 	case 1:	// bottom left
 		x = 0;
-		y = vid_conheight.integer - pic->height;
+		y = vid_conheight.integer - Draw_GetPicHeight(pic);
 		break;
 	case 2:	// bottom centre
-		x = (vid_conwidth.integer - pic->width) / 2;
-		y = vid_conheight.integer - pic->height;
+		x = (vid_conwidth.integer - Draw_GetPicWidth(pic)) / 2;
+		y = vid_conheight.integer - Draw_GetPicHeight(pic);
 		break;
 	case 3:	// bottom right
-		x = vid_conwidth.integer - pic->width;
-		y = vid_conheight.integer - pic->height;
+		x = vid_conwidth.integer - Draw_GetPicWidth(pic);
+		y = vid_conheight.integer - Draw_GetPicHeight(pic);
 		break;
 	case 4:	// centre right
-		x = vid_conwidth.integer - pic->width;
-		y = (vid_conheight.integer - pic->height) / 2;
+		x = vid_conwidth.integer - Draw_GetPicWidth(pic);
+		y = (vid_conheight.integer - Draw_GetPicHeight(pic)) / 2;
 		break;
 	case 5:	// top right
-		x = vid_conwidth.integer - pic->width;
+		x = vid_conwidth.integer - Draw_GetPicWidth(pic);
 		y = 0;
 		break;
 	case 6:	// top centre
-		x = (vid_conwidth.integer - pic->width) / 2;
+		x = (vid_conwidth.integer - Draw_GetPicWidth(pic)) / 2;
 		y = 0;
 		break;
 	case 7:	// top left
@@ -508,7 +486,7 @@ static void SCR_DrawBrand (void)
 		break;
 	case 8:	// centre left
 		x = 0;
-		y = (vid_conheight.integer - pic->height) / 2;
+		y = (vid_conheight.integer - Draw_GetPicHeight(pic)) / 2;
 		break;
 	default:
 		return;
@@ -800,6 +778,8 @@ const char *r_stat_name[r_stat_count] =
 	"bloom",
 	"bloom_copypixels",
 	"bloom_drawpixels",
+	"rendertargets_used",
+	"rendertargets_pixels",
 	"indexbufferuploadcount",
 	"indexbufferuploadsize",
 	"vertexbufferuploadcount",
@@ -814,9 +794,6 @@ const char *r_stat_name[r_stat_count] =
 	"bufferdatasize_index16",
 	"bufferdatasize_index32",
 	"bufferdatasize_uniform",
-	"animcache_vertexmesh_count",
-	"animcache_vertexmesh_vertices",
-	"animcache_vertexmesh_maxvertices",
 	"animcache_skeletal_count",
 	"animcache_skeletal_bones",
 	"animcache_skeletal_maxbones",
@@ -895,10 +872,6 @@ const char *r_stat_name[r_stat_count] =
 	"dynamic_surfaces_because_tcmod_turbulent",
 	"dynamic_vertices_because_tcmod_turbulent",
 	"dynamic_triangles_because_tcmod_turbulent",
-	"dynamic_batches_because_interleavedarrays",
-	"dynamic_surfaces_because_interleavedarrays",
-	"dynamic_vertices_because_interleavedarrays",
-	"dynamic_triangles_because_interleavedarrays",
 	"dynamic_batches_because_nogaps",
 	"dynamic_surfaces_because_nogaps",
 	"dynamic_vertices_because_nogaps",
@@ -1027,6 +1000,7 @@ static void R_TimeReport_EndFrame(void)
 "bouncegrid:%4i lights%6i particles%6i traces%6i hits%6i splats%6i bounces\n"
 "photon cache efficiency:%6i cached%6i traced%6ianimated\n"
 "%6i draws%8i vertices%8i triangles bloompixels%8i copied%8i drawn\n"
+"%3i rendertargets%8i pixels\n"
 "updated%5i indexbuffers%8i bytes%5i vertexbuffers%8i bytes\n"
 "animcache%5ib gpuskeletal%7i vertices (%7i with normals)\n"
 "fastbatch%5i count%5i surfaces%7i vertices %7i triangles\n"
@@ -1043,6 +1017,7 @@ static void R_TimeReport_EndFrame(void)
 , r_refdef.stats[r_stat_bouncegrid_lights], r_refdef.stats[r_stat_bouncegrid_particles], r_refdef.stats[r_stat_bouncegrid_traces], r_refdef.stats[r_stat_bouncegrid_hits], r_refdef.stats[r_stat_bouncegrid_splats], r_refdef.stats[r_stat_bouncegrid_bounces]
 , r_refdef.stats[r_stat_photoncache_cached], r_refdef.stats[r_stat_photoncache_traced], r_refdef.stats[r_stat_photoncache_animated]
 , r_refdef.stats[r_stat_draws], r_refdef.stats[r_stat_draws_vertices], r_refdef.stats[r_stat_draws_elements] / 3, r_refdef.stats[r_stat_bloom_copypixels], r_refdef.stats[r_stat_bloom_drawpixels]
+, r_refdef.stats[r_stat_rendertargets_used], r_refdef.stats[r_stat_rendertargets_pixels]
 , r_refdef.stats[r_stat_indexbufferuploadcount], r_refdef.stats[r_stat_indexbufferuploadsize], r_refdef.stats[r_stat_vertexbufferuploadcount], r_refdef.stats[r_stat_vertexbufferuploadsize]
 , r_refdef.stats[r_stat_animcache_skeletal_bones], r_refdef.stats[r_stat_animcache_shape_vertices], r_refdef.stats[r_stat_animcache_shade_vertices]
 , r_refdef.stats[r_stat_batch_fast_batches], r_refdef.stats[r_stat_batch_fast_surfaces], r_refdef.stats[r_stat_batch_fast_vertices], r_refdef.stats[r_stat_batch_fast_triangles]
@@ -1135,8 +1110,7 @@ static void R_TimeReport_EndFrame(void)
 	if (cls.r_speeds_graph_length)
 	{
 		char legend[128];
-		r_vertexgeneric_t *v;
-		int i, numlines;
+		int i;
 		const int *data;
 		float x, y, width, height, scalex, scaley;
 		int range_default = max(r_speeds_graph_maxdefault.integer, 1);
@@ -1216,9 +1190,6 @@ static void R_TimeReport_EndFrame(void)
 			// legend text is drawn after the graphs
 			// render the graph lines, we'll go back and render the legend text later
 			scalex = (float)width / (1000000.0 * r_speeds_graph_seconds.value);
-			// get space in a vertex buffer to draw this
-			numlines = stats * (graph_length - 1);
-			v = R_Mesh_PrepareVertices_Generic_Lock(numlines * 2);
 			stats = 0;
 			for (color = 0;color < R_SPEEDS_GRAPH_COLORS;color++)
 			{
@@ -1241,39 +1212,19 @@ static void R_TimeReport_EndFrame(void)
 				sum = 0;
 				for (i = 0;i < graph_length - 1;)
 				{
-					v->vertex3f[0] = x + width - sum * scalex;
-					if (v->vertex3f[0] < x)
-						v->vertex3f[0] = x;
-					v->vertex3f[1] = y + height - (data[index] - range_min) * scaley;
-					v->vertex3f[2] = 0;
-					v->color4f[0] = r_speeds_graph_colors[color][0];
-					v->color4f[1] = r_speeds_graph_colors[color][1];
-					v->color4f[2] = r_speeds_graph_colors[color][2];
-					v->color4f[3] = r_speeds_graph_colors[color][3];
-					v->texcoord2f[0] = 0;
-					v->texcoord2f[1] = 0;
-					v++;
+					float x1, y1, x2, y2;
+					x1 = max(x, x + width - sum * scalex);
+					y1 = y + height - (data[index] - range_min) * scaley;
 					sum += graph_data[r_stat_timedelta * graph_length + index];
 					index--;
 					if (index < 0)
 						index = graph_length - 1;
 					i++;
-					v->vertex3f[0] = x + width - sum * scalex;
-					if (v->vertex3f[0] < x)
-						v->vertex3f[0] = x;
-					v->vertex3f[1] = y + height - (data[index] - range_min) * scaley;
-					v->vertex3f[2] = 0;
-					v->color4f[0] = r_speeds_graph_colors[color][0];
-					v->color4f[1] = r_speeds_graph_colors[color][1];
-					v->color4f[2] = r_speeds_graph_colors[color][2];
-					v->color4f[3] = r_speeds_graph_colors[color][3];
-					v->texcoord2f[0] = 0;
-					v->texcoord2f[1] = 0;
-					v++;
+					x2 = max(x, x + width - sum * scalex);
+					y2 = y + height - (data[index] - range_min) * scaley;
+					DrawQ_Line(1, x1, y1, x2, y2, r_speeds_graph_colors[color][0], r_speeds_graph_colors[color][1], r_speeds_graph_colors[color][2], r_speeds_graph_colors[color][3], 0);
 				}
 			}
-			R_Mesh_PrepareVertices_Generic_Unlock();
-			DrawQ_Lines(0.0f, numlines, 0, false);
 		}
 
 		// return to not drawing anything if r_render is 0
@@ -1358,6 +1309,7 @@ void CL_Screen_Init(void)
 	Cvar_RegisterVariable (&vid_conwidth);
 	Cvar_RegisterVariable (&vid_conheight);
 	Cvar_RegisterVariable (&vid_pixelheight);
+	Cvar_RegisterVariable (&vid_conwidthauto);
 	Cvar_RegisterVariable (&scr_screenshot_jpeg);
 	Cvar_RegisterVariable (&scr_screenshot_jpeg_quality);
 	Cvar_RegisterVariable (&scr_screenshot_png);
@@ -1854,6 +1806,7 @@ static void R_Envmap_f (void)
 	char filename[MAX_QPATH], basename[MAX_QPATH];
 	unsigned char *buffer1;
 	unsigned char *buffer2;
+	r_rendertarget_t *rt;
 
 	if (Cmd_Argc() != 3)
 	{
@@ -1886,6 +1839,7 @@ static void R_Envmap_f (void)
 	r_refdef.view.depth = 1;
 	r_refdef.view.useperspective = true;
 	r_refdef.view.isoverlay = false;
+	r_refdef.view.ismain = true;
 
 	r_refdef.view.frustum_x = 1; // tan(45 * M_PI / 180.0);
 	r_refdef.view.frustum_y = 1; // tan(45 * M_PI / 180.0);
@@ -1895,6 +1849,9 @@ static void R_Envmap_f (void)
 	buffer1 = (unsigned char *)Mem_Alloc(tempmempool, size * size * 4);
 	buffer2 = (unsigned char *)Mem_Alloc(tempmempool, size * size * 3);
 
+	// TODO: use TEXTYPE_COLORBUFFER16F and output to .exr files as well?
+	rt = R_RenderTarget_Get(size, size, TEXTYPE_DEPTHBUFFER24STENCIL8, true, TEXTYPE_COLORBUFFER, TEXTYPE_UNUSED, TEXTYPE_UNUSED, TEXTYPE_UNUSED);
+	CL_UpdateEntityShading();
 	for (j = 0;j < 12;j++)
 	{
 		dpsnprintf(filename, sizeof(filename), "env/%s%s.tga", basename, envmapinfo[j].name);
@@ -1902,7 +1859,7 @@ static void R_Envmap_f (void)
 		r_refdef.view.quality = 1;
 		r_refdef.view.clear = true;
 		R_Mesh_Start();
-		R_RenderView();
+		R_RenderView(rt->fbo, rt->depthtexture, rt->colortexture[0], 0, 0, size, size);
 		R_Mesh_Finish();
 		SCR_ScreenShot(filename, buffer1, buffer2, 0, vid.height - (r_refdef.view.y + r_refdef.view.height), size, size, envmapinfo[j].flipx, envmapinfo[j].flipy, envmapinfo[j].flipdiagonaly, false, false, false, false);
 	}
@@ -2070,9 +2027,9 @@ static void SCR_DrawTouchscreenOverlay(void)
 			DrawQ_Fill(a->rect[0] +              1, a->rect[1] + a->rect[3] - 2, a->rect[2] - 2,          1    , 1, 1, 1, vid_touchscreen_outlinealpha.value * (0.5f + 0.5f * a->active), 0);
 			DrawQ_Fill(a->rect[0] +              2, a->rect[1] + a->rect[3] - 1, a->rect[2] - 4,          1    , 1, 1, 1, vid_touchscreen_outlinealpha.value * (0.5f + 0.5f * a->active), 0);
 		}
-		pic = a->pic ? Draw_CachePic(a->pic) : NULL;
-		if (pic && pic->tex != r_texture_notexture)
-			DrawQ_Pic(a->rect[0], a->rect[1], Draw_CachePic(a->pic), a->rect[2], a->rect[3], 1, 1, 1, vid_touchscreen_overlayalpha.value * (0.5f + 0.5f * a->active), 0);
+		pic = a->pic ? Draw_CachePic_Flags(a->pic, CACHEPICFLAG_FAILONMISSING) : NULL;
+		if (Draw_IsPicLoaded(pic))
+			DrawQ_Pic(a->rect[0], a->rect[1], pic, a->rect[2], a->rect[3], 1, 1, 1, vid_touchscreen_overlayalpha.value * (0.5f + 0.5f * a->active), 0);
 		if (a->text && a->text[0])
 		{
 			int textwidth = DrawQ_TextWidth(a->text, 0, a->textheight, a->textheight, false, FONT_CHAT);
@@ -2096,14 +2053,13 @@ void R_ClearScreen(qboolean fogcolor)
 		VectorCopy(r_refdef.fogcolor, clearcolor);
 	}
 	// clear depth is 1.0
-	// LordHavoc: we use a stencil centered around 128 instead of 0,
-	// to avoid clamping interfering with strange shadow volume
-	// drawing orders
 	// clear the screen
-	GL_Clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | (vid.stencil ? GL_STENCIL_BUFFER_BIT : 0), clearcolor, 1.0f, 128);
+	GL_Clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | (vid.stencil ? GL_STENCIL_BUFFER_BIT : 0), clearcolor, 1.0f, 0);
 }
 
 int r_stereo_side;
+extern cvar_t v_isometric;
+extern cvar_t v_isometric_verticalfov;
 
 static void SCR_DrawScreen (void)
 {
@@ -2112,6 +2068,10 @@ static void SCR_DrawScreen (void)
 	R_Mesh_Start();
 
 	R_UpdateVariables();
+
+	// this will be set back to 0 by R_RenderView during CL_VM_UpdateView
+	r_refdef.draw2dstage = 1;
+	R_ResetViewRendering2D_Common(0, NULL, NULL, 0, 0, vid.width, vid.height, vid_conwidth.integer, vid_conheight.integer);
 
 	// Quake uses clockwise winding, so these are swapped
 	r_refdef.view.cullface_front = GL_BACK;
@@ -2174,7 +2134,7 @@ static void SCR_DrawScreen (void)
 		// for a 4x3 display, if the ratio is not 4x3 this makes the fov
 		// higher/lower according to the ratio
 		r_refdef.view.useperspective = true;
-		r_refdef.view.frustum_y = tan(scr_fov.value * M_PI / 360.0) * (3.0/4.0) * cl.viewzoom;
+		r_refdef.view.frustum_y = tan(scr_fov.value * M_PI / 360.0) * (3.0 / 4.0) * cl.viewzoom;
 		r_refdef.view.frustum_x = r_refdef.view.frustum_y * (float)r_refdef.view.width / (float)r_refdef.view.height / vid_pixelheight.value;
 
 		r_refdef.view.frustum_x *= r_refdef.frustumscale_x;
@@ -2182,13 +2142,21 @@ static void SCR_DrawScreen (void)
 		r_refdef.view.ortho_x = atan(r_refdef.view.frustum_x) * (360.0 / M_PI); // abused as angle by VM_CL_R_SetView
 		r_refdef.view.ortho_y = atan(r_refdef.view.frustum_y) * (360.0 / M_PI); // abused as angle by VM_CL_R_SetView
 
+		r_refdef.view.ismain = true;
+
 		// if CSQC is loaded, it is required to provide the CSQC_UpdateView function,
 		// and won't render a view if it does not call that.
 		if (cl.csqc_loaded)
 			CL_VM_UpdateView(r_stereo_side ? 0.0 : max(0.0, cl.time - cl.oldtime));
 		else
-			R_RenderView();
+		{
+			CL_UpdateEntityShading();
+			R_RenderView(0, NULL, NULL, r_refdef.view.x, r_refdef.view.y, r_refdef.view.width, r_refdef.view.height);
+		}
 	}
+
+	// Don't apply debugging stuff like r_showsurfaces to the UI
+	r_refdef.view.showdebug = false;
 
 	if (!r_stereo_sidebyside.integer && !r_stereo_horizontal.integer && !r_stereo_vertical.integer)
 	{
@@ -2272,9 +2240,8 @@ static void SCR_DrawScreen (void)
 
 	DrawQ_Finish();
 
-	R_DrawGamma();
-
 	R_Mesh_Finish();
+	R_RenderTarget_FreeUnused(false);
 }
 
 typedef struct loadingscreenstack_s
@@ -2311,17 +2278,8 @@ static void SCR_SetLoadingScreenTexture(void)
 
 	SCR_ClearLoadingScreenTexture();
 
-	if (vid.support.arb_texture_non_power_of_two)
-	{
-		w = vid.width; h = vid.height;
-		loadingscreentexture_w = loadingscreentexture_h = 1;
-	}
-	else
-	{
-		w = CeilPowerOf2(vid.width); h = CeilPowerOf2(vid.height);
-		loadingscreentexture_w = vid.width / (float) w;
-		loadingscreentexture_h = vid.height / (float) h;
-	}
+	w = vid.width; h = vid.height;
+	loadingscreentexture_w = loadingscreentexture_h = 1;
 
 	loadingscreentexture = R_LoadTexture2D(r_main_texturepool, "loadingscreentexture", w, h, NULL, TEXTYPE_COLORBUFFER, TEXF_RENDERTARGET | TEXF_FORCENEAREST | TEXF_CLAMP, -1, NULL);
 	R_Mesh_CopyToTexture(loadingscreentexture, 0, 0, 0, 0, vid.width, vid.height);
@@ -2498,8 +2456,8 @@ static void SCR_DrawLoadingScreen_SharedSetup (qboolean clear)
 	// draw the loading plaque
 	loadingscreenpic = Draw_CachePic_Flags (loadingscreenpic_number ? va(vabuf, sizeof(vabuf), "%s%d", scr_loadingscreen_picture.string, loadingscreenpic_number+1) : scr_loadingscreen_picture.string, loadingscreenpic_number ? CACHEPICFLAG_NOTPERSISTENT : 0);
 
-	w = loadingscreenpic->width;
-	h = loadingscreenpic->height;
+	w = Draw_GetPicWidth(loadingscreenpic);
+	h = Draw_GetPicHeight(loadingscreenpic);
 
 	// apply scale
 	w *= scr_loadingscreen_scale.value;
@@ -2562,11 +2520,11 @@ static void SCR_DrawLoadingScreen (qboolean clear)
 	if(loadingscreentexture)
 	{
 		R_Mesh_PrepareVertices_Generic_Arrays(4, loadingscreentexture_vertex3f, NULL, loadingscreentexture_texcoord2f);
-		R_SetupShader_Generic(loadingscreentexture, NULL, GL_MODULATE, 1, true, true, true);
+		R_SetupShader_Generic(loadingscreentexture, false, true, true);
 		R_Mesh_Draw(0, 4, 0, 2, polygonelement3i, NULL, 0, polygonelement3s, NULL, 0);
 	}
 	R_Mesh_PrepareVertices_Generic_Arrays(4, loadingscreenpic_vertex3f, NULL, loadingscreenpic_texcoord2f);
-	R_SetupShader_Generic(Draw_GetPicTexture(loadingscreenpic), NULL, GL_MODULATE, 1, true, true, false);
+	R_SetupShader_Generic(Draw_GetPicTexture(loadingscreenpic), true, true, false);
 	R_Mesh_Draw(0, 4, 0, 2, polygonelement3i, NULL, 0, polygonelement3s, NULL, 0);
 	SCR_DrawLoadingStack();
 }
@@ -2579,6 +2537,8 @@ static void SCR_DrawLoadingScreen_SharedFinish (qboolean clear)
 }
 
 static double loadingscreen_lastupdate;
+
+static void SCR_UpdateVars(void);
 
 void SCR_UpdateLoadingScreen (qboolean clear, qboolean startup)
 {
@@ -2597,6 +2557,12 @@ void SCR_UpdateLoadingScreen (qboolean clear, qboolean startup)
 			return;
 		loadingscreen_lastupdate = t;
 	}
+
+	SCR_UpdateVars();
+
+	// set up the r_texture_gammaramps texture which we need for rendering the loadingscreenpic
+	VID_UpdateGamma();
+	R_UpdateVariables();
 
 	if(!scr_loadingscreen_background.integer)
 		clear = true;
@@ -2633,10 +2599,9 @@ void SCR_UpdateLoadingScreen (qboolean clear, qboolean startup)
 	SCR_DrawLoadingScreen_SharedSetup(clear);
 	SCR_DrawLoadingScreen(clear);
 #else
-	if (qglDrawBuffer)
-		qglDrawBuffer(GL_BACK);
+	qglDrawBuffer(GL_BACK);
 	SCR_DrawLoadingScreen_SharedSetup(clear);
-	if (vid.stereobuffer && qglDrawBuffer)
+	if (vid.stereobuffer)
 	{
 		qglDrawBuffer(GL_BACK_LEFT);
 		SCR_DrawLoadingScreen(clear);
@@ -2645,8 +2610,7 @@ void SCR_UpdateLoadingScreen (qboolean clear, qboolean startup)
 	}
 	else
 	{
-		if (qglDrawBuffer)
-			qglDrawBuffer(GL_BACK);
+		qglDrawBuffer(GL_BACK);
 		SCR_DrawLoadingScreen(clear);
 	}
 #endif
@@ -2672,6 +2636,43 @@ qboolean R_Stereo_Active(void)
 	return (vid.stereobuffer || r_stereo_sidebyside.integer || r_stereo_horizontal.integer || r_stereo_vertical.integer || R_Stereo_ColorMasking());
 }
 
+void SCR_UpdateVars(void)
+{
+	float conwidth = bound(160, vid_conwidth.value, 32768);
+	float conheight = bound(90, vid_conheight.value, 24576);
+	if (vid_conwidthauto.integer)
+		conwidth = floor(conheight * vid.width / (vid.height * vid_pixelheight.value));
+	if (vid_conwidth.value != conwidth)
+		Cvar_SetValue("vid_conwidth", conwidth);
+	if (vid_conheight.value != conheight)
+		Cvar_SetValue("vid_conheight", conheight);
+
+	// bound viewsize
+	if (scr_viewsize.value < 30)
+		Cvar_Set("viewsize", "30");
+	if (scr_viewsize.value > 120)
+		Cvar_Set("viewsize", "120");
+
+	// bound field of view
+	if (scr_fov.value < 1)
+		Cvar_Set("fov", "1");
+	if (scr_fov.value > 170)
+		Cvar_Set("fov", "170");
+
+	// intermission is always full screen
+	if (cl.intermission)
+		sb_lines = 0;
+	else
+	{
+		if (scr_viewsize.value >= 120)
+			sb_lines = 0;		// no status bar at all
+		else if (scr_viewsize.value >= 110)
+			sb_lines = 24;		// no inventory
+		else
+			sb_lines = 24 + 16 + 8;
+	}
+}
+
 extern cvar_t cl_minfps;
 extern cvar_t cl_minfps_fade;
 extern cvar_t cl_minfps_qualitymax;
@@ -2686,7 +2687,6 @@ void CL_UpdateScreen(void)
 	vec3_t vieworigin;
 	static double drawscreenstart = 0.0;
 	double drawscreendelta;
-	float conwidth, conheight;
 	r_viewport_t viewport;
 
 	if(drawscreenstart)
@@ -2786,37 +2786,7 @@ void CL_UpdateScreen(void)
 		return;
 	}
 
-	conwidth = bound(160, vid_conwidth.value, 32768);
-	conheight = bound(90, vid_conheight.value, 24576);
-	if (vid_conwidth.value != conwidth)
-		Cvar_SetValue("vid_conwidth", conwidth);
-	if (vid_conheight.value != conheight)
-		Cvar_SetValue("vid_conheight", conheight);
-
-	// bound viewsize
-	if (scr_viewsize.value < 30)
-		Cvar_Set ("viewsize","30");
-	if (scr_viewsize.value > 120)
-		Cvar_Set ("viewsize","120");
-
-	// bound field of view
-	if (scr_fov.value < 1)
-		Cvar_Set ("fov","1");
-	if (scr_fov.value > 170)
-		Cvar_Set ("fov","170");
-
-	// intermission is always full screen
-	if (cl.intermission)
-		sb_lines = 0;
-	else
-	{
-		if (scr_viewsize.value >= 120)
-			sb_lines = 0;		// no status bar at all
-		else if (scr_viewsize.value >= 110)
-			sb_lines = 24;		// no inventory
-		else
-			sb_lines = 24+16+8;
-	}
+	SCR_UpdateVars();
 
 	R_FrameData_NewFrame();
 	R_BufferData_NewFrame();
@@ -2831,20 +2801,8 @@ void CL_UpdateScreen(void)
 	SCR_SetUpToDrawConsole();
 
 #ifndef USE_GLES2
-	if (qglDrawBuffer)
-	{
-		CHECKGLERROR
-		qglDrawBuffer(GL_BACK);CHECKGLERROR
-		// set dithering mode
-		if (gl_dither.integer)
-		{
-			qglEnable(GL_DITHER);CHECKGLERROR
-		}
-		else
-		{
-			qglDisable(GL_DITHER);CHECKGLERROR
-		}
-	}
+	CHECKGLERROR
+	qglDrawBuffer(GL_BACK);CHECKGLERROR
 #endif
 
 	R_Viewport_InitOrtho(&viewport, &identitymatrix, 0, 0, vid.width, vid.height, 0, 0, vid_conwidth.integer, vid_conheight.integer, -10, 100, NULL);
@@ -2861,34 +2819,11 @@ void CL_UpdateScreen(void)
 	// calculate r_refdef.view.quality
 	r_refdef.view.quality = cl_updatescreen_quality;
 
-#ifndef USE_GLES2
-	if (qglPolygonStipple)
+	if(scr_stipple.integer)
 	{
-		if(scr_stipple.integer)
-		{
-			GLubyte stipple[128];
-			int i, s, width, parts;
-			static int frame = 0;
-			++frame;
-	
-			s = scr_stipple.integer;
-			parts = (s & 007);
-			width = (s & 070) >> 3;
-	
-			qglEnable(GL_POLYGON_STIPPLE);CHECKGLERROR // 0x0B42
-			for(i = 0; i < 128; ++i)
-			{
-				int line = i/4;
-				stipple[i] = (((line >> width) + frame) & ((1 << parts) - 1)) ? 0x00 : 0xFF;
-			}
-			qglPolygonStipple(stipple);CHECKGLERROR
-		}
-		else
-		{
-			qglDisable(GL_POLYGON_STIPPLE);CHECKGLERROR
-		}
+		Con_Print("FIXME: scr_stipple not implemented\n");
+		Cvar_SetValueQuick(&scr_stipple, 0);
 	}
-#endif
 
 #ifndef USE_GLES2
 	if (R_Stereo_Active())
@@ -2934,8 +2869,7 @@ void CL_UpdateScreen(void)
 	SCR_CaptureVideo();
 #endif
 
-	if (qglFlush)
-		qglFlush(); // FIXME: should we really be using qglFlush here?
+	qglFlush(); // ensure that the commands are submitted to the GPU before we do other things
 
 	if (!vid_activewindow)
 		VID_SetMouse(false, false, false);
