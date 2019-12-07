@@ -458,7 +458,7 @@ reset_build() {
 			if ! rm -rfv "$cache_build_dir" ; then # Can't delete?
 				perror "*** --reset-build: Failed to delete build files under '$cache_build_dir'\n\n"
 			else
-				pwarn "* --reset-cache: Deleted the build directory of '$option_config'.\n\n"
+				pwarn "* --reset-cache: Deleted the build directory of '$option_project'.\n\n"
 			fi
 		fi
 	fi
