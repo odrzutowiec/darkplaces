@@ -271,16 +271,18 @@ option_get_check() {
 option_get_check_config() { # If the user didn't give us anything, ask.
 	if (( option_run_reset_build )); then pwarn "* Resetting build files...\n\n"; fi
 	
-	while ! [ "$option_project" ]; do
-		option_get_prompt \
+	while true; do
+		if [ "$option_project" ]; then
+			if [ "${option_project}" == "default" ]; then
+				pwarn "* H-hey...! Get your own project! That's the template. You can't use that!\n\n"
+				option_project=""
+			else break; fi
+		else option_get_prompt \
 			option_project \
 			"$cache_project" \
 			"Please specify the name of your project" \
 			"" \
 			""
-		if [ "${option_project}" == "default" ]; then
-			pwarn "* H-hey...! Get your own project! That's the template. You can't use that!\n\n"
-			option_project=""
 		fi
 	done
 }
