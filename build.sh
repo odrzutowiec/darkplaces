@@ -431,8 +431,8 @@ build_start_compile() {
 
 	printf "* CMake build commandline: %s\n\n" "$cmd_cmake_build"
 	if ! eval "$cmd_cmake_build"; then
-		perror "* Build failed, but configure was successful. Please check the output for more information.\n\n"
-		exit 1
+		pwarn "* Build failed, but configure was successful. Please check the output for more information.\n\n"
+		return
 	fi
 	psuccess "* Build completed successfully.\n\n"
 }
