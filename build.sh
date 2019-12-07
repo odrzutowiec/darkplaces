@@ -146,6 +146,7 @@ option_cache_compare() {
 }
 
 option_cache_list() {
+	local cache_list="$(pwd)/.temp"
 	local cache_select
 
 	if (( option_auto )) || check_empty "${cache_dir}" || [ "$option_project" ]; then
@@ -156,13 +157,23 @@ option_cache_list() {
 	if (( ! option_run_reset_build )); then
 		printf " Leave blank to create a new one."
 	fi
-	
-	printf "\n\n"
 
-	select cache_select in $(for i in "${cache_dir}"/*; do basename "$i"; done); do
-		option_project="${cache_select}"
+	printf "\n\n"
+	
+	while [ ! "$option_project" ]; do
+		local j=1
+		
+		rm -f "$cache_list"
+		for i in "${cache_dir}"/*; do
+			printf "%s. %s\n" "$j" "$(basename "$i")" >> "$cache_list"
+			j=$((j+1))
+		done
+		cat "$cache_list"
+		printf "\nChoose: "
+		read -r cache_select
+		if [ ! "$cache_select" ]; then break; fi
+		option_project="$(cat "$cache_list" | sed -n -e "s/^.*$cache_select. //p")"
 		printf "\n"
-		break
 	done
 }
 #------------------------------------------------------------------------------#
