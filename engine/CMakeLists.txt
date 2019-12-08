@@ -78,3 +78,6 @@ endif()
 
 ### INCLUDE ###
 include("${MODULE_DIR}/engine.cmake")
+if(ENGINE_BUILD_GMQCC)
+	include("${MODULE_DIR}/gmqcc.cmake")
+endif()

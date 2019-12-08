@@ -11,3 +11,8 @@ option(ENGINE_CONFIG_MENU "Compile the engine with legacy menu support. Required
 option(ENGINE_CONFIG_CD "Compile the engine with CD audio support. Required if you intend to have in-game music at all, even if you don't use CDs. Default = ON" ON)
 
 option(ENGINE_NO_BUILD_TIMESTAMPS "Disable build timestamps in the version string. Default = OFF" OFF)
+
+### TOOLS ###
+
+# TODO: Actually integrate it into the engine.
+option(ENGINE_BUILD_GMQCC "Compile the engine with GMQCC, to allow compiling QC in-game or from the command-line. Default = ON" ON)
