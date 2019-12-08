@@ -401,6 +401,9 @@ static void Cvar_SetQuick_Internal (cvar_t *var, const char *value)
 			if (value_check > value_max) { value = var->max; }
 		}
 	}
+	if (var->check_ex)
+		value = var->check_ex(value);
+
 	// LordHavoc: don't reallocate when the buffer is the same size
 	valuelen = strlen(value);
 	if (!var->string || strlen(var->string) != valuelen)

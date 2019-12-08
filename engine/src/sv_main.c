@@ -31,6 +31,14 @@ static void SV_Download_f(void);
 static void SV_VM_Setup(void);
 extern cvar_t net_connecttimeout;
 
+const char *Cvar_Check_slowmo(const char *value)
+{
+	float check_value = atof(value);
+	if (check_value < 0.00001 && check_value != 0)
+		return value = "0";
+	return value;
+}
+
 cvar_t sv_worldmessage = {CVAR_READONLY, "sv_worldmessage", "", "title of current level", vstring};
 cvar_t sv_worldname = {CVAR_READONLY, "sv_worldname", "", "name of current worldmodel", vstring};
 cvar_t sv_worldnamenoextension = {CVAR_READONLY, "sv_worldnamenoextension", "", "name of current worldmodel without extension", vstring};
@@ -47,7 +55,7 @@ cvar_t pausable = {0, "pausable","1", "allow players to pause or not (otherwise,
 cvar_t pr_checkextension = {CVAR_READONLY, "pr_checkextension", "1", "indicates to QuakeC that the standard quakec extensions system is available (if 0, quakec should not attempt to use extensions)", vboolean};
 cvar_t samelevel = {CVAR_NOTIFY, "samelevel","0", "repeats same level if level ends (due to timelimit or someone hitting an exit)", vboolean};
 cvar_t skill = {0, "skill","1", "difficulty level of game, affects monster layouts in levels, 0 = easy, 1 = normal, 2 = hard, 3 = nightmare (same layout as hard but monsters fire twice)", vinteger, "0", "3"};
-cvar_t slowmo = {0, "slowmo", "1.0", "controls game speed, 0.5 is half speed, 2 is double speed", vdecimal, "0"};
+cvar_t slowmo = {0, "slowmo", "1.0", "controls game speed, 0.5 is half speed, 2 is double speed", vdecimal, "0", NULL, Cvar_Check_slowmo};
 
 cvar_t sv_accelerate = {0, "sv_accelerate", "10", "rate at which a player accelerates to sv_maxspeed", vinteger, "0"};
 cvar_t sv_aim = {CVAR_SAVE, "sv_aim", "2", "maximum cosine angle for quake's vertical autoaim, a value above 1 completely disables the autoaim, quake used 0.93"};

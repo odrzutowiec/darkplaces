@@ -59,8 +59,9 @@ client_t *host_client;
 
 jmp_buf host_abortframe;
 
+extern const char *Cvar_Check_slowmo(const char *value);
 // pretend frames take this amount of time (in seconds), 0 = realtime
-cvar_t host_framerate = {0, "host_framerate","0", "locks frame timing to this value in seconds, 0.05 is 20fps for example, note that this can easily run too fast, use cl_maxfps if you want to limit your framerate instead, or sys_ticrate to limit server speed"};
+cvar_t host_framerate = {0, "host_framerate","0", "locks frame timing to this value in seconds, 0.05 is 20fps for example, note that this can easily run too fast, use cl_maxfps if you want to limit your framerate instead, or sys_ticrate to limit server speed", vdecimal, 0, NULL, Cvar_Check_slowmo};
 cvar_t cl_maxphysicsframesperserverframe = {0, "cl_maxphysicsframesperserverframe","10", "maximum number of physics frames per server frame"};
 // shows time used by certain subsystems
 cvar_t host_speeds = {0, "host_speeds","0", "reports how much time is used in server/graphics/sound"};
@@ -739,11 +740,6 @@ void Host_Main(void)
 				svs.perf_acc_realtime = svs.perf_acc_sleeptime = svs.perf_acc_lost = svs.perf_acc_offset = svs.perf_acc_offset_squared = svs.perf_acc_offset_max = svs.perf_acc_offset_samples = 0;
 			}
 		}
-
-		if (slowmo.value < 0.00001 && slowmo.value != 0)
-			Cvar_SetValue("slowmo", 0);
-		if (host_framerate.value < 0.00001 && host_framerate.value != 0)
-			Cvar_SetValue("host_framerate", 0);
 
 		// keep the random time dependent, but not when playing demos/benchmarking
 		if(!*sv_random_seed.string && !cls.demoplayback)

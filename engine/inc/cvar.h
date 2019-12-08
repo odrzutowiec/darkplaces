@@ -125,7 +125,8 @@ typedef struct cvar_s
 		vinteger,
 		vdecimal
 	} domain;
-	char *min, *max;
+	const char *min, *max;
+	const char *(*check_ex)(const char*);
 
 	int integer;
 	float value;
