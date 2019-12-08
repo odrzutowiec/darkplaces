@@ -251,6 +251,48 @@ const char **Cvar_CompleteBuildList (const char *partial)
 	return buf;
 }
 
+static void print_help (cvar_t *var, qboolean full)
+{
+	Con_Printf("^3\"%s\"^7 is \"%s\" [default: \"%s\"] ", var->name, ((var->flags & CVAR_PRIVATE) ? "********"/*hunter2*/ : var->string), var->defstring);
+	if (full) {
+		Con_Printf("\nDomain: ");
+		switch (var->domain)
+		{
+		case vnone:
+			break;
+		case vboolean:
+			Con_Printf("Boolean");
+			break;
+		case vinteger:
+			Con_Printf("Any number");
+			break;
+		case vdecimal:
+			Con_Printf("Any decimal");
+			break;
+		case vstring:
+			break;
+		}
+
+		if (var->domain == vstring) {
+			Con_Printf("Any valid string");
+		} else if (var->domain != vnone &&
+				   var->domain != vboolean) {
+			if (var->min) {
+				if (var->max) {
+					Con_Printf(" between %s and %s", var->min, var->max);
+				} else {
+					Con_Printf(" greater than or equal to %s", var->min);
+				}
+			}
+			else if (var->max) {
+				Con_Printf(" up to %s", var->max);
+			}
+		}
+		Con_Printf("\n");
+	}
+	Con_Printf("- %s\n", var->description);
+}
+
 // written by LordHavoc
 void Cvar_CompleteCvarPrint (const char *partial)
 {
@@ -259,7 +301,7 @@ void Cvar_CompleteCvarPrint (const char *partial)
 	// Loop through the command list and print all matches
 	for (cvar = cvar_vars; cvar; cvar = cvar->next)
 		if (!strncasecmp(partial, cvar->name, len))
-			Con_Printf ("^3%s^7 is \"%s\" [\"%s\"] %s\n", cvar->name, cvar->string, cvar->defstring, cvar->description);
+			print_help(cvar, false);
 }
 
 // check if a cvar is held by some progs
@@ -340,12 +382,25 @@ static void Cvar_SetQuick_Internal (cvar_t *var, const char *value)
 	qboolean changed;
 	size_t valuelen;
 	char vabuf[1024];
+	float value_check, value_min, value_max;
 
 	changed = strcmp(var->string, value) != 0;
 	// LordHavoc: don't reallocate when there is no change
 	if (!changed)
 		return;
 
+	if (var->domain != vstring &&
+	    var->domain != vnone) {
+		value_check = atof(value);
+		if (var->min) {
+			value_min = atof(var->min);
+			if (value_check < value_min) { value = var->min; }
+		}
+		if (var->max) {
+			value_max = atof(var->max);
+			if (value_check > value_max) { value = var->max; }
+		}
+	}
 	// LordHavoc: don't reallocate when the buffer is the same size
 	valuelen = strlen(value);
 	if (!var->string || strlen(var->string) != valuelen)
@@ -553,7 +608,10 @@ void Cvar_RegisterVariable (cvar_t *variable)
 	memcpy ((char *)variable->defstring, oldstr, alloclen);
 	variable->value = atof (variable->string);
 	variable->integer = (int) variable->value;
-
+	if (variable->domain == vboolean) {
+		variable->min = "0";
+		variable->max = "1";
+	}
 	// Mark it as not an autocvar.
 	for (i = 0;i < PRVM_PROG_MAX;i++)
 		variable->globaldefindex[i] = -1;
@@ -682,8 +740,7 @@ qboolean	Cvar_Command (void)
 // perform a variable print or set
 	if (Cmd_Argc() == 1)
 	{
-		Con_Printf("\"%s\" is \"%s\" [\"%s\"]\n", v->name, ((v->flags & CVAR_PRIVATE) ? "********"/*hunter2*/ : v->string), v->defstring);
-		Con_Printf("- %s\n", v->description);
+		print_help(v, true);
 		return true;
 	}
 
@@ -911,7 +968,7 @@ void Cvar_List_f (void)
 		if (len && (ispattern ? !matchpattern_with_separator(cvar->name, partial, false, "", false) : strncmp (partial,cvar->name,len)))
 			continue;
 
-		Con_Printf("%s is \"%s\" [\"%s\"] %s\n", cvar->name, ((cvar->flags & CVAR_PRIVATE) ? "********"/*hunter2*/ : cvar->string), cvar->defstring, cvar->description);
+		print_help(cvar, false);
 		count++;
 	}
 

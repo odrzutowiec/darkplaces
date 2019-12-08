@@ -118,6 +118,15 @@ typedef struct cvar_s
 
 	const char *string;
 	const char *description;
+	enum {
+		vnone,
+		vstring,
+		vboolean,
+		vinteger,
+		vdecimal
+	} domain;
+	char *min, *max;
+
 	int integer;
 	float value;
 	float vector[3];
