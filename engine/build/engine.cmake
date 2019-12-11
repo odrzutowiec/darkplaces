@@ -18,7 +18,9 @@
 
 ### VARIABLES ###
 
-set(ENGINE_PLATFLAGS "-Wall -Wno-pointer-sign -Wno-unknown-pragmas -Wno-format-zero-length -Wno-strict-aliasing -Dstrnicmp=strncasecmp -Dstricmp=strcasecmp")
+set(ENGINE_PLATFLAGS "-Wall -Wold-style-definition -Wstrict-prototypes -Wdeclaration-after-statement -Wmissing-prototypes -Wsign-compare -Wno-pointer-sign -Wno-unknown-pragmas -Wno-format-zero-length -Wno-strict-aliasing -Dstrnicmp=strncasecmp -Dstricmp=strcasecmp")
+
+set(ENGINE_FLAGS "${ENGINE_FLAGS} -MMD")
 
 if(ENGINE_VERSION)
 	set(ENGINE_FLAGS "${ENGINE_FLAGS} -DSVNREVISION='${ENGINE_VERSION}'")

@@ -36,5 +36,9 @@ Makefile
 !/game/default/src
 /.csettings/
 /.cache
-
+/output
 /.temp
+/.vscode
+.buildconfig
+.externalToolBuilders/
+/.temp.cmake
