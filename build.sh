@@ -473,14 +473,14 @@ reset_build() {
 	else
 		option_get_prompt \
 			reset \
-			"N" \
+			"Y" \
 			"Do you wish to delete all build files under\n'$cache_build_dir'?"
 		if [[ "$reset" =~ ^(N|n)$ ]]; then return;
 		else
 			if ! rm -rfv "$cache_build_dir" ; then # Can't delete?
 				perror "*** --reset-build: Failed to delete build files under '$cache_build_dir'\n\n"
 			else
-				pwarn "* --reset-cache: Deleted the build directory of '$option_project'.\n\n"
+				pwarn "* --reset-build: Deleted the build directory of '$option_project'.\n\n"
 			fi
 		fi
 	fi
@@ -492,7 +492,7 @@ reset_cache() { # It resets the cache.
 	if [ -d "$cache_dir" ]; then
 		option_get_prompt \
 			reset \
-			"N" \
+			"Y" \
 			"Do you wish to delete the entire build cache?"
 		if [[ "$reset" =~ ^(N|n)$ ]]; then return
 		else
