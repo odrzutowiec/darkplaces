@@ -30,7 +30,7 @@ phelp() {
 Usage: %s [OPTIONS] PROJECT" "$me"
 	if (( ! full )); then
 		printf "
-For more information, run again with --help.
+For more information, run again with --help."
 
 	else printf "
 Options
