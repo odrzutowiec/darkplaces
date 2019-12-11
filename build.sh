@@ -25,9 +25,14 @@ psuccess() {
 }
 
 phelp() {
+	local full=$2
 	printf "
-Usage: %s [OPTIONS] <PROJECT>
+Usage: %s [OPTIONS] PROJECT" "$me"
+	if (( ! full )); then
+		printf "
+For more information, run again with --help.
 
+	else printf "
 Options
     --threads= | --jN   set how many threads to compile with
     --generator=        cmake generator to use. Run 'cmake --help' for a list
@@ -53,7 +58,8 @@ the script with PROJECT, and optionally --build, and it will configure and/or
 build PROJECT with the cached settings automatically.
 
 This script will run in auto mode if ran from a non-interactive shell.
-" "$me"; exit "$1"
+"; fi
+	exit "$1"
 }
 
 check_empty()
@@ -89,7 +95,7 @@ check_env() { # Make sure the environment is sane before continuing.
 
 	if (( failed )); then
 		perror "*** The script failed to initialize. Please check the output for more information.\n\n"
-		phelp 1
+		phelp 1 0
 	fi
 }
 #------------------------------------------------------------------------------#
@@ -187,7 +193,7 @@ option_get_prompt() { # Generic prompt function
 	if (( option_auto )); then # No prompts in auto mode.
 		if (( required )); then
 			perror "$error\n"
-			phelp 1
+			phelp 1 0
 		else
 			option="${default}"
 			return
@@ -232,10 +238,10 @@ option_get_cmdline() { 	# Iterate over any args.
 				"--jackass" )
 					option_asroot=1 ;;
 				"--help" )
-					phelp 0 ;;
+					phelp 0 1 ;;
 				* )
 					pwarn "Unknown option '${args[$i]}'\n"
-					phelp 1 ;;
+					phelp 1 0 ;;
 			esac
 		# Last arg should be the build config, but not the first arg.
 		else option_project=${args[$i]}; fi
