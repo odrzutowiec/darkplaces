@@ -657,7 +657,7 @@ const char *Host_TimingReport(char *buf, size_t buflen)
 
 /*
 ==================
-Host_Frame
+Host_Main
 
 Runs all active servers
 ==================
