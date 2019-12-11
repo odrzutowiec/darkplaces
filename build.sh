@@ -152,7 +152,7 @@ option_cache_compare() {
 }
 
 option_cache_list() {
-	local cache_list="$(pwd)/.temp"
+	local cache_list; cache_list="$(pwd)/.temp"
 	local cache_select
 
 	if (( option_auto )) || check_empty "${cache_dir}" || [ "$option_project" ]; then
