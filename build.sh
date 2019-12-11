@@ -178,7 +178,7 @@ option_cache_list() {
 		printf "\nChoose: "
 		read -r cache_select
 		if [ ! "$cache_select" ]; then break; fi
-		option_project="$(cat "$cache_list" | sed -n -e "s/^.*$cache_select. //p")"
+		option_project="$(sed -n -e "s/^.*$cache_select. //p" "$cache_list")"
 		printf "\n"
 	done
 }
