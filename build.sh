@@ -144,10 +144,11 @@ cache_build_cmake_options=\"${option_build_cmake_options}\"
 " > "$cache_file"
 
 			printf "\
-Your build options for \"%s\" has been written to the cache. You
-only have to run '%s %s' to build the same project again.
+Your build options for \"%s\" has been written to the cache. You only have to
+run '%s %s' to build the same project again.
 
-You may also use --auto to skip the prompts.
+If you wish to change any setting later, you can pass --new-options to the
+script.
 
 " "$option_project" "$me" "$option_project"
 		else pwarn "* The cache is disabled. Skipping write.\n\n"; fi
