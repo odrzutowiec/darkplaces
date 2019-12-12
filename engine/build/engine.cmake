@@ -130,6 +130,7 @@ set(OBJ_COMMON
 	${ENGINE_DIR}/sv_main.c
 	${ENGINE_DIR}/sv_move.c
 	${ENGINE_DIR}/sv_phys.c
+	${ENGINE_DIR}/sv_send.c
 	${ENGINE_DIR}/sv_user.c
 	${ENGINE_DIR}/svbsp.c
 	${ENGINE_DIR}/svvm_cmds.c

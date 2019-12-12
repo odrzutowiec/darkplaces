@@ -968,7 +968,7 @@ static void VM_SV_stuffcmd(prvm_prog_t *prog)
 
 	old = host_client;
 	host_client = svs.clients + entnum-1;
-	Host_ClientCommands ("%s", string);
+	SV_ClientCommand ("%s", string);
 	host_client = old;
 }
 

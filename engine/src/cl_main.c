@@ -403,7 +403,7 @@ void CL_Disconnect_f(void)
 {
 	CL_Disconnect ();
 	if (sv.active)
-		Host_ShutdownServer ();
+		SV_Shutdown ();
 }
 
 

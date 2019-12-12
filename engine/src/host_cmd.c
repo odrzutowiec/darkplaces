@@ -370,7 +370,7 @@ static void Host_Map_f (void)
 	cls.demonum = -1;		// stop demo loop in case this fails
 
 	CL_Disconnect ();
-	Host_ShutdownServer();
+	SV_Shutdown();
 
 	if(svs.maxclients != svs.maxclients_next)
 	{
@@ -2472,7 +2472,7 @@ static void Host_Stopdemo_f (void)
 	if (!cls.demoplayback)
 		return;
 	CL_Disconnect ();
-	Host_ShutdownServer ();
+	SV_Shutdown ();
 }
 
 static void Host_SendCvar_f (void)
@@ -2509,7 +2509,7 @@ static void Host_SendCvar_f (void)
 		if(svs.clients[i].active && svs.clients[i].netconnection)
 		{
 			host_client = &svs.clients[i];
-			Host_ClientCommands("sendcvar %s\n", cvarname);
+			SV_ClientCommand("sendcvar %s\n", cvarname);
 		}
 	host_client = old;
 }
