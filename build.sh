@@ -417,11 +417,13 @@ option_get_check_build_cc() {
 			"Which C compiler would you like to use? Leave this default to use the compiler\nspecified in the cache, or if blank, for CMake to autodetect the compiler,\nunless you have something specific in mind (like clang)" \
 			"" \
 			""
-		export CC="$option_build_cc"
-		if ! option_cache_compare "$option_build_cc" "$cache_build_cc" && (( ! cache_new )); then
-			pwarn "* The cmake cache must be deleted and regenerated when changing compilers.\n\n"
-			reset_build
-		fi
+	fi
+
+	export CC="$option_build_cc"
+
+	if ! option_cache_compare "$option_build_cc" "$cache_build_cc" && (( ! cache_new )); then
+		pwarn "* The cmake cache must be deleted and regenerated when changing compilers.\n\n"
+		reset_build
 	fi
 }
 
@@ -433,11 +435,13 @@ option_get_check_build_cxx() {
 			"Which C++ compiler would you like to use? Leave this default to use the compiler\nspecified in the cache, or if blank, for CMake to autodetect the compiler,\nunless you have something specific in mind (like clang++)" \
 			"" \
 			""
-		export CXX="$option_build_cxx"
-		if ! option_cache_compare "$option_build_cxx" "$cache_build_cxx" && (( ! cache_new )); then
-			pwarn "* The cmake cache must be deleted and regenerated when changing compilers.\n\n"
-			reset_build
-		fi
+	fi
+
+	export CXX="$option_build_cxx"
+
+	if ! option_cache_compare "$option_build_cxx" "$cache_build_cxx" && (( ! cache_new )); then
+		pwarn "* The cmake cache must be deleted and regenerated when changing compilers.\n\n"
+		reset_build
 	fi
 }
 
@@ -465,15 +469,17 @@ option_get_check_build_threads() {
 }
 
 option_get_check_build_cmake_generator() {
-	if [ ! "$option_build_cmake_generator" ] && (( ! option_new )); then
-		option_build_cmake_generator="$cache_build_cmake_generator"
-	else
-		option_get_prompt \
-			option_build_cmake_generator \
-			"$cache_build_cmake_generator" \
-			"What CMake generator would you like to use?" \
-			"" \
-			""
+	if [ ! "$option_build_cmake_generator" ]; then
+		if (( ! option_new )); then
+			option_build_cmake_generator="$cache_build_cmake_generator"
+		else
+			option_get_prompt \
+				option_build_cmake_generator \
+				"$cache_build_cmake_generator" \
+				"What CMake generator would you like to use?" \
+				"" \
+				""
+		fi
 	fi
 	if ! option_cache_compare "$option_build_cmake_generator" "$cache_build_cmake_generator" && (( ! cache_new )); then
 		pwarn "* The cmake cache must be deleted and regenerated when changing generators.\n\n"
@@ -537,14 +543,13 @@ reset_build() {
 			reset \
 			"Y" \
 			"Do you wish to delete all build files under\n'$cache_build_dir'?"
-		if [[ "$reset" =~ ^(N|n)$ ]]; then return;
-		else
+		if [[ "$reset" =~ ^(Y|y)$ ]]; then
 			if ! rm -rfv "$cache_build_dir" ; then # Can't delete?
 				perror "*** --reset-build: Failed to delete build files under '$cache_build_dir'\n\n"
 			else
 				pwarn "* --reset-build: Deleted the build directory of '$option_project'.\n\n"
 			fi
-		fi
+		else return; fi
 	fi
 }
 
@@ -556,11 +561,10 @@ reset_cache() { # It resets the cache.
 			reset \
 			"Y" \
 			"Do you wish to delete the entire build cache?"
-		if [[ "$reset" =~ ^(N|n)$ ]]; then return
-		else
+		if [[ "$reset" =~ ^(Y|y)$ ]]; then
 			rm -rfv "$cache_dir"
 			pwarn "* --reset-cache: Deleted the build cache.\n\n"
-		fi
+		else return; fi
 	else
 		pwarn "* --reset-cache: The build cache doesn't exist. Nothing to delete.\n\n"
 	fi
