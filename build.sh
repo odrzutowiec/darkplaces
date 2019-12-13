@@ -364,7 +364,7 @@ option_get_check_build_dir() {
 	local finished=0; local force=0; local ask=0
 
 	if [ ! "$cache_build_dir" ]; then
-		cache_build_dir="$option_project_dir/build"; fi
+		cache_build_dir="$(pwd)/output/$option_project/"; fi
 
 	# Don't prompt for this unless something is wrong. Assume the default.
 	if [ ! "$option_build_dir" ]; then
