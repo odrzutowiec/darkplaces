@@ -20,13 +20,45 @@
 ### BASICS ###
 cmake_minimum_required(VERSION 3.0.2 FATAL_ERROR)
 
-set(PROJ_NAME "horsepower" CACHE STRING "")
-set(PROJ_DIR "" CACHE STRING "")
+set(option_project "$ENV{HPOPTION_PROJECT}")
+set(option_project_dir "$ENV{HPOPTION_PROJECT_DIR}")
 
-mark_as_advanced(PROJ_NAME)
-mark_as_advanced(PROJ_DIR)
+# Platform ID stuff...
+# Because "internally inconsistent" is the CMake Way(tm)
+if(UNIX)
+	if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+		set(LINUX TRUE) # CMake please.
+	elseif(${CMAKE_SYSTEM_NAME} STREQUAL "FreeBSD")
+		set(FREEBSD TRUE) # CMAKE PLEASE.
+	elseif(${CMAKE_SYSTEM_NAME} STREQUAL "SunOS")
+		set(SUN_OS TRUE) # Can I stop now?
+	elseif(APPLE)
+		set(DARWIN TRUE)
+	endif()
+elseif(WIN32)
+	if(MINGW OR CYGWIN)
+		set(WIN_GNU TRUE)
+	else
+		set(WIN_VS TRUE)
+	endif()
+endif()
 
-project(${PROJ_NAME})
+if(NOT DEFINED "$ENV{HPBUILD_FROM_SCRIPT}")
+	if(NOT WIN_VS)
+		execute_process(WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/..
+			COMMAND bash ./build.sh --auto --from-cmake --config-dir=${option_project_dir} ${option_project}
+			RESULT_VARIABLE status
+		)
+		if(${status} GREATER 0)
+			message(FATAL_ERROR "The build script failed. CMake cannot continue.")
+		endif()
+		include("${CMAKE_SOURCE_DIR}/../.temp.cmake")
+	else
+		message("The build script requires bash. I'll make this work on standard Windows later. For now, I hope you know what you're doing.")
+	endif()
+endif()
+
+project(${option_project})
 
 ### VARIABLES ###
 
@@ -42,14 +74,16 @@ execute_process(
 	OUTPUT_VARIABLE HP_REV
 	OUTPUT_STRIP_TRAILING_WHITESPACE
 )
+# TODO: Add proper date string based on author date, for reproducible builds.
+# TZ=UTC git show -s --format=%ad --date='format-local:%a %b %d %Y %H:%I:%S UTC'
 
 ### CHECKS ###
 
-if(PROJ_DIR STREQUAL "")
-	message(FATAL_ERROR "No PROJ_DIR specified. Specify -DPROJ_DIR to the directory containing your build config. If you got here from the build script, it's broken again.")
+if("${option_project_dir}" STREQUAL "")
+	message(FATAL_ERROR "option_project_dir is undefined. If you got here from the build script or used CMake directly, one or both of them are broken again.")
 endif()
 
-include("${PROJ_DIR}/config.cmake")
+include("${option_project_dir}/config.cmake")
 
 if(ENGINE_EXE_NAME STREQUAL "") # Cannot be empty
     message(FATAL_ERROR "You must give the executable a name.")
@@ -61,20 +95,6 @@ endif()
 
 set(ENGINE_DIR "${HP_DIR}/src") 		# Engine source code
 set(LIB_DIR "${MODULE_DIR}/libs")		# CMake modules for 3rd party libraries.
-
-# Platform ID stuff...
-# Because "internally inconsistent" is the CMake Way(tm)
-if(UNIX AND NOT APPLE)
-	if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-		set(LINUX TRUE) # CMake please.
-	elseif(${CMAKE_SYSTEM_NAME} STREQUAL "FreeBSD")
-		set(FREEBSD TRUE) # CMAKE PLEASE.
-	elseif(${CMAKE_SYSTEM_NAME} STREQUAL "SunOS")
-		set(SUN_OS TRUE) # Can I stop now?
-	endif()
-elseif(APPLE)
-	set(DARWIN TRUE)
-endif()
 
 ### INCLUDE ###
 include("${MODULE_DIR}/engine.cmake")

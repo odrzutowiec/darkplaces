@@ -1,6 +1,8 @@
 set(CMAKE_BUILD_TYPE "Debug")
 
-set(ENGINE_EXE_NAME "${PROJ_NAME}" CACHE STRING "What do you want to name the engine executable? If unsure, leave this default. Default = horsepower")
+set(GAME_BUILD_TOOL "" CACHE STRING "Which tool(s) to build the game?")
+
+set(ENGINE_EXE_NAME "${option_project}" CACHE STRING "What do you want to name the engine executable? If unsure, leave this default. Default = horsepower")
 
 set(ENGINE_VERSION "${HP_REV}" CACHE STRING "Set engine version string. If unsure, leave this blank. Default = SHA of HEAD")
 

@@ -4,7 +4,7 @@
 # FILE: build.sh (Horsepower/Darkplaces Build Script)           #
 # AUTHOR: David Knapp (Cloudwalk)                               #
 # LICENSE: GPL2.0 or later                                      #
-# Copyright (C) 2019 David Knapp                                #
+# Copyright (C) 2019-2020 David Knapp                                #
 #---------------------------------------------------------------#
 if [ -z "${BASH_VERSION:-}" ]; then
 	echo "This script requires bash."
@@ -250,6 +250,8 @@ option_get_cmdline() { 	# Iterate over any args.
 					option_build_cmake_options=${args[$i]##--cmake-options=} ;;
 				"--nocache" )
 					option_cache_off=1 ;;
+				"--from-cmake" )
+					option_from_cmake=1 ;;
 				"--jackass" )
 					option_asroot=1 ;;
 				"--help" )
@@ -283,12 +285,14 @@ option_get_check() {
 	if (( option_run_reset_build )); then reset_build; exit 0; fi
 
 	option_get_check_config_dir
-	option_get_check_build_dir
-	option_get_check_build_cc
-	option_get_check_build_cxx
-	option_get_check_build_threads
-	option_get_check_build_cmake_generator
-	option_get_check_build_cmake_options
+	if (( ! option_from_cmake )); then
+		option_get_check_build_dir
+		option_get_check_build_cc
+		option_get_check_build_cxx
+		option_get_check_build_threads
+		option_get_check_build_cmake_generator
+		option_get_check_build_cmake_options
+	fi
 }
 
 option_get_check_config() { # If the user didn't give us anything, ask.
@@ -528,8 +532,16 @@ build_start_compile() {
 }
 
 build_start() {
-	build_start_config
-	if (( option_build_threads )); then build_start_compile; fi
+	if (( ! option_from_cmake )); then
+		export HPBUILD_FROM_SCRIPT=1
+		build_start_config
+		build_start_compile
+	else
+		printf "
+set(option_project \"%s\")
+set(option_project_dir \"%s\")" \
+"${option_project}" "${option_project_dir}" > .temp.cmake
+	fi
 }
 #------------------------------------------------------------------------------#
 reset_build() {
@@ -575,7 +587,7 @@ printf "\n\e[1;34m---Horsepower Build Wizard---\e[0m\n\n"
 
 declare -g args=("$@") # Put cmdline in separate array to be read in functions
 declare -g me=$0 # Script can refer to itself regardless of filename in global scope
-declare -g cache_dir; cache_dir="$(pwd)/.cache"
+declare -g cache_dir; cache_dir="./.cache"
 declare -g cache_file # Current cache file handle.
 declare -g config_template; config_template="$(pwd)/game/default"
 
@@ -592,14 +604,14 @@ declare -g cache_build_cmake_generator="Unix Makefiles"
 
 ### User options ###
 # If any of these don't match the cache, write to it.
-declare -g option_project=""
-declare -g option_project_dir=""
-declare -g option_build_dir=""
-declare -g option_build_cc=""
-declare -g option_build_cxx=""
-declare -g option_build_threads=""
-declare -g option_build_cmake_options=""
-declare -g option_build_cmake_generator=""
+declare -g option_project
+declare -g option_project_dir
+declare -g option_build_dir
+declare -g option_build_cc
+declare -g option_build_cxx
+declare -g option_build_threads
+declare -g option_build_cmake_options
+declare -g option_build_cmake_generator
 # Per-build options
 declare -g option_auto=0
 declare -g option_new=0
@@ -607,6 +619,7 @@ declare -g option_asroot=0
 declare -g option_run_reset_build=0
 declare -g option_run_reset_cache=0
 declare -g option_cache_off=0
+declare -g option_from_cmake=0
 
 # State tracking variables
 declare -g cache_new=0

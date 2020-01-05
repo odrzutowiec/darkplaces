@@ -39,3 +39,6 @@ Makefile
 /output
 /.temp
 /.vscode
+.buildconfig
+.externalToolBuilders/
+/.temp.cmake
