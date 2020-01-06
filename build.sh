@@ -387,14 +387,16 @@ option_get_check_build_dir() {
 					ask=1
 				elif ! check_empty "$option_build_dir" &&
 				[[ $cache_build_dir != "$option_build_dir" ]]; then
-					pwarn "* The directory '$option_build_dir' is NOT empty.\n\n"
-					option_get_prompt \
-						force \
-						"y/N" \
-						"Would you like to build here anyway?" \
-						1 \
-						"*** You must specify an empty directory when --auto is set."
-					if [[ "$force" =~ ^(Y|y)$ ]]; then ask=1; fi
+					if (( ! option_from_cmake )) && [ ! -f "$option_build_dir/CMakeCache.txt" ]; then
+						pwarn "* The directory '$option_build_dir' is NOT empty.\n\n"
+						option_get_prompt \
+							force \
+							"y/N" \
+							"Would you like to build here anyway?" \
+							1 \
+							"*** You must specify an empty directory when --auto is set."
+						if [[ "$force" =~ ^(Y|y)$ ]]; then ask=1; fi
+					fi
 				fi
 			else
 				pwarn "* Build directory doesn't exist. CMake will create the directory for you.\n\n"
