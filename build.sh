@@ -506,7 +506,7 @@ option_get_check_build_cmake_options() {
 }
 #------------------------------------------------------------------------------#
 build_start_config() {
-	local cmd_cmake_config="cmake ./engine -G\"${option_build_cmake_generator}\" -B$option_build_dir -DPROJ_DIR=$option_project_dir -DPROJ_NAME=$option_project $option_build_cmake_options"
+	local cmd_cmake_config="cmake ./engine -G\"${option_build_cmake_generator}\" -B$option_build_dir $option_build_cmake_options"
 
 	printf "* Running CMake...\n\n"	
 	printf "* Using \"%s\" build config.\n\n" "$option_project"
@@ -521,7 +521,7 @@ build_start_config() {
 }
 
 build_start_compile() {
-	local cmd_cmake_build="cmake --build $option_build_dir -- -j $option_build_threads"
+	local cmd_cmake_build="cmake --build $option_build_dir --parallel $option_build_threads"
 
 	printf "* CMake build commandline: %s\n\n" "$cmd_cmake_build"
 	if ! eval "$cmd_cmake_build"; then
@@ -534,6 +534,8 @@ build_start_compile() {
 build_start() {
 	if (( ! option_from_cmake )); then
 		export HPBUILD_FROM_SCRIPT=1
+		export HPOPTION_PROJECT="${option_project}"
+		export HPOPTION_PROJECT_DIR="${option_project_dir}"
 		build_start_config
 		build_start_compile
 	else

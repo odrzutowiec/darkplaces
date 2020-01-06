@@ -18,12 +18,14 @@
 ### --- HORSEPOWER MAIN CMAKE FILE --- ###
 
 ### BASICS ###
-cmake_minimum_required(VERSION 3.0.2 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.2 FATAL_ERROR)
 
 set(option_project "$ENV{HPOPTION_PROJECT}")
 set(option_project_dir "$ENV{HPOPTION_PROJECT_DIR}")
+set(from_script "$ENV{HPBUILD_FROM_SCRIPT}")
 
-if(NOT DEFINED "$ENV{HPBUILD_FROM_SCRIPT}")
+
+if(NOT from_script EQUAL 1)
 	if(UNIX)
 		execute_process(WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/..
 			COMMAND bash ./build.sh --auto --from-cmake --cc=cc --cxx=c++ --build-dir=${CMAKE_BINARY_DIR} --generator=${CMAKE_GENERATOR} --threads=1 --config-dir=${option_project_dir} ${option_project}
