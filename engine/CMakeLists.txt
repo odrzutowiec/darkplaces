@@ -26,7 +26,7 @@ set(option_project_dir "$ENV{HPOPTION_PROJECT_DIR}")
 if(NOT DEFINED "$ENV{HPBUILD_FROM_SCRIPT}")
 	if(UNIX)
 		execute_process(WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/..
-			COMMAND bash ./build.sh --auto --from-cmake --nocache --config-dir=${option_project_dir} ${option_project}
+			COMMAND bash ./build.sh --auto --from-cmake --cc=cc --cxx=c++ --build-dir=${CMAKE_BINARY_DIR} --generator=${CMAKE_GENERATOR} --threads=1 --config-dir=${option_project_dir} ${option_project}
 			RESULT_VARIABLE status
 		)
 		if(${status} GREATER 0)

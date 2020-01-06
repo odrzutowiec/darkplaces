@@ -285,8 +285,8 @@ option_get_check() {
 	if (( option_run_reset_build )); then reset_build; exit 0; fi
 
 	option_get_check_config_dir
+	option_get_check_build_dir
 	if (( ! option_from_cmake )); then
-		option_get_check_build_dir
 		option_get_check_build_cc
 		option_get_check_build_cxx
 		option_get_check_build_threads
@@ -393,7 +393,7 @@ option_get_check_build_dir() {
 						"y/N" \
 						"Would you like to build here anyway?" \
 						1 \
-						"You must specify an empty directory when --auto is set."
+						"*** You must specify an empty directory when --auto is set."
 					if [[ "$force" =~ ^(Y|y)$ ]]; then ask=1; fi
 				fi
 			else
@@ -407,7 +407,7 @@ option_get_check_build_dir() {
 				"$cache_build_dir" \
 				"Please provide an empty and writable directory for the build files" \
 				1 \
-				"You must provide a valid build directory with --auto set\n\n"
+				"*** You must provide a valid build directory with --auto set\n\n"
 			ask=0
 		else finished=1; fi
 	done
