@@ -97,4 +97,5 @@ HPOPTION_PROJECT="testing" HPOPTION_PROJECT_DIR="../game/testing" CC="clang" CXX
 
 You may use the generated build file directly (whether make, ninja, or otherwise) for subsequent builds.
 
-If you use CMake directly, your build configuration will still be cached in case you decide to use the build script later.
+~~If you use CMake directly, your build configuration will still be cached in case you decide to use the build script later.~~
+Disabled due to bugs.
