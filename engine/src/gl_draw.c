@@ -833,7 +833,7 @@ void DrawQ_RotPic(float x, float y, cachepic_t *pic, float width, float height, 
 
 void DrawQ_Fill(float x, float y, float width, float height, float red, float green, float blue, float alpha, int flags)
 {
-	DrawQ_Pic(x, y, Draw_CachePic("white"), width, height, red, green, blue, alpha, flags);
+	DrawQ_Pic(x, y, NULL, width, height, red, green, blue, alpha, flags);
 }
 
 /// color tag printing
