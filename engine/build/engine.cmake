@@ -73,6 +73,7 @@ set(OBJ_COMMON
 	${ENGINE_DIR}/cl_particles.c
 	${ENGINE_DIR}/cl_screen.c
 	${ENGINE_DIR}/cl_video.c
+	${ENGINE_DIR}/cl_video_libavw.c
 	${ENGINE_DIR}/clvm_cmds.c
 	${ENGINE_DIR}/cmd.c
 	${ENGINE_DIR}/collision.c

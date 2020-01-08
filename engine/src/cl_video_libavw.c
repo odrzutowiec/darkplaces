@@ -21,8 +21,10 @@
 
 */
 
-// LordHavoc: for some reason this is being #include'd rather than treated as its own file...
 // LordHavoc: adapted to not require stdint.h as this is not available on MSVC++, using unsigned char instead of uint8_t and fs_offset_t instead of int64_t.
+
+#include "quakedef.h"
+#include "cl_video.h"
 
 // scaler type
 #define LIBAVW_SCALER_BILINEAR  0
@@ -246,7 +248,7 @@ static fs_offset_t LibAvW_FS_SeekSize(void *opaque)
 }
 
 // open as DP video stream
-static void *LibAvW_OpenVideo(clvideo_t *video, char *filename, const char **errorstring)
+void *LibAvW_OpenVideo(clvideo_t *video, char *filename, const char **errorstring)
 {
 	libavwstream_t *s;
 	char filebase[MAX_OSPATH], check[MAX_OSPATH];
@@ -352,7 +354,7 @@ static void libavw_message(int level, const char *message)
 		Con_Printf("LibAvcodec panic: %s\n", message);
 }
 
-static qboolean LibAvW_OpenLibrary(void)
+qboolean LibAvW_OpenLibrary(void)
 {
 	int errorcode;
 
@@ -379,7 +381,7 @@ static qboolean LibAvW_OpenLibrary(void)
 	return true;
 }
 
-static void LibAvW_CloseLibrary(void)
+void LibAvW_CloseLibrary(void)
 {
 	Sys_UnloadLibrary(&libavw_dll);
 }
