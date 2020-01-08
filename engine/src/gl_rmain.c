@@ -5033,7 +5033,7 @@ finish:
 
 static void R_Bloom_StartFrame(void)
 {
-	int bloomtexturewidth, bloomtextureheight, screentexturewidth, screentextureheight;
+	int screentexturewidth, screentextureheight;
 	int viewwidth, viewheight;
 	textype_t textype = TEXTYPE_COLORBUFFER;
 
@@ -5083,8 +5083,6 @@ static void R_Bloom_StartFrame(void)
 	// calculate desired texture sizes
 	screentexturewidth = viewwidth;
 	screentextureheight = viewheight;
-	bloomtexturewidth = r_fb.bloomwidth;
-	bloomtextureheight = r_fb.bloomheight;
 
 	if ((r_bloom.integer || (!R_Stereo_Active() && (r_motionblur.value > 0 || r_damageblur.value > 0))) && ((r_bloom_resolution.integer < 4 || r_bloom_blur.value < 1 || r_bloom_blur.value >= 512) || r_refdef.view.width > (int)vid.maxtexturesize_2d || r_refdef.view.height > (int)vid.maxtexturesize_2d))
 	{
