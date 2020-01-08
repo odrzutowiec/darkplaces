@@ -393,23 +393,23 @@ static void R_BuildNoTexture(void)
 {
 	int x, y;
 	unsigned char pix[16][16][4];
-	// this makes a light grey/dark grey checkerboard texture
+	// this makes a bright pink/black checkerboard texture
 	for (y = 0;y < 16;y++)
 	{
 		for (x = 0;x < 16;x++)
 		{
 			if ((y < 8) ^ (x < 8))
 			{
-				pix[y][x][0] = 128;
-				pix[y][x][1] = 128;
-				pix[y][x][2] = 128;
+				pix[y][x][0] = 0;
+				pix[y][x][1] = 0;
+				pix[y][x][2] = 0;
 				pix[y][x][3] = 255;
 			}
 			else
 			{
-				pix[y][x][0] = 64;
-				pix[y][x][1] = 64;
-				pix[y][x][2] = 64;
+				pix[y][x][0] = 255;
+				pix[y][x][1] = 0;
+				pix[y][x][2] = 255;
 				pix[y][x][3] = 255;
 			}
 		}
@@ -2756,7 +2756,7 @@ skinframe_t *R_SkinFrame_LoadNoTexture(void)
 	if (cls.state == ca_dedicated)
 		return NULL;
 
-	// this makes a light grey/dark grey checkerboard texture
+	// this makes a bright pink/black checkerboard texture
 	if (!pix[0][0][3])
 	{
 		for (y = 0; y < 16; y++)
@@ -2765,16 +2765,16 @@ skinframe_t *R_SkinFrame_LoadNoTexture(void)
 			{
 				if ((y < 8) ^ (x < 8))
 				{
-					pix[y][x][0] = 128;
-					pix[y][x][1] = 128;
-					pix[y][x][2] = 128;
+					pix[y][x][0] = 255;
+					pix[y][x][1] = 0;
+					pix[y][x][2] = 255;
 					pix[y][x][3] = 255;
 				}
 				else
 				{
-					pix[y][x][0] = 64;
-					pix[y][x][1] = 64;
-					pix[y][x][2] = 64;
+					pix[y][x][0] = 0;
+					pix[y][x][1] = 0;
+					pix[y][x][2] = 0;
 					pix[y][x][3] = 255;
 				}
 			}

@@ -1886,18 +1886,33 @@ static unsigned char *Image_GenerateDitherPattern(void)
 unsigned char *Image_GenerateNoTexture(void)
 {
 	int x, y;
+	unsigned char color[4];
 	unsigned char *data = (unsigned char *)Mem_Alloc(tempmempool, 16 * 16 * 4);
 	image_width = 16;
 	image_height = 16;
-	// this makes a light grey/dark grey checkerboard texture
+	/* This makes a bright pink/black checkerboard texture
+	   RGBA 255,0,255,255 - 0,0,0,255 */
+	color[1] = 0; // This is zero either way.
+	color[3] = 255; // Alpha
 	for (y = 0; y < 16; y++)
 	{
 		for (x = 0; x < 16; x++)
 		{
-			data[(y * 16 + x) * 4 + 0] =
-			data[(y * 16 + x) * 4 + 1] =
-			data[(y * 16 + x) * 4 + 2] = (y < 8) ^ (x < 8) ? 128 : 64;
-			data[(y * 16 + x) * 4 + 3] = 255;
+			if ((y < 8) ^ (x < 8)) {
+				// Everything except constant zero = alpha value
+				color[0] =
+				color[2] =
+				color[3];
+			} else {
+				// Everything except alpha = the constant zero above
+				color[0] =
+				color[2] =
+				color[1];
+			}
+			data[(y * 16 + x) * 4 + 0] = color[0];
+			data[(y * 16 + x) * 4 + 1] = color[1];
+			data[(y * 16 + x) * 4 + 2] = color[2];
+			data[(y * 16 + x) * 4 + 3] = color[3];
 		}
 	}
 	return data;
