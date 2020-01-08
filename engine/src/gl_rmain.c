@@ -116,6 +116,7 @@ cvar_t r_fullbright_directed_ambient = {0, "r_fullbright_directed_ambient", "0.5
 cvar_t r_fullbright_directed_diffuse = {0, "r_fullbright_directed_diffuse", "0.75", "diffuse light multiplier for directed fullbright"};
 cvar_t r_fullbright_directed_pitch = {0, "r_fullbright_directed_pitch", "20", "constant pitch direction ('height') of the fake light source to use for fullbright"};
 cvar_t r_fullbright_directed_pitch_relative = {0, "r_fullbright_directed_pitch_relative", "0", "whether r_fullbright_directed_pitch is interpreted as absolute (0) or relative (1) pitch"};
+cvar_t r_fullbright_missingtexture = {0, "r_fullbright_missingtexture", "0", "UNIMPLEMENTED - toggles fullbright on the missing texture placeholder"};
 
 cvar_t r_wateralpha = {CVAR_SAVE, "r_wateralpha","1", "opacity of water polygons"};
 cvar_t r_dynamic = {CVAR_SAVE, "r_dynamic","1", "enables dynamic lights (rocket glow and such)"};
