@@ -990,6 +990,7 @@ static void CL_ClientMovement_Move(cl_clientmovement_state_t *s)
 		VectorCopy(primalvelocity, s->velocity);
 }
 
+extern cvar_t cl_gameplayfix_xonotic_swimvelocity;
 
 static void CL_ClientMovement_Physics_Swim(cl_clientmovement_state_t *s)
 {
@@ -1075,7 +1076,7 @@ static void CL_ClientMovement_Physics_Swim(cl_clientmovement_state_t *s)
 				s->velocity[2] =  80;
 			else
 			{
-				if (IS_NEXUIZ_DERIVED(gamemode))
+				if (cl_gameplayfix_xonotic_swimvelocity.integer > 0)
 					s->velocity[2] = 200;
 				else
 					s->velocity[2] = 100;

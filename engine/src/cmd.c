@@ -521,6 +521,7 @@ static void Cmd_Exec(const char *filename)
 "sys_ticrate 0.01388889\n"
 "r_shadow_gloss 1\n"
 "r_shadow_bumpscale_basetexture 0\n"
+"maxplayers 1\n"
 				);
 			break;
 		case GAME_NEHAHRA:
@@ -545,6 +546,7 @@ static void Cmd_Exec(const char *filename)
 "sys_ticrate 0.01388889\n"
 "r_shadow_gloss 1\n"
 "r_shadow_bumpscale_basetexture 0\n"
+"maxplayers 1\n"
 				);
 			break;
 		// hipnotic mission pack has issues in their 'friendly monster' ai, which seem to attempt to attack themselves for some reason when findradius() returns non-solid entities.
@@ -598,6 +600,7 @@ static void Cmd_Exec(const char *filename)
 "sys_ticrate 0.01388889\n"
 "r_shadow_gloss 1\n"
 "r_shadow_bumpscale_basetexture 0\n"
+"maxplayers 1\n"
 				);
 			break;
 		case GAME_TENEBRAE:
@@ -622,6 +625,7 @@ static void Cmd_Exec(const char *filename)
 "sys_ticrate 0.01388889\n"
 "r_shadow_gloss 2\n"
 "r_shadow_bumpscale_basetexture 4\n"
+"maxplayers 1\n"
 				);
 			break;
 		case GAME_NEXUIZ:
@@ -646,7 +650,54 @@ static void Cmd_Exec(const char *filename)
 "sys_ticrate 0.01388889\n"
 "sv_gameplayfix_q2airaccelerate 1\n"
 "sv_gameplayfix_stepmultipletimes 1\n"
+"cl_gameplayfix_xonotic_swimvelocity 1\n"
+"cl_gameplayfix_xonotic_playerbbox 1\n"
+"cl_gameplayfix_xonotic_plasmatrail 1\n"
+"cl_gameplayfix_xonotic_brokendownload 1\n"
+"cl_gameplayfix_xonotic_dlsave 1\n"
+"cl_gameplayfix_xonotic_rainbowclothes 1\n"
+"cl_gameplayfix_xonotic_chatsound 1\n"
+"sv_gameplayfix_xonotic_teamplay 1\n"
+"showspeed_conversion_ms 0.0254\n"
+"showspeed_conversion_kmh 0.09144\n"
+"showspeed_conversion_mph 0.056818182\n"
+"showspeed_conversion_kts 0.04937365\n"
 				);
+			break;
+		case GAME_VORETOURNAMENT:
+		case GAME_XONOTIC:
+			Cbuf_InsertText("\n"
+"sv_gameplayfix_blowupfallenzombies 1\n"
+"sv_gameplayfix_findradiusdistancetobox 1\n"
+"sv_gameplayfix_grenadebouncedownslopes 1\n"
+"sv_gameplayfix_slidemoveprojectiles 1\n"
+"sv_gameplayfix_upwardvelocityclearsongroundflag 1\n"
+"sv_gameplayfix_setmodelrealbox 1\n"
+"sv_gameplayfix_droptofloorstartsolid 1\n"
+"sv_gameplayfix_droptofloorstartsolid_nudgetocorrect 1\n"
+"sv_gameplayfix_noairborncorpse 1\n"
+"sv_gameplayfix_noairborncorpse_allowsuspendeditems 1\n"
+"sv_gameplayfix_easierwaterjump 1\n"
+"sv_gameplayfix_delayprojectiles 1\n"
+"sv_gameplayfix_multiplethinksperframe 1\n"
+"sv_gameplayfix_fixedcheckwatertransition 1\n"
+"sv_gameplayfix_q1bsptracelinereportstexture 1\n"
+"sv_gameplayfix_swiminbmodels 1\n"
+"sv_gameplayfix_downtracesupportsongroundflag 1\n"
+"sys_ticrate 0.01388889\n"
+"cl_gameplayfix_xonotic_swimvelocity 1\n"
+"cl_gameplayfix_xonotic_playerbbox 1\n"
+"cl_gameplayfix_xonotic_plasmatrail 1\n"
+"cl_gameplayfix_xonotic_brokendownload 1\n"
+"cl_gameplayfix_xonotic_dlsave 1\n"
+"cl_gameplayfix_xonotic_rainbowclothes 1\n"
+"cl_gameplayfix_xonotic_chatsound 1\n"
+"sv_gameplayfix_xonotic_teamplay 1\n"
+"showspeed_conversion_ms 0.0254\n"
+"showspeed_conversion_kmh 0.09144\n"
+"showspeed_conversion_mph 0.056818182\n"
+"showspeed_conversion_kts 0.04937365\n"
+					);
 			break;
 		// Steel Storm: Burning Retribution csqc misinterprets CSQC_InputEvent if type is a value other than 0 or 1
 		case GAME_STEELSTORM:
@@ -670,6 +721,7 @@ static void Cmd_Exec(const char *filename)
 "sv_gameplayfix_downtracesupportsongroundflag 1\n"
 "sys_ticrate 0.01388889\n"
 "cl_csqc_generatemousemoveevents 0\n"
+"maxplayers 1\n"
 				);
 			break;
 		default:
@@ -692,6 +744,7 @@ static void Cmd_Exec(const char *filename)
 "sv_gameplayfix_swiminbmodels 1\n"
 "sv_gameplayfix_downtracesupportsongroundflag 1\n"
 "sys_ticrate 0.01388889\n"
+"maxplayers 1\n" // TODO: Proper singleplayer flag.
 				);
 			break;
 		}

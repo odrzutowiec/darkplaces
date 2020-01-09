@@ -2502,6 +2502,8 @@ static void NetConn_BuildChallengeString(char *buffer, int bufferlength)
 	buffer[i] = 0;
 }
 
+extern cvar_t sv_gameplayfix_xonotic_teamplay;
+
 /// (div0) build the full response only if possible; better a getinfo response than no response at all if getstatus won't fit
 static qboolean NetConn_BuildStatusResponse(const char* challenge, char* out_msg, size_t out_size, qboolean fullstatus)
 {
@@ -2616,7 +2618,7 @@ static qboolean NetConn_BuildStatusResponse(const char* challenge, char* out_msg
 					*p = 0;
 				}
 
-				if (IS_NEXUIZ_DERIVED(gamemode) && (teamplay.integer > 0))
+				if (sv_gameplayfix_xonotic_teamplay.integer > 0 && (teamplay.integer > 0))
 				{
 					if(client->frags == -666) // spectator
 						strlcpy(teambuf, " 0", sizeof(teambuf));

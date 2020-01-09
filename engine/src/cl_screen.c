@@ -2681,6 +2681,7 @@ extern cvar_t cl_minfps_qualitymultiply;
 extern cvar_t cl_minfps_qualityhysteresis;
 extern cvar_t cl_minfps_qualitystepmax;
 extern cvar_t cl_minfps_force;
+extern cvar_t cl_gameplayfix_xonotic_rainbowclothes;
 static double cl_updatescreen_quality = 1;
 void CL_UpdateScreen(void)
 {
@@ -2767,7 +2768,7 @@ void CL_UpdateScreen(void)
 
 	loadingscreendone = false;
 
-	if(IS_NEXUIZ_DERIVED(gamemode))
+	if(cl_gameplayfix_xonotic_rainbowclothes.integer > 0)
 	{
 		// play a bit with the palette (experimental)
 		palette_rgb_pantscolormap[15][0] = (unsigned char) (128 + 127 * sin(cl.time / exp(1.0f) + 0.0f*M_PI/3.0f));

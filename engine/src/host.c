@@ -91,6 +91,21 @@ cvar_t timeformat = {CVAR_SAVE, "timeformat", "[%Y-%m-%d %H:%M:%S] ", "time form
 cvar_t sessionid = {CVAR_READONLY, "sessionid", "", "ID of the current session (use the -sessionid parameter to set it); this is always either empty or begins with a dot (.)"};
 cvar_t locksession = {0, "locksession", "0", "Lock the session? 0 = no, 1 = yes and abort on failure, 2 = yes and continue on failure"};
 
+cvar_t cl_gameplayfix_xonotic_swimvelocity = {0,"cl_gameplayfix_xonotic_swimvelocity","0","change swim velocity to 200 for xonotic"};
+cvar_t cl_gameplayfix_xonotic_playerbbox = {0,"cl_gameplayfix_xonotic_playerbbox","0","change player bounding box for xonotic"};
+cvar_t cl_gameplayfix_xonotic_plasmatrail = {0,"cl_gameplayfix_xonotic_plasmatrail","0","change trail type for xonotic"};
+cvar_t cl_gameplayfix_xonotic_brokendownload = {0,"cl_gameplayfix_xonotic_brokendownload","0","don't use broken download protocol for xonotic"};
+cvar_t cl_gameplayfix_xonotic_dlsave = {0,"cl_gameplayfix_xonotic_dlsave","0","save downloads to disk for xonotic(?)"};
+cvar_t cl_gameplayfix_xonotic_rainbowclothes = {0,"cl_gameplayfix_xonotic_rainbowclothes","0","play with the color palette on pants and shirt for xonotic"};
+cvar_t cl_gameplayfix_xonotic_chatsound = {0,"cl_gameplayfix_xonotic_chatsound","0","change the chat sound trigger for xonotic"};
+cvar_t sv_gameplayfix_xonotic_teamplay = {0,"sv_gameplayfix_xonotic_teamplay","0","change team colors for xonotic"};
+cvar_t showspeed_conversion_ms = {0,"showspeed_conversion_ms","0.0381","Meters/sec - 0.0254 for Xonotic, 0.0381 for everything else"};
+cvar_t showspeed_conversion_kmh = {0,"showspeed_conversion_kmh","0.13716","Kilometers/hour - 0.09144 for Xonotic, 0.13716 for everything else"};
+cvar_t showspeed_conversion_mph = {0,"showspeed_conversion_mph","0.085227273","Miles/hour - 0.056818182 for Xonotic, 0.085227273 for everything else"};
+cvar_t showspeed_conversion_kts = {0,"showspeed_conversion_kts","","Knots - 0.04937365 for Xonotic, 0.074060475 for everything else"};
+
+
+
 /*
 ================
 Host_AbortCurrentFrame
@@ -210,9 +225,7 @@ static void Host_ServerOptions (void)
 		}
 		else
 		{
-			// default players in some games, singleplayer in most
-			if (gamemode != GAME_GOODVSBAD2 && !IS_NEXUIZ_DERIVED(gamemode) && gamemode != GAME_BATTLEMECH)
-				svs.maxclients = 1;
+			//TODO: Use flag in config file, or maybe a cvar?
 		}
 	}
 
@@ -266,6 +279,19 @@ static void Host_InitLocal (void)
 
 	Cvar_RegisterVariable (&sv_writepicture_quality);
 	Cvar_RegisterVariable (&r_texture_jpeg_fastpicmip);
+	
+	Cvar_RegisterVariable(&cl_gameplayfix_xonotic_swimvelocity);
+	Cvar_RegisterVariable(&cl_gameplayfix_xonotic_playerbbox);
+	Cvar_RegisterVariable(&cl_gameplayfix_xonotic_plasmatrail);
+	Cvar_RegisterVariable(&cl_gameplayfix_xonotic_brokendownload);
+	Cvar_RegisterVariable(&cl_gameplayfix_xonotic_dlsave);
+	Cvar_RegisterVariable(&cl_gameplayfix_xonotic_rainbowclothes);
+	Cvar_RegisterVariable(&cl_gameplayfix_xonotic_chatsound);
+	Cvar_RegisterVariable(&sv_gameplayfix_xonotic_teamplay);
+	Cvar_RegisterVariable(&showspeed_conversion_ms);
+	Cvar_RegisterVariable(&showspeed_conversion_kmh);
+	Cvar_RegisterVariable(&showspeed_conversion_mph);
+	Cvar_RegisterVariable(&showspeed_conversion_kts);
 }
 
 

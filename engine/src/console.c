@@ -1118,6 +1118,8 @@ static char Sys_Con_NearestColor(const unsigned char _r, const unsigned char _g,
 		return '1';
 }
 
+extern cvar_t cl_gameplayfix_xonotic_chatsound;
+
 /*
 ================
 Con_MaskPrint
@@ -1156,7 +1158,7 @@ void Con_MaskPrint(int additionalmask, const char *msg)
 				{
 					if (con_chatsound.value)
 					{
-						if(IS_NEXUIZ_DERIVED(gamemode))
+						if(cl_gameplayfix_xonotic_chatsound.integer > 0)
 						{
 							if(msg[1] == '\r' && cl.foundtalk2wav)
 								S_LocalSound ("sound/misc/talk2.wav");

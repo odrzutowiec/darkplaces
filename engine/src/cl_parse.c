@@ -1078,6 +1078,8 @@ static void CL_UpdateItemsAndWeapon(void)
 #define LOADPROGRESSWEIGHT_WORLDMODEL      30.0
 #define LOADPROGRESSWEIGHT_WORLDMODEL_INIT  2.0
 
+extern cvar_t cl_gameplayfix_xonotic_brokendownload;
+
 static void CL_BeginDownloads(qboolean aborteddownload)
 {
 	char vabuf[1024];
@@ -1237,7 +1239,7 @@ static void CL_BeginDownloads(qboolean aborteddownload)
 		// finished loading sounds
 	}
 
-	if(IS_NEXUIZ_DERIVED(gamemode))
+	if(cl_gameplayfix_xonotic_brokendownload.integer > 0)
 		Cvar_SetValueQuick(&cl_serverextension_download, false);
 		// in Nexuiz/Xonotic, the built in download protocol is kinda broken (misses lots
 		// of dependencies) anyway, and can mess around with the game directory;
@@ -1376,6 +1378,8 @@ static void CL_BeginDownloads_f(void)
 		CL_BeginDownloads(false);
 }
 
+extern cvar_t cl_gameplayfix_xonotic_dlsave;
+
 static void CL_StopDownload(int size, int crc)
 {
 	if (cls.qw_downloadmemory && cls.qw_downloadmemorycursize == size && CRC_Block(cls.qw_downloadmemory, cls.qw_downloadmemorycursize) == crc)
@@ -1416,7 +1420,7 @@ static void CL_StopDownload(int size, int crc)
 			// save to disk only if we don't already have it
 			// (this is mainly for playing back demos)
 			existingcrc = FS_CRCFile(cls.qw_downloadname, &existingsize);
-			if (existingsize || IS_NEXUIZ_DERIVED(gamemode) || !strcmp(cls.qw_downloadname, csqc_progname.string))
+			if (existingsize || cl_gameplayfix_xonotic_dlsave.integer > 0 || !strcmp(cls.qw_downloadname, csqc_progname.string))
 				// let csprogs ALWAYS go to dlcache, to prevent "viral csprogs"; also, never put files outside dlcache for Nexuiz/Xonotic
 			{
 				if ((int)existingsize != size || existingcrc != crc)

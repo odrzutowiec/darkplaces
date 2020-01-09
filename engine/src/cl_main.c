@@ -96,6 +96,8 @@ cvar_t cl_locs_show = {0, "locs_show", "0", "shows defined locations for editing
 client_static_t	cls;
 client_state_t	cl;
 
+extern cvar_t cl_gameplayfix_xonotic_playerbbox;
+
 /*
 =====================
 CL_ClearState
@@ -169,7 +171,7 @@ void CL_ClearState(void)
 		cl.entities[i].state_current = defaultstate;
 	}
 
-	if (IS_NEXUIZ_DERIVED(gamemode))
+	if (cl_gameplayfix_xonotic_playerbbox.integer > 0)
 	{
 		VectorSet(cl.playerstandmins, -16, -16, -24);
 		VectorSet(cl.playerstandmaxs, 16, 16, 45);
@@ -1189,6 +1191,8 @@ static void CL_UpdateNetworkEntity(entity_t *e, int recursionlimit, qboolean int
 	CL_UpdateRenderEntity(&e->render);
 }
 
+extern cvar_t cl_gameplayfix_xonotic_plasmatrail;
+
 // creates light and trails from an entity
 static void CL_UpdateNetworkEntityTrail(entity_t *e)
 {
@@ -1214,7 +1218,7 @@ static void CL_UpdateNetworkEntityTrail(entity_t *e)
 	{
 		if (e->render.effects & EF_BRIGHTFIELD)
 		{
-			if (IS_NEXUIZ_DERIVED(gamemode))
+			if (cl_gameplayfix_xonotic_plasmatrail.integer > 0)
 				trailtype = EFFECT_TR_NEXUIZPLASMA;
 			else
 				CL_EntityParticles(e);
@@ -1441,7 +1445,7 @@ static void CL_LinkNetworkEntity(entity_t *e)
 	{
 		if (e->render.effects & EF_BRIGHTFIELD)
 		{
-			if (IS_NEXUIZ_DERIVED(gamemode))
+			if (cl_gameplayfix_xonotic_plasmatrail.integer > 0)
 				trailtype = EFFECT_TR_NEXUIZPLASMA;
 		}
 		if (e->render.effects & EF_DIMLIGHT)
