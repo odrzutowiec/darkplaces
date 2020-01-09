@@ -78,6 +78,7 @@ set(OBJ_COMMON
 	${ENGINE_DIR}/cmd.c
 	${ENGINE_DIR}/collision.c
 	${ENGINE_DIR}/common.c
+	${ENGINE_DIR}/com_game.c
 	${ENGINE_DIR}/console.c
 	${ENGINE_DIR}/csprogs.c
 	${ENGINE_DIR}/curves.c
