@@ -113,6 +113,8 @@ cvar_t crosshair_color_blue = {CVAR_SAVE, "crosshair_color_blue", "0", "customiz
 cvar_t crosshair_color_alpha = {CVAR_SAVE, "crosshair_color_alpha", "1", "how opaque the crosshair should be"};
 cvar_t crosshair_size = {CVAR_SAVE, "crosshair_size", "1", "adjusts size of the crosshair on the screen"};
 
+cvar_t sbar_mode = {0,"sbar_mode","2","0 = off, 1 = nexuiz, 2 = zymotic, 3 = quake, 4 = hipnotic and quoth, 5 = rogue, 6 = good vs bad 2, 7 = transfusion"};
+
 static void Sbar_MiniDeathmatchOverlay (int x, int y);
 static void Sbar_DeathmatchOverlay (void);
 static void Sbar_IntermissionOverlay (void);
@@ -153,10 +155,10 @@ static void sbar_start(void)
 	char vabuf[1024];
 	int i;
 
-	if (gamemode == GAME_DELUXEQUAKE || gamemode == GAME_BLOODOMNICIDE)
+	if (sbar_mode.integer == 0)
 	{
 	}
-	else if (IS_OLDNEXUIZ_DERIVED(gamemode))
+	else if (sbar_mode.integer == 1)
 	{
 		for (i = 0;i < 10;i++)
 			sb_nums[0][i] = Draw_CachePic_Flags (va(vabuf, sizeof(vabuf), "gfx/num_%i",i), CACHEPICFLAG_QUIET);
@@ -194,7 +196,7 @@ static void sbar_start(void)
 		for(i = 0; i < 9;i++)
 			sb_weapons[0][i] = Draw_CachePic_Flags (va(vabuf, sizeof(vabuf), "gfx/inv_weapon%i",i), CACHEPICFLAG_QUIET);
 	}
-	else if (gamemode == GAME_ZYMOTIC)
+	else if (sbar_mode.integer == 2)
 	{
 		zymsb_crosshair_center = Draw_CachePic_Flags ("gfx/hud/crosshair_center", CACHEPICFLAG_QUIET);
 		zymsb_crosshair_line = Draw_CachePic_Flags ("gfx/hud/crosshair_line", CACHEPICFLAG_QUIET);
@@ -291,7 +293,7 @@ static void sbar_start(void)
 		sb_scorebar = Draw_CachePic_Flags ("gfx/scorebar", CACHEPICFLAG_QUIET);
 
 	//MED 01/04/97 added new hipnotic weapons
-		if (gamemode == GAME_HIPNOTIC || gamemode == GAME_QUOTH)
+		if (sbar_mode.integer == 4)
 		{
 			hsb_weapons[0][0] = Draw_CachePic_Flags ("gfx/inv_laser", CACHEPICFLAG_QUIET);
 			hsb_weapons[0][1] = Draw_CachePic_Flags ("gfx/inv_mjolnir", CACHEPICFLAG_QUIET);
@@ -317,7 +319,7 @@ static void sbar_start(void)
 			hsb_items[0] = Draw_CachePic_Flags ("gfx/sb_wsuit", CACHEPICFLAG_QUIET);
 			hsb_items[1] = Draw_CachePic_Flags ("gfx/sb_eshld", CACHEPICFLAG_QUIET);
 		}
-		else if (gamemode == GAME_ROGUE)
+		else if (sbar_mode.integer == 5)
 		{
 			rsb_invbar[0] = Draw_CachePic_Flags ("gfx/r_invbar1", CACHEPICFLAG_QUIET);
 			rsb_invbar[1] = Draw_CachePic_Flags ("gfx/r_invbar2", CACHEPICFLAG_QUIET);
@@ -377,7 +379,7 @@ void Sbar_Init (void)
 	Cvar_RegisterVariable(&sbar_miniscoreboard_size);
 	Cvar_RegisterVariable(&sbar_info_pos);
 	Cvar_RegisterVariable(&cl_deathscoreboard);
-
+	Cvar_RegisterVariable(&sbar_mode);
 	Cvar_RegisterVariable(&crosshair_color_red);
 	Cvar_RegisterVariable(&crosshair_color_green);
 	Cvar_RegisterVariable(&crosshair_color_blue);
@@ -515,7 +517,7 @@ static void Sbar_DrawXNum (int x, int y, int num, int digits, int lettersize, fl
 static int Sbar_IsTeammatch(void)
 {
 	// currently only nexuiz uses the team score board
-	return (IS_OLDNEXUIZ_DERIVED(gamemode)
+	return (sbar_mode.integer == 1
 		&& (teamplay.integer > 0));
 }
 
@@ -692,7 +694,7 @@ static void Sbar_SoloScoreboard (void)
 	int		minutes, seconds, tens, units;
 	int		l;
 
-	if (IS_OLDNEXUIZ_DERIVED(gamemode)) {
+	if (sbar_mode.integer == 1) {
 		dpsnprintf (str, sizeof(str), "Monsters:%3i /%3i", cl.stats[STAT_MONSTERS], cl.stats[STAT_TOTALMONSTERS]);
 		Sbar_DrawString (8, 4, str);
 
@@ -709,7 +711,7 @@ static void Sbar_SoloScoreboard (void)
 	Sbar_DrawString (184, 4, str);
 
 // draw level name
-	if (IS_OLDNEXUIZ_DERIVED(gamemode)) {
+	if (sbar_mode.integer == 1) {
 		l = (int) strlen (cl.worldname);
 		Sbar_DrawString (232 - l*4, 12, cl.worldname);
 	} else {
@@ -771,7 +773,7 @@ static void Sbar_DrawInventory (void)
 	float time;
 	int flashon;
 
-	if (gamemode == GAME_ROGUE)
+	if (sbar_mode.integer == 5)
 	{
 		if ( cl.stats[STAT_ACTIVEWEAPON] >= RIT_LAVA_NAILGUN )
 			Sbar_DrawAlphaPic (0, -24, rsb_invbar[0], sbar_alpha_bg.value);
@@ -804,7 +806,7 @@ static void Sbar_DrawInventory (void)
 
 	// MED 01/04/97
 	// hipnotic weapons
-	if (gamemode == GAME_HIPNOTIC || gamemode == GAME_QUOTH)
+	if (sbar_mode.integer == 4)
 	{
 		int grenadeflashing=0;
 		for (i=0 ; i<4 ; i++)
@@ -851,7 +853,7 @@ static void Sbar_DrawInventory (void)
 		}
 	}
 
-	if (gamemode == GAME_ROGUE)
+	if (sbar_mode.integer == 5)
 	{
 		// check for powered up weapon.
 		if ( cl.stats[STAT_ACTIVEWEAPON] >= RIT_LAVA_NAILGUN )
@@ -879,20 +881,20 @@ static void Sbar_DrawInventory (void)
 		if (cl.stats[STAT_ITEMS] & (1<<(17+i)))
 		{
 			//MED 01/04/97 changed keys
-			if (!(gamemode == GAME_HIPNOTIC || gamemode == GAME_QUOTH) || (i>1))
+			if (sbar_mode.integer != 4 || (i>1))
 				Sbar_DrawPic (192 + i*16, -16, sb_items[i]);
 		}
 
 	//MED 01/04/97 added hipnotic items
 	// hipnotic items
-	if (gamemode == GAME_HIPNOTIC || gamemode == GAME_QUOTH)
+	if (sbar_mode.integer == 4)
 	{
 		for (i=0 ; i<2 ; i++)
 			if (cl.stats[STAT_ITEMS] & (1<<(24+i)))
 				Sbar_DrawPic (288 + i*16, -16, hsb_items[i]);
 	}
 
-	if (gamemode == GAME_ROGUE)
+	if (sbar_mode.integer == 5)
 	{
 		// new rogue items
 		for (i=0 ; i<2 ; i++)
@@ -970,7 +972,7 @@ static void Sbar_DrawFace (void)
 
 // PGM 01/19/97 - team color drawing
 // PGM 03/02/97 - fixed so color swatch only appears in CTF modes
-	if (gamemode == GAME_ROGUE && !cl.islocalgame && (teamplay.integer > 3) && (teamplay.integer < 7))
+	if (sbar_mode.integer == 5 && !cl.islocalgame && (teamplay.integer > 3) && (teamplay.integer < 7))
 	{
 		char num[12];
 		scoreboard_t *s;
@@ -1369,7 +1371,7 @@ void Sbar_Draw (void)
 			Sbar_DrawScoreboard ();
 		else if (cl.intermission == 1)
 		{
-			if(IS_OLDNEXUIZ_DERIVED(gamemode)) // display full scoreboard (that is, show scores + map name)
+			if(sbar_mode.integer == 1) // display full scoreboard (that is, show scores + map name)
 			{
 				Sbar_DrawScoreboard();
 				return;
@@ -1378,10 +1380,10 @@ void Sbar_Draw (void)
 		}
 		else if (cl.intermission == 2)
 			Sbar_FinaleOverlay();
-		else if (gamemode == GAME_DELUXEQUAKE)
+		else if (sbar_mode.integer == 0)
 		{
 		}
-		else if (IS_OLDNEXUIZ_DERIVED(gamemode))
+		else if (sbar_mode.integer == 1)
 		{
 			if (sb_showscores || (cl.stats[STAT_HEALTH] <= 0 && cl_deathscoreboard.integer))
 			{
@@ -1582,7 +1584,7 @@ void Sbar_Draw (void)
 					//   to the right!
 			}
 		}
-		else if (gamemode == GAME_ZYMOTIC)
+		else if (sbar_mode.integer == 2)
 		{
 #if 1
 			float scale = 64.0f / 256.0f;
@@ -1655,15 +1657,15 @@ void Sbar_Draw (void)
 
 			if (sb_lines > 24)
 			{
-				if (gamemode != GAME_GOODVSBAD2)
+				if (sbar_mode.integer == 6)
 					Sbar_DrawInventory ();
-				if (!cl.islocalgame && gamemode != GAME_TRANSFUSION)
+				if (!cl.islocalgame && sbar_mode.integer != 8)
 					Sbar_DrawFrags ();
 			}
 
 			if (sb_showscores || (cl.stats[STAT_HEALTH] <= 0 && cl_deathscoreboard.integer))
 			{
-				if (gamemode != GAME_GOODVSBAD2)
+				if (sbar_mode.integer != 6)
 					Sbar_DrawAlphaPic (0, 0, sb_scorebar, sbar_alpha_bg.value);
 				Sbar_DrawScoreboard ();
 			}
@@ -1673,7 +1675,7 @@ void Sbar_Draw (void)
 
 				// keys (hipnotic only)
 				//MED 01/04/97 moved keys here so they would not be overwritten
-				if (gamemode == GAME_HIPNOTIC || gamemode == GAME_QUOTH)
+				if (sbar_mode.integer == 4)
 				{
 					if (cl.stats[STAT_ITEMS] & IT_KEY1)
 						Sbar_DrawPic (209, 3, sb_items[0]);
@@ -1681,7 +1683,7 @@ void Sbar_Draw (void)
 						Sbar_DrawPic (209, 12, sb_items[1]);
 				}
 				// armor
-				if (gamemode != GAME_GOODVSBAD2)
+				if (sbar_mode.integer != 6)
 				{
 					if (cl.stats[STAT_ITEMS] & IT_INVULNERABILITY)
 					{
@@ -1690,7 +1692,7 @@ void Sbar_Draw (void)
 					}
 					else
 					{
-						if (gamemode == GAME_ROGUE)
+						if (sbar_mode.integer == 5)
 						{
 							Sbar_DrawNum (24, 0, cl.stats[STAT_ARMOR], 3, cl.stats[STAT_ARMOR] <= 25);
 							if (cl.stats[STAT_ITEMS] & RIT_ARMOR3)
@@ -1720,7 +1722,7 @@ void Sbar_Draw (void)
 				Sbar_DrawNum (136, 0, cl.stats[STAT_HEALTH], 3, cl.stats[STAT_HEALTH] <= 25);
 
 				// ammo icon
-				if (gamemode == GAME_ROGUE)
+				if (sbar_mode.integer == 5)
 				{
 					if (cl.stats[STAT_ITEMS] & RIT_SHELLS)
 						Sbar_DrawPic (224, 0, sb_ammo[0]);
@@ -1754,7 +1756,7 @@ void Sbar_Draw (void)
 				// LordHavoc: changed to draw the deathmatch overlays in any multiplayer mode
 				if ((!cl.islocalgame || cl.gametype != GAME_COOP))
 				{
-					if (gamemode == GAME_TRANSFUSION)
+					if (sbar_mode.integer == 7)
 						Sbar_MiniDeathmatchOverlay (0, 0);
 					else
 						Sbar_MiniDeathmatchOverlay (sbar_x + 324, vid_conheight.integer - 8*8);
@@ -1904,7 +1906,7 @@ void Sbar_DeathmatchOverlay (void)
 		xmin = (int) (vid_conwidth.integer - (16 + 25) * 8 * FONT_SBAR->maxwidth) / 2; // 16 characters until name, then we assume 25 character names (they can be longer but usually aren't)
 	xmax = vid_conwidth.integer - xmin;
 
-	if(IS_OLDNEXUIZ_DERIVED(gamemode))
+	if(sbar_mode.integer == 1)
 		DrawQ_Pic (xmin - 8, ymin - 8, 0, xmax-xmin+1 + 2*8, ymax-ymin+1 + 2*8, 0, 0, 0, sbar_alpha_bg.value, 0);
 
 	DrawQ_Pic ((vid_conwidth.integer - Draw_GetPicWidth(sb_ranking))/2, 8, sb_ranking, 0, 0, 1, 1, 1, 1 * sbar_alpha_fg.value, 0);
@@ -1954,7 +1956,7 @@ void Sbar_MiniDeathmatchOverlay (int x, int y)
 	Sbar_SortFrags ();
 
 	// decide where to print
-	if (gamemode == GAME_TRANSFUSION)
+	if (sbar_mode.integer == 7)
 		numlines = (vid_conwidth.integer - x + 127) / 128;
 	else
 		numlines = (vid_conheight.integer - y + 7) / 8;
@@ -1972,7 +1974,7 @@ void Sbar_MiniDeathmatchOverlay (int x, int y)
 	range_end = scoreboardlines;
 	teamsep = 0;
 
-	if (gamemode != GAME_TRANSFUSION)
+	if (sbar_mode.integer != 7)
 		if (Sbar_IsTeammatch ())
 		{
 			// reserve space for the team scores
@@ -1999,7 +2001,7 @@ void Sbar_MiniDeathmatchOverlay (int x, int y)
 	i = min(i, range_end - numlines);
 	i = max(i, range_begin);
 
-	if (gamemode == GAME_TRANSFUSION)
+	if (sbar_mode.integer == 7)
 	{
 		for (;i < range_end && x < vid_conwidth.integer;i++)
 			x += 128 + (int)Sbar_PrintScoreboardItem(cl.scores + fragsort[i], x, y);
@@ -2220,7 +2222,7 @@ void Sbar_IntermissionOverlay (void)
 	if(cl.stats[STAT_TOTALSECRETS])
 	{
 		Sbar_DrawNum (160, 104, cl.stats[STAT_SECRETS], 3, 0);
-		if (!IS_OLDNEXUIZ_DERIVED(gamemode))
+		if (sbar_mode.integer != 1)
 			Sbar_DrawPic (232, 104, sb_slash);
 		Sbar_DrawNum (240, 104, cl.stats[STAT_TOTALSECRETS], 3, 0);
 	}
@@ -2232,7 +2234,7 @@ void Sbar_IntermissionOverlay (void)
 	if(cl.stats[STAT_TOTALMONSTERS])
 	{
 		Sbar_DrawNum (160, 144, cl.stats[STAT_MONSTERS], 3, 0);
-		if (!IS_OLDNEXUIZ_DERIVED(gamemode))
+		if (sbar_mode.integer != 1)
 			Sbar_DrawPic (232, 144, sb_slash);
 		Sbar_DrawNum (240, 144, cl.stats[STAT_TOTALMONSTERS], 3, 0);
 	}

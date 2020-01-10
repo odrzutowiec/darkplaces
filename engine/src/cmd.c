@@ -555,6 +555,7 @@ static void Cmd_Exec(const char *filename)
 		case GAME_HIPNOTIC:
 		case GAME_QUOTH:
 			Cbuf_InsertText("\n"
+"sbar_mode 4\n"
 "sv_gameplayfix_blowupfallenzombies 0\n"
 "sv_gameplayfix_findradiusdistancetobox 0\n"
 "sv_gameplayfix_grenadebouncedownslopes 0\n"
@@ -580,6 +581,7 @@ static void Cmd_Exec(const char *filename)
 		// rogue mission pack has a guardian boss that does not wake up if findradius returns one of the entities around its spawn area
 		case GAME_ROGUE:
 			Cbuf_InsertText("\n"
+"sbar_mode 5\n"
 "sv_gameplayfix_blowupfallenzombies 0\n"
 "sv_gameplayfix_findradiusdistancetobox 0\n"
 "sv_gameplayfix_grenadebouncedownslopes 0\n"
@@ -628,43 +630,12 @@ static void Cmd_Exec(const char *filename)
 "maxplayers 1\n"
 				);
 			break;
+		case GAME_VORETOURNAMENT:
 		case GAME_NEXUIZ:
 			Cbuf_InsertText("\n"
-"sv_gameplayfix_blowupfallenzombies 1\n"
-"sv_gameplayfix_findradiusdistancetobox 1\n"
-"sv_gameplayfix_grenadebouncedownslopes 1\n"
-"sv_gameplayfix_slidemoveprojectiles 1\n"
-"sv_gameplayfix_upwardvelocityclearsongroundflag 1\n"
-"sv_gameplayfix_setmodelrealbox 1\n"
-"sv_gameplayfix_droptofloorstartsolid 1\n"
-"sv_gameplayfix_droptofloorstartsolid_nudgetocorrect 1\n"
-"sv_gameplayfix_noairborncorpse 1\n"
-"sv_gameplayfix_noairborncorpse_allowsuspendeditems 1\n"
-"sv_gameplayfix_easierwaterjump 1\n"
-"sv_gameplayfix_delayprojectiles 1\n"
-"sv_gameplayfix_multiplethinksperframe 1\n"
-"sv_gameplayfix_fixedcheckwatertransition 1\n"
-"sv_gameplayfix_q1bsptracelinereportstexture 1\n"
-"sv_gameplayfix_swiminbmodels 1\n"
-"sv_gameplayfix_downtracesupportsongroundflag 1\n"
-"sys_ticrate 0.01388889\n"
-"sv_gameplayfix_q2airaccelerate 1\n"
-"sv_gameplayfix_stepmultipletimes 1\n"
-"cl_gameplayfix_xonotic_swimvelocity 1\n"
-"cl_gameplayfix_xonotic_playerbbox 1\n"
-"cl_gameplayfix_xonotic_plasmatrail 1\n"
-"cl_gameplayfix_xonotic_brokendownload 1\n"
-"cl_gameplayfix_xonotic_dlsave 1\n"
-"cl_gameplayfix_xonotic_rainbowclothes 1\n"
-"cl_gameplayfix_xonotic_chatsound 1\n"
-"sv_gameplayfix_xonotic_teamplay 1\n"
-"showspeed_conversion_ms 0.0254\n"
-"showspeed_conversion_kmh 0.09144\n"
-"showspeed_conversion_mph 0.056818182\n"
-"showspeed_conversion_kts 0.04937365\n"
+"sbar_mode 1\n"
 				);
-			break;
-		case GAME_VORETOURNAMENT:
+			// No break - Xonotic and Nexuiz share the same options
 		case GAME_XONOTIC:
 			Cbuf_InsertText("\n"
 "sv_gameplayfix_blowupfallenzombies 1\n"
@@ -746,6 +717,14 @@ static void Cmd_Exec(const char *filename)
 "sys_ticrate 0.01388889\n"
 "maxplayers 1\n" // TODO: Proper singleplayer flag.
 				);
+			if (gamemode == (GAME_BLOODOMNICIDE || GAME_DELUXEQUAKE))
+				Cbuf_InsertText("\nsbar_mode 0\n");
+			if (gamemode == GAME_ZYMOTIC)
+				Cbuf_InsertText("\nsbar_mode 2\n");
+			if (gamemode == GAME_GOODVSBAD2)
+				Cbuf_InsertText("\nsbar_mode 6\n");
+			if (gamemode == GAME_TRANSFUSION)
+				Cbuf_InsertText("\nsbar_mode 7\n");
 			break;
 		}
 	}
