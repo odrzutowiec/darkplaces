@@ -576,6 +576,7 @@ static void Cmd_Exec(const char *filename)
 "sys_ticrate 0.02\n"
 "r_shadow_gloss 1\n"
 "r_shadow_bumpscale_basetexture 0\n"
+"cl_gameplayfix_statbitshift 1\n"
 				);
 			break;
 		// rogue mission pack has a guardian boss that does not wake up if findradius returns one of the entities around its spawn area
@@ -603,6 +604,7 @@ static void Cmd_Exec(const char *filename)
 "r_shadow_gloss 1\n"
 "r_shadow_bumpscale_basetexture 0\n"
 "maxplayers 1\n"
+"cl_gameplayfix_statbitshift 1\n"
 				);
 			break;
 		case GAME_TENEBRAE:
@@ -634,6 +636,10 @@ static void Cmd_Exec(const char *filename)
 		case GAME_NEXUIZ:
 			Cbuf_InsertText("\n"
 "sbar_mode 1\n"
+"cl_gameplayfix_nexuiz_nocollidenetworkplayer 1\n"
+"cl_gameplayfix_nexuiz_notifyalign 1\n"
+"sv_gameplayfix_nexuiz_evilfrags 1\n"
+"cl_gameplayfix_statbitshift 1\n"
 				);
 			// No break - Xonotic and Nexuiz share the same options
 		case GAME_XONOTIC:

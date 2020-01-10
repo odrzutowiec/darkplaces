@@ -2134,6 +2134,7 @@ static void CL_ParseBaseline (entity_t *ent, int large)
 	ent->state_previous = ent->state_current = ent->state_baseline;
 }
 
+extern cvar_t cl_gameplayfix_statbitshift;
 
 /*
 ==================
@@ -2240,7 +2241,7 @@ static void CL_ParseClientdata (void)
 		cl.stats[STAT_NAILS] = MSG_ReadByte(&cl_message);
 		cl.stats[STAT_ROCKETS] = MSG_ReadByte(&cl_message);
 		cl.stats[STAT_CELLS] = MSG_ReadByte(&cl_message);
-		if (gamemode == GAME_HIPNOTIC || gamemode == GAME_ROGUE || gamemode == GAME_QUOTH || IS_OLDNEXUIZ_DERIVED(gamemode))
+		if (cl_gameplayfix_statbitshift.integer)
 			cl.stats[STAT_ACTIVEWEAPON] = (1<<MSG_ReadByte(&cl_message));
 		else
 			cl.stats[STAT_ACTIVEWEAPON] = MSG_ReadByte(&cl_message);

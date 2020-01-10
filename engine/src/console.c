@@ -1733,6 +1733,8 @@ static int Con_DrawNotifyRect(int mask_must, int mask_mustnot, float maxage, flo
 	return lines;
 }
 
+extern cvar_t cl_gameplayfix_nexuiz_notifyalign;
+
 /*
 ================
 Con_DrawNotify
@@ -1767,7 +1769,7 @@ void Con_DrawNotify (void)
 	align = con_notifyalign.value;
 	if(!*con_notifyalign.string) // empty string, evaluated to 0 above
 	{
-		if(IS_OLDNEXUIZ_DERIVED(gamemode))
+		if(cl_gameplayfix_nexuiz_notifyalign.integer)
 			align = 0.5;
 	}
 

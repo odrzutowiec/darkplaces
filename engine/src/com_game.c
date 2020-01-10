@@ -25,6 +25,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 gamemode_t com_startupgamemode;
 gamemode_t com_startupgamegroup;
 
+// Leaving these here for now
+cvar_t cl_gameplayfix_nexuiz_nocollidenetworkplayer = {0,"cl_gameplayfix_nexuiz_nocollidenetworkplayer","0","don't hit networked players if spectator, for nexuiz"};
+cvar_t cl_gameplayfix_statbitshift = {0,"cl_gameplayfix_statbitshift","0","bitshift on cl.stats for multiple games"};
+cvar_t cl_gameplayfix_nexuiz_notifyalign = {0,"cl_gameplayfix_nexuiz_notifyalign","0","center console notify for nexuiz"};
+cvar_t sv_gameplayfix_nexuiz_evilfrags = {0,"sv_gameplayfix_nexuiz_evilfrags","0","set frags of connected player to -666 for nexuiz"};
+
 typedef struct gamemode_info_s
 {
 	gamemode_t mode; // this gamemode
