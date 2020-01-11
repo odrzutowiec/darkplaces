@@ -30,6 +30,7 @@ cvar_t cl_gameplayfix_nexuiz_nocollidenetworkplayer = {0,"cl_gameplayfix_nexuiz_
 cvar_t cl_gameplayfix_statbitshift = {0,"cl_gameplayfix_statbitshift","0","bitshift on cl.stats for multiple games"};
 cvar_t cl_gameplayfix_nexuiz_notifyalign = {0,"cl_gameplayfix_nexuiz_notifyalign","0","center console notify for nexuiz"};
 cvar_t sv_gameplayfix_nexuiz_evilfrags = {0,"sv_gameplayfix_nexuiz_evilfrags","0","set frags of connected player to -666 for nexuiz"};
+cvar_t shareware = {0,"shareware","0","indicates whether or not the game has the basic pop.lmp check, for Quake and Steelstorm"};
 
 typedef struct gamemode_info_s
 {

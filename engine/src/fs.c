@@ -1407,6 +1407,7 @@ static void FS_AddSelfPack(void)
 	}
 }
 
+extern cvar_t shareware;
 
 /*
 ================
@@ -1481,32 +1482,19 @@ void FS_Rescan (void)
 	if (COM_CheckParm ("-condebug") != 0)
 		unlink (va(vabuf, sizeof(vabuf), "%s/qconsole.log", fs_gamedir));
 
-	// look for the pop.lmp file and set registered to true if it is found
-	if (FS_FileExists("gfx/pop.lmp"))
-		Cvar_Set ("registered", "1");
-	switch(gamemode)
-	{
-	case GAME_NORMAL:
-	case GAME_HIPNOTIC:
-	case GAME_ROGUE:
-		if (!registered.integer)
-		{
+	if (shareware.integer) {
+		// look for the pop.lmp file and set registered to true if it is found
+		if (FS_FileExists("gfx/pop.lmp"))
+			Cvar_Set ("registered", "1");
+
+		if (!registered.integer) {
 			if (fs_modified)
-				Con_Print("Playing shareware version, with modification.\nwarning: most mods require full quake data.\n");
+				Con_Print("Playing shareware version, with modification.\nwarning: most mods require full game data.\n");
 			else
 				Con_Print("Playing shareware version.\n");
+		} else {
+			Con_Print("Playing registered version.\n");
 		}
-		else
-			Con_Print("Playing registered version.\n");
-		break;
-	case GAME_STEELSTORM:
-		if (registered.integer)
-			Con_Print("Playing registered version.\n");
-		else
-			Con_Print("Playing shareware version.\n");
-		break;
-	default:
-		break;
 	}
 
 	// unload all wads so that future queries will return the new data

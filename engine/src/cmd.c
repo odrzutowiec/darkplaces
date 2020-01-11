@@ -522,6 +522,7 @@ static void Cmd_Exec(const char *filename)
 "r_shadow_gloss 1\n"
 "r_shadow_bumpscale_basetexture 0\n"
 "maxplayers 1\n"
+"shareware 1\n"
 				);
 			break;
 		case GAME_NEHAHRA:
@@ -553,6 +554,9 @@ static void Cmd_Exec(const char *filename)
 		// hipnotic mission pack has issues with bobbing water entities 'jittering' between different heights on alternate frames at the default 0.0138889 ticrate, 0.02 avoids this issue
 		// hipnotic mission pack has issues in their proximity mine sticking code, which causes them to bounce off.
 		case GAME_HIPNOTIC:
+			Cbuf_InsertText("\n"
+"shareware 1\n"
+					);
 		case GAME_QUOTH:
 			Cbuf_InsertText("\n"
 "sbar_mode 4\n"
@@ -605,6 +609,7 @@ static void Cmd_Exec(const char *filename)
 "r_shadow_bumpscale_basetexture 0\n"
 "maxplayers 1\n"
 "cl_gameplayfix_statbitshift 1\n"
+"shareware 1\n"
 				);
 			break;
 		case GAME_TENEBRAE:
@@ -699,6 +704,7 @@ static void Cmd_Exec(const char *filename)
 "sys_ticrate 0.01388889\n"
 "cl_csqc_generatemousemoveevents 0\n"
 "maxplayers 1\n"
+"shareware 1\n"
 				);
 			break;
 		default:
