@@ -113,7 +113,7 @@ cvar_t crosshair_color_blue = {CVAR_SAVE, "crosshair_color_blue", "0", "customiz
 cvar_t crosshair_color_alpha = {CVAR_SAVE, "crosshair_color_alpha", "1", "how opaque the crosshair should be"};
 cvar_t crosshair_size = {CVAR_SAVE, "crosshair_size", "1", "adjusts size of the crosshair on the screen"};
 
-cvar_t sbar_mode = {0,"sbar_mode","2","0 = off, 1 = nexuiz, 2 = zymotic, 3 = quake, 4 = hipnotic and quoth, 5 = rogue, 6 = good vs bad 2, 7 = transfusion"};
+cvar_t sbar_mode = {0,"sbar_mode","3","0 = off, 1 = nexuiz, 2 = zymotic, 3 = quake, 4 = hipnotic and quoth, 5 = rogue, 6 = good vs bad 2, 7 = transfusion"};
 
 static void Sbar_MiniDeathmatchOverlay (int x, int y);
 static void Sbar_DeathmatchOverlay (void);
