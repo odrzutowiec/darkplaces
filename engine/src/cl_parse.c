@@ -1718,7 +1718,7 @@ static void CL_ParseServerInfo (void)
 		return;
 	}
 	// hack for unmarked Nehahra movie demos which had a custom protocol
-	if (protocol == PROTOCOL_QUAKEDP && cls.demoplayback && gamemode == GAME_NEHAHRA)
+	if (protocol == PROTOCOL_QUAKEDP && cls.demoplayback && cl_gameplayfix_nehahra_demos.integer)
 		protocol = PROTOCOL_NEHAHRAMOVIE;
 	cls.protocol = protocol;
 	Con_DPrintf("Server protocol is %s\n", Protocol_NameForEnum(cls.protocol));
@@ -3880,7 +3880,7 @@ void CL_ParseServerMessage(void)
 				if (protocol == PROTOCOL_UNKNOWN)
 					Host_Error("CL_ParseServerMessage: Server is unrecognized protocol number (%i)", i);
 				// hack for unmarked Nehahra movie demos which had a custom protocol
-				if (protocol == PROTOCOL_QUAKEDP && cls.demoplayback && gamemode == GAME_NEHAHRA)
+				if (protocol == PROTOCOL_QUAKEDP && cls.demoplayback && cl_gameplayfix_nehahra_demos.integer)
 					protocol = PROTOCOL_NEHAHRAMOVIE;
 				cls.protocol = protocol;
 				break;
@@ -4182,7 +4182,7 @@ void CL_ParseServerMessage(void)
 				Cmd_ExecuteString ("help", src_command, true);
 				break;
 			case svc_hidelmp:
-				if (gamemode == GAME_TENEBRAE)
+				if (cl_gameplayfix_tenebrae_repeatparticle.integer)
 				{
 					// repeating particle effect
 					MSG_ReadCoord(&cl_message, cls.protocol);
@@ -4200,7 +4200,7 @@ void CL_ParseServerMessage(void)
 					SHOWLMP_decodehide();
 				break;
 			case svc_showlmp:
-				if (gamemode == GAME_TENEBRAE)
+				if (cl_gameplayfix_tenebrae_repeatparticle.integer)
 				{
 					// particle effect
 					MSG_ReadCoord(&cl_message, cls.protocol);

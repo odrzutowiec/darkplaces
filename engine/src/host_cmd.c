@@ -344,7 +344,7 @@ SERVER TRANSITIONS
 ===============================================================================
 */
 
-cvar_t host_gameplayfix_deluxequake_clearwarpmark = {0,"host_gameplayfix_deluxequake_clearwarpmark","0"};
+cvar_t host_gameplayfix_deluxequake_clearwarpmark = {0,"host_gameplayfix_deluxequake_clearwarpmark","0","description"};
 
 /*
 ======================
@@ -366,7 +366,7 @@ static void Host_Map_f (void)
 	}
 
 	// GAME_DELUXEQUAKE - clear warpmark (used by QC)
-	if (gamemode == GAME_DELUXEQUAKE)
+	if (host_gameplayfix_deluxequake_clearwarpmark.integer)
 		Cvar_Set("warpmark", "");
 
 	cls.demonum = -1;		// stop demo loop in case this fails
@@ -2172,7 +2172,7 @@ static void Host_Give_f (void)
 	case '8':
 	case '9':
 		// MED 01/04/97 added hipnotic give stuff
-		if (gamemode == GAME_HIPNOTIC || gamemode == GAME_QUOTH)
+		if (host_give_mode.integer == 1)
 		{
 			if (t[0] == '6')
 			{
@@ -2196,13 +2196,13 @@ static void Host_Give_f (void)
 		break;
 
 	case 's':
-		if (gamemode == GAME_ROGUE)
+		if (host_give_mode.integer == 2)
 			PRVM_serveredictfloat(host_client->edict, ammo_shells1) = v;
 
 		PRVM_serveredictfloat(host_client->edict, ammo_shells) = v;
 		break;
 	case 'n':
-		if (gamemode == GAME_ROGUE)
+		if (host_give_mode.integer == 2)
 		{
 			PRVM_serveredictfloat(host_client->edict, ammo_nails1) = v;
 			if (PRVM_serveredictfloat(host_client->edict, weapon) <= IT_LIGHTNING)
@@ -2214,7 +2214,7 @@ static void Host_Give_f (void)
 		}
 		break;
 	case 'l':
-		if (gamemode == GAME_ROGUE)
+		if (host_give_mode.integer == 2)
 		{
 			PRVM_serveredictfloat(host_client->edict, ammo_lava_nails) = v;
 			if (PRVM_serveredictfloat(host_client->edict, weapon) > IT_LIGHTNING)
@@ -2222,7 +2222,7 @@ static void Host_Give_f (void)
 		}
 		break;
 	case 'r':
-		if (gamemode == GAME_ROGUE)
+		if (host_give_mode.integer == 2)
 		{
 			PRVM_serveredictfloat(host_client->edict, ammo_rockets1) = v;
 			if (PRVM_serveredictfloat(host_client->edict, weapon) <= IT_LIGHTNING)
@@ -2234,7 +2234,7 @@ static void Host_Give_f (void)
 		}
 		break;
 	case 'm':
-		if (gamemode == GAME_ROGUE)
+		if (host_give_mode.integer == 2)
 		{
 			PRVM_serveredictfloat(host_client->edict, ammo_multi_rockets) = v;
 			if (PRVM_serveredictfloat(host_client->edict, weapon) > IT_LIGHTNING)
@@ -2245,7 +2245,7 @@ static void Host_Give_f (void)
 		PRVM_serveredictfloat(host_client->edict, health) = v;
 		break;
 	case 'c':
-		if (gamemode == GAME_ROGUE)
+		if (host_give_mode.integer == 2)
 		{
 			PRVM_serveredictfloat(host_client->edict, ammo_cells1) = v;
 			if (PRVM_serveredictfloat(host_client->edict, weapon) <= IT_LIGHTNING)
@@ -2257,7 +2257,7 @@ static void Host_Give_f (void)
 		}
 		break;
 	case 'p':
-		if (gamemode == GAME_ROGUE)
+		if (host_give_mode.integer == 2)
 		{
 			PRVM_serveredictfloat(host_client->edict, ammo_plasma) = v;
 			if (PRVM_serveredictfloat(host_client->edict, weapon) > IT_LIGHTNING)

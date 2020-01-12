@@ -72,6 +72,8 @@ static texture_t mod_q1bsp_texture_water;
 
 static qboolean Mod_Q3BSP_TraceLineOfSight(struct model_s *model, const vec3_t start, const vec3_t end, const vec3_t acceptmins, const vec3_t acceptmaxs);
 
+cvar_t cl_gameplayfix_nexuiz_texturehack = {0,"cl_gameplayfix_nexuiz_texturehack","0","description"};
+
 void Mod_BrushInit(void)
 {
 //	Cvar_RegisterVariable(&r_subdivide_size);
@@ -113,7 +115,7 @@ void Mod_BrushInit(void)
 
 	// these games were made for older DP engines and are no longer
 	// maintained; use this hack to show their textures properly
-	if(gamemode == GAME_NEXUIZ) // TODO: Just add this to the cbuf thing
+	if(cl_gameplayfix_nexuiz_texturehack.integer)
 		Cvar_SetQuick(&mod_q3shader_force_addalpha, "1");
 
 	memset(&mod_q1bsp_texture_solid, 0, sizeof(mod_q1bsp_texture_solid));
@@ -1878,9 +1880,9 @@ static void Mod_Q1BSP_LoadTextures(sizebuf_t *sb)
 			// LordHavoc: HL sky textures are entirely different than quake
 			if (!loadmodel->brush.ishlbsp && !strncmp(tx->name, "sky", 3) && mtwidth == mtheight * 2)
 			{
-				data = loadimagepixelsbgra(gamemode == GAME_TENEBRAE ? tx->name : va(vabuf, sizeof(vabuf), "textures/%s/%s", mapname, tx->name), false, false, false, NULL);
+				data = loadimagepixelsbgra(cl_gameplayfix_tenebrae_loadtextures.integer ? tx->name : va(vabuf, sizeof(vabuf), "textures/%s/%s", mapname, tx->name), false, false, false, NULL);
 				if (!data)
-					data = loadimagepixelsbgra(gamemode == GAME_TENEBRAE ? tx->name : va(vabuf, sizeof(vabuf), "textures/%s", tx->name), false, false, false, NULL);
+					data = loadimagepixelsbgra(cl_gameplayfix_tenebrae_loadtextures.integer ? tx->name : va(vabuf, sizeof(vabuf), "textures/%s", tx->name), false, false, false, NULL);
 				if (data && image_width == image_height * 2)
 				{
 					R_Q1BSP_LoadSplitSky(data, image_width, image_height, 4);
@@ -1891,9 +1893,9 @@ static void Mod_Q1BSP_LoadTextures(sizebuf_t *sb)
 			}
 			else
 			{
-				skinframe_t *skinframe = R_SkinFrame_LoadExternal(gamemode == GAME_TENEBRAE ? tx->name : va(vabuf, sizeof(vabuf), "textures/%s/%s", mapname, tx->name), TEXF_ALPHA | TEXF_MIPMAP | TEXF_ISWORLD | TEXF_PICMIP | TEXF_COMPRESS, false, false);
+				skinframe_t *skinframe = R_SkinFrame_LoadExternal(cl_gameplayfix_tenebrae_loadtextures.integer ? tx->name : va(vabuf, sizeof(vabuf), "textures/%s/%s", mapname, tx->name), TEXF_ALPHA | TEXF_MIPMAP | TEXF_ISWORLD | TEXF_PICMIP | TEXF_COMPRESS, false, false);
 				if (!skinframe)
-					skinframe = R_SkinFrame_LoadExternal(gamemode == GAME_TENEBRAE ? tx->name : va(vabuf, sizeof(vabuf), "textures/%s", tx->name), TEXF_ALPHA | TEXF_MIPMAP | TEXF_ISWORLD | TEXF_PICMIP | TEXF_COMPRESS, false, false);
+					skinframe = R_SkinFrame_LoadExternal(cl_gameplayfix_tenebrae_loadtextures.integer ? tx->name : va(vabuf, sizeof(vabuf), "textures/%s", tx->name), TEXF_ALPHA | TEXF_MIPMAP | TEXF_ISWORLD | TEXF_PICMIP | TEXF_COMPRESS, false, false);
 				if (skinframe)
 					tx->offsetmapping = OFFSETMAPPING_DEFAULT; // allow offsetmapping on external textures without a q3 shader
 				if (!skinframe)

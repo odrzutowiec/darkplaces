@@ -928,7 +928,7 @@ void CL_SpawnDecalParticleForPoint(const vec3_t org, float maxdist, float size, 
 }
 
 cvar_t cl_gameplayfix_goodvsbad2_particlefallback = {0,"cl_gameplayfix_goodvsbad2_particlefallback","0","change particle fallback behavior for goodvsbad2"};
-cvar_t cl_gameplayfix_prydon_particles = {0,"cl_gameplayfix_prydon_particles","0"};
+cvar_t cl_gameplayfix_prydon_particles = {0,"cl_gameplayfix_prydon_particles","0","description"};
 
 static void CL_Sparks(const vec3_t originmins, const vec3_t originmaxs, const vec3_t velocitymins, const vec3_t velocitymaxs, float sparkcount);
 static void CL_Smoke(const vec3_t originmins, const vec3_t originmaxs, const vec3_t velocitymins, const vec3_t velocitymaxs, float smokecount);
@@ -1261,7 +1261,7 @@ static void CL_ParticleEffect_Fallback(int effectnameindex, float count, const v
 				Vector4Set(light, 3.0f, 1.5f, 0.5f, 200);
 			else if (effectnameindex == EFFECT_TR_VORESPIKE)
 			{
-				if (gamemode == GAME_PRYDON && !cl_particles_quake.integer)
+				if (cl_gameplayfix_prydon_particles.integer && !cl_particles_quake.integer)
 					Vector4Set(light, 0.3f, 0.6f, 1.2f, 100);
 				else
 					Vector4Set(light, 1.2f, 0.5f, 1.0f, 200);
@@ -1381,7 +1381,7 @@ static void CL_ParticleEffect_Fallback(int effectnameindex, float count, const v
 						CL_NewParticle(center, pt_alphastatic, color, color, tex_particle, 1.5f, 0, 255, 0, 0, 0, pos[0], pos[1], pos[2], 30*dir[1], 30*-dir[0], 0, 0, 0, 0, 0, true, 0.5, 1, PBLEND_ALPHA, PARTICLE_BILLBOARD, -1, -1, -1, 1, 1, 0, 0, NULL);
 						CL_NewParticle(center, pt_alphastatic, color, color, tex_particle, 1.5f, 0, 255, 0, 0, 0, pos[0], pos[1], pos[2], 30*-dir[1], 30*dir[0], 0, 0, 0, 0, 0, true, 0.5, 1, PBLEND_ALPHA, PARTICLE_BILLBOARD, -1, -1, -1, 1, 1, 0, 0, NULL);
 					}
-					else if (gamemode == GAME_GOODVSBAD2)
+					else if (cl_gameplayfix_goodvsbad2_particlefallback.integer)
 					{
 						dec = 6;
 						CL_NewParticle(center, pt_static, 0x00002E, 0x000030, tex_particle, 6, 0, 128, 384, 0, 0, pos[0], pos[1], pos[2], 0, 0, 0, 0, 0, 0, 0, true, 0, 1, PBLEND_ADD, PARTICLE_BILLBOARD, -1, -1, -1, 1, 1, 0, 0, NULL);
@@ -1414,12 +1414,12 @@ static void CL_ParticleEffect_Fallback(int effectnameindex, float count, const v
 						color = particlepalette[152 + (rand()&3)];
 						CL_NewParticle(center, pt_alphastatic, color, color, tex_particle, 1.5f, 0, 255, 0, 0, 0, pos[0], pos[1], pos[2], 0, 0, 0, 0, 0, 8, 0, true, 0.3, 1, PBLEND_ALPHA, PARTICLE_BILLBOARD, -1, -1, -1, 1, 1, 0, 0, NULL);
 					}
-					else if (gamemode == GAME_GOODVSBAD2)
+					else if (cl_gameplayfix_goodvsbad2_particlefallback.integer)
 					{
 						dec = 6;
 						CL_NewParticle(center, pt_alphastatic, particlepalette[0 + (rand()&255)], particlepalette[0 + (rand()&255)], tex_particle, 6, 0, 255, 384, 0, 0, pos[0], pos[1], pos[2], 0, 0, 0, 0, 0, 0, 0, true, 0, 1, PBLEND_ALPHA, PARTICLE_BILLBOARD, -1, -1, -1, 1, 1, 0, 0, NULL);
 					}
-					else if (gamemode == GAME_PRYDON)
+					else if (cl_gameplayfix_prydon_particles.integer)
 					{
 						dec = 6;
 						CL_NewParticle(center, pt_static, 0x103040, 0x204050, tex_particle, 6, 0, 64, 192, 0, 0, pos[0], pos[1], pos[2], 0, 0, 0, 0, 0, 0, 0, true, 0, 1, PBLEND_ADD, PARTICLE_BILLBOARD, -1, -1, -1, 1, 1, 0, 0, NULL);
@@ -1989,7 +1989,7 @@ void CL_ParticleRain (const vec3_t mins, const vec3_t maxs, const vec3_t dir, in
 		{
 			k = particlepalette[colorbase + (rand()&3)];
 			VectorSet(org, lhrandom(mins[0], maxs[0]), lhrandom(mins[1], maxs[1]), lhrandom(minz, maxz));
-			if (gamemode == GAME_GOODVSBAD2)
+			if (cl_gameplayfix_goodvsbad2_rain.integer)
 				CL_NewParticle(org, pt_rain, k, k, tex_particle, 20, 0, lhrandom(32, 64), 0, 0, -1, org[0], org[1], org[2], dir[0], dir[1], dir[2], 0, 0, 0, 0, true, lifetime, 1, PBLEND_ADD, PARTICLE_SPARK, -1, -1, -1, 1, 1, 0, 0, NULL);
 			else
 				CL_NewParticle(org, pt_rain, k, k, tex_particle, 0.5, 0, lhrandom(32, 64), 0, 0, -1, org[0], org[1], org[2], dir[0], dir[1], dir[2], 0, 0, 0, 0, true, lifetime, 1, PBLEND_ADD, PARTICLE_SPARK, -1, -1, -1, 1, 1, 0, 0, NULL);
@@ -2001,7 +2001,7 @@ void CL_ParticleRain (const vec3_t mins, const vec3_t maxs, const vec3_t dir, in
 		{
 			k = particlepalette[colorbase + (rand()&3)];
 			VectorSet(org, lhrandom(mins[0], maxs[0]), lhrandom(mins[1], maxs[1]), lhrandom(minz, maxz));
-			if (gamemode == GAME_GOODVSBAD2)
+			if (cl_gameplayfix_goodvsbad2_rain.integer)
 				CL_NewParticle(org, pt_snow, k, k, tex_particle, 20, 0, lhrandom(64, 128), 0, 0, -1, org[0], org[1], org[2], dir[0], dir[1], dir[2], 0, 0, 0, 0, true, lifetime, 1, PBLEND_ADD, PARTICLE_BILLBOARD, -1, -1, -1, 1, 1, 0, 0, NULL);
 			else
 				CL_NewParticle(org, pt_snow, k, k, tex_particle, 1, 0, lhrandom(64, 128), 0, 0, -1, org[0], org[1], org[2], dir[0], dir[1], dir[2], 0, 0, 0, 0, true, lifetime, 1, PBLEND_ADD, PARTICLE_BILLBOARD, -1, -1, -1, 1, 1, 0, 0, NULL);

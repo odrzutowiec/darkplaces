@@ -246,6 +246,41 @@ void Host_SaveConfig_f(void);
 void Host_LoadConfig_f(void);
 extern cvar_t sv_writepicture_quality;
 extern cvar_t r_texture_jpeg_fastpicmip;
+
+extern cvar_t shareware;
+extern cvar_t cl_gameplayfix_nehahra_demos;
+extern cvar_t cl_gameplayfix_nehahra_showlmpbyte;
+extern cvar_t cl_gameplayfix_nehahra_fog;
+extern cvar_t cl_gameplayfix_fullbrights;
+extern cvar_t cl_gameplayfix_statbitshift;
+extern cvar_t host_give_mode;
+extern cvar_t cl_gameplayfix_tenebrae_additivesprites;
+extern cvar_t cl_gameplayfix_tenebrae_repeatparticle;
+extern cvar_t cl_gameplayfix_tenebrae_loadtextures;
+extern cvar_t sv_gameplayfix_tenebrae_fulldynamic;
+extern cvar_t cl_gameplayfix_nexuiz_nocollidenetworkplayer;
+extern cvar_t cl_gameplayfix_nexuiz_notifyalign;
+extern cvar_t sv_gameplayfix_nexuiz_evilfrags;
+extern cvar_t cl_gameplayfix_nexuiz_moveflag;
+extern cvar_t cl_gameplayfix_nexuiz_texturehack;
+cvar_t vid_gameplayfix_steelstorm_touch = {0,"vid_gameplayfix_steelstorm_touch","0","change touchscreen behavior for steelstorm"};
+cvar_t menu_mode = {0,"menu_mode","0","0 = quake, 1 = nehahra,"};
+cvar_t menu_mode_maplist = {0,"menu_mode_maplist","0","description"};
+cvar_t menu_mode_quit = {0, "menu_mode_quit", "0", "0 = Default, 1 = Quake and mods, 2 = Good vs Bad 2, 3 = Battlemech, 4 = Openquartz"};
+cvar_t host_gameplayfix_startmapmode = {0,"host_gameplayfix_startmapmode","0","0 = default, 1 = nehahra, 2 = transfusion, 3 = teu"};
+extern cvar_t cl_gameplayfix_bloodomnicide_subtitles;
+extern cvar_t cl_gameplayfix_bloodomnicide_fkeys;
+extern cvar_t host_gameplayfix_deluxequake_clearwarpmark;
+extern cvar_t cl_gameplayfix_deluxequake_loadtextures;
+extern cvar_t cl_gameplayfix_goodvsbad2_particlefallback;
+extern cvar_t cl_gameplayfix_goodvsbad2_rain;
+extern cvar_t cl_gameplayfix_goodvsbad2_chasecam;
+extern cvar_t cl_gameplayfix_transfusion_convertical;
+extern cvar_t cl_gameplayfix_transfusion_viewmodelalpha;
+extern cvar_t sv_gameplayfix_transfusion_loadedict;
+extern cvar_t cl_gameplayfix_transfusion_viewblend;
+extern cvar_t cl_gameplayfix_prydon_particles;
+
 static void Host_InitLocal (void)
 {
 	Cmd_AddCommand("saveconfig", Host_SaveConfig_f, "save settings to config.cfg (or a specified filename) immediately (also automatic when quitting)");
@@ -292,6 +327,39 @@ static void Host_InitLocal (void)
 	Cvar_RegisterVariable(&showspeed_conversion_kmh);
 	Cvar_RegisterVariable(&showspeed_conversion_mph);
 	Cvar_RegisterVariable(&showspeed_conversion_kts);
+	Cvar_RegisterVariable(&shareware);
+	Cvar_RegisterVariable(&cl_gameplayfix_nehahra_demos);
+	Cvar_RegisterVariable(&cl_gameplayfix_nehahra_showlmpbyte);
+	Cvar_RegisterVariable(&cl_gameplayfix_nehahra_fog);
+	Cvar_RegisterVariable(&cl_gameplayfix_fullbrights);
+	Cvar_RegisterVariable(&cl_gameplayfix_statbitshift);
+	Cvar_RegisterVariable(&host_give_mode);
+	Cvar_RegisterVariable(&cl_gameplayfix_tenebrae_additivesprites);
+	Cvar_RegisterVariable(&cl_gameplayfix_tenebrae_repeatparticle);
+	Cvar_RegisterVariable(&cl_gameplayfix_tenebrae_loadtextures);
+	Cvar_RegisterVariable(&sv_gameplayfix_tenebrae_fulldynamic);
+	Cvar_RegisterVariable(&cl_gameplayfix_nexuiz_nocollidenetworkplayer);
+	Cvar_RegisterVariable(&cl_gameplayfix_nexuiz_notifyalign);
+	Cvar_RegisterVariable(&sv_gameplayfix_nexuiz_evilfrags);
+	Cvar_RegisterVariable(&cl_gameplayfix_nexuiz_moveflag);
+	Cvar_RegisterVariable(&cl_gameplayfix_nexuiz_texturehack);
+	Cvar_RegisterVariable(&vid_gameplayfix_steelstorm_touch);
+	Cvar_RegisterVariable(&menu_mode);
+	Cvar_RegisterVariable(&menu_mode_maplist);
+	Cvar_RegisterVariable(&menu_mode_quit);
+	Cvar_RegisterVariable(&host_gameplayfix_startmapmode);
+	Cvar_RegisterVariable(&cl_gameplayfix_bloodomnicide_subtitles);
+	Cvar_RegisterVariable(&cl_gameplayfix_bloodomnicide_fkeys);
+	Cvar_RegisterVariable(&host_gameplayfix_deluxequake_clearwarpmark);
+	Cvar_RegisterVariable(&cl_gameplayfix_deluxequake_loadtextures);
+	Cvar_RegisterVariable(&cl_gameplayfix_goodvsbad2_particlefallback);
+	Cvar_RegisterVariable(&cl_gameplayfix_goodvsbad2_rain);
+	Cvar_RegisterVariable(&cl_gameplayfix_goodvsbad2_chasecam);
+	Cvar_RegisterVariable(&cl_gameplayfix_transfusion_convertical);
+	Cvar_RegisterVariable(&cl_gameplayfix_transfusion_viewmodelalpha);
+	Cvar_RegisterVariable(&sv_gameplayfix_transfusion_loadedict);
+	Cvar_RegisterVariable(&cl_gameplayfix_transfusion_viewblend);
+	Cvar_RegisterVariable(&cl_gameplayfix_prydon_particles);
 }
 
 
@@ -344,14 +412,21 @@ static void Host_AddConfigText(void)
 {
 	// set up the default startmap_sp and startmap_dm aliases (mods can
 	// override these) and then execute the quake.rc startup script
-	if (gamemode == GAME_NEHAHRA)
-		Cbuf_InsertText("alias startmap_sp \"map nehstart\"\nalias startmap_dm \"map nehstart\"\nexec " STARTCONFIGFILENAME "\n");
-	else if (gamemode == GAME_TRANSFUSION)
-		Cbuf_InsertText("alias startmap_sp \"map e1m1\"\n""alias startmap_dm \"map bb1\"\nexec " STARTCONFIGFILENAME "\n");
-	else if (gamemode == GAME_TEU)
-		Cbuf_InsertText("alias startmap_sp \"map start\"\nalias startmap_dm \"map start\"\nexec teu.rc\n");
-	else
+	switch (host_gameplayfix_startmapmode.integer) {
+	default:
 		Cbuf_InsertText("alias startmap_sp \"map start\"\nalias startmap_dm \"map start\"\nexec " STARTCONFIGFILENAME "\n");
+		break;
+	case 1:
+		Cbuf_InsertText("alias startmap_sp \"map nehstart\"\nalias startmap_dm \"map nehstart\"\nexec " STARTCONFIGFILENAME "\n");
+		break;
+	case 2:
+		Cbuf_InsertText("alias startmap_sp \"map e1m1\"\n""alias startmap_dm \"map bb1\"\nexec " STARTCONFIGFILENAME "\n");
+		break;
+	case 3:
+		Cbuf_InsertText("alias startmap_sp \"map start\"\nalias startmap_dm \"map start\"\nexec teu.rc\n");
+		break;
+	}
+
 }
 
 /*

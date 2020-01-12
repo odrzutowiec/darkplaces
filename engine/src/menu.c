@@ -30,7 +30,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 static cvar_t forceqmenu = { 0, "forceqmenu", "0", "enables the quake menu instead of the quakec menu.dat (if present)" };
 static cvar_t menu_progs = { 0, "menu_progs", "menu.dat", "name of quakec menu.dat file" };
-
+extern cvar_t menu_mode;
 static int NehGameType;
 
 enum m_state_e m_state;
@@ -365,7 +365,7 @@ void M_Menu_Main_f (void)
 	const char *s;
 	s = "gfx/mainmenu";
 
-	if (gamemode == GAME_NEHAHRA)
+	if (menu_mode.integer == 1)
 	{
 		if (FS_FileExists("maps/neh1m4.bsp"))
 		{
@@ -400,7 +400,7 @@ void M_Menu_Main_f (void)
 		else
 			MAIN_ITEMS = 6;
 	}
-	else if (gamemode == GAME_TRANSFUSION)
+	else if (menu_mode.integer == 2)
 	{
 		s = "gfx/menu/mainmenu1";
 		if (sv.active && !cl.intermission && cl.islocalgame)
@@ -452,7 +452,7 @@ static void M_Main_Draw (void)
 		return;
 	}
 
-	if (gamemode == GAME_TRANSFUSION) {
+	if (menu_mode.integer == 2) {
 		int y1, y2, y3;
 		M_Background(640, 480);
 		p = Draw_CachePic ("gfx/menu/tb-transfusion");
@@ -479,7 +479,7 @@ static void M_Main_Draw (void)
 	p = Draw_CachePic ("gfx/ttl_main");
 	M_DrawPic ( (320-Draw_GetPicWidth(p))/2, 4, "gfx/ttl_main");
 // Nehahra
-	if (gamemode == GAME_NEHAHRA)
+	if (menu_mode.integer == 1)
 	{
 		if (NehGameType == TYPE_BOTH)
 			M_DrawPic (72, 32, "gfx/mainmenu");
@@ -541,7 +541,7 @@ static void M_Main_Key (int key, int ascii)
 				break;
 			}
 		}
-		else if (gamemode == GAME_NEHAHRA)
+		else if (menu_mode.integer == 1)
 		{
 			switch (NehGameType)
 			{
@@ -628,7 +628,7 @@ static void M_Main_Key (int key, int ascii)
 				break;
 			}
 		}
-		else if (gamemode == GAME_TRANSFUSION) {
+		else if (menu_mode.integer == 2) {
 			if (MAIN_ITEMS == 7)
 			{
 				switch (m_main_cursor)
@@ -754,12 +754,12 @@ static void M_SinglePlayer_Draw (void)
 	p = Draw_CachePic ("gfx/ttl_sgl");
 
 	// Some mods don't have a single player mode
-	if (gamemode == GAME_GOODVSBAD2 || gamemode == GAME_BATTLEMECH)
+	if (menu_mode.integer == 3 || menu_mode.integer == 4)
 	{
 		M_DrawPic ((320 - Draw_GetPicWidth(p)) / 2, 4, "gfx/ttl_sgl");
 
 		M_DrawTextBox (60, 8 * 8, 23, 4);
-		if (gamemode == GAME_GOODVSBAD2)
+		if (menu_mode.integer == 3)
 			M_Print(95, 10 * 8, "Good Vs Bad 2 is for");
 		else  // if (gamemode == GAME_BATTLEMECH)
 			M_Print(95, 10 * 8, "Battlemech is for");
@@ -781,7 +781,7 @@ static void M_SinglePlayer_Draw (void)
 
 static void M_SinglePlayer_Key (int key, int ascii)
 {
-	if (gamemode == GAME_GOODVSBAD2 || gamemode == GAME_BATTLEMECH)
+	if (menu_mode.integer == 3 || menu_mode.integer == 4)
 	{
 		if (key == K_ESCAPE || key == K_ENTER)
 			m_state = m_main;
@@ -818,7 +818,7 @@ static void M_SinglePlayer_Key (int key, int ascii)
 			Cbuf_AddText ("maxplayers 1\n");
 			Cbuf_AddText ("deathmatch 0\n");
 			Cbuf_AddText ("coop 0\n");
-			if (gamemode == GAME_TRANSFUSION)
+			if (menu_mode.integer == 2)
 			{
 				key_dest = key_menu;
 				M_Menu_Transfusion_Episode_f ();
@@ -957,7 +957,7 @@ static void M_Load_Key (int k, int ascii)
 	switch (k)
 	{
 	case K_ESCAPE:
-		if (gamemode == GAME_TRANSFUSION)
+		if (menu_mode.integer == 2)
 			M_Menu_Main_f ();
 		else
 			M_Menu_SinglePlayer_f ();
@@ -999,7 +999,7 @@ static void M_Save_Key (int k, int ascii)
 	switch (k)
 	{
 	case K_ESCAPE:
-		if (gamemode == GAME_TRANSFUSION)
+		if (menu_mode.integer == 2)
 			M_Menu_Main_f ();
 		else
 			M_Menu_SinglePlayer_f ();
@@ -1209,7 +1209,7 @@ static void M_MultiPlayer_Draw (void)
 	cachepic_t	*p;
 	char vabuf[1024];
 
-	if (gamemode == GAME_TRANSFUSION)
+	if (menu_mode.integer == 2)
 	{
 		M_Background(640, 480);
 		p = Draw_CachePic ("gfx/menu/tb-online");
@@ -1348,7 +1348,7 @@ static void M_Setup_Draw (void)
 	M_DrawTextBox (160, 32, 16, 1);
 	M_PrintColored(168, 40, setup_myname);
 
-	if (gamemode != GAME_GOODVSBAD2)
+	if (menu_mode.integer != 3)
 	{
 		M_Print(64, 64, "Shirt color");
 		M_Print(64, 88, "Pants color");
@@ -2554,12 +2554,12 @@ void M_Menu_Keys_f (void)
 	m_state = m_keys;
 	m_entersound = true;
 
-	if (gamemode == GAME_TRANSFUSION)
+	if (menu_mode.integer == 2)
 	{
 		numcommands = sizeof(transfusionbindnames) / sizeof(transfusionbindnames[0]);
 		bindnames = transfusionbindnames;
 	}
-	else if (gamemode == GAME_GOODVSBAD2)
+	else if (menu_mode.integer == 2)
 	{
 		numcommands = sizeof(goodvsbad2bindnames) / sizeof(goodvsbad2bindnames[0]);
 		bindnames = goodvsbad2bindnames;
@@ -3182,7 +3182,14 @@ static int M_QuitMessage(const char *line1, const char *line2, const char *line3
 	return 1;
 }
 
-cvar_t menu_mode_quit = {0, "menu_mode_quit", "0", "0 = Default, 1 = Quake and mods, 2 = Good vs Bad 2, 3 = Battlemech, 4 = Openquartz"};
+extern cvar_t menu_mode_quit;
+
+// default = 0
+// normal, hipnotic, rogue, quoth, nehahra, defeatindetail2 = 1
+// goodvsbad2 = 2
+// battlemech = 3
+// openquartz = 4
+
 
 static int M_ChooseQuitMessage(int request)
 {
@@ -3192,14 +3199,9 @@ static int M_ChooseQuitMessage(int request)
 		if (request-- == 0) return M_QuitMessage("Are you sure you want to quit?","Press Y to quit, N to stay",NULL,NULL,NULL,NULL,NULL,NULL);
 		return 0;
 	}
-	switch (gamemode)
+	switch (menu_mode_quit.integer)
 	{
-	case GAME_NORMAL:
-	case GAME_HIPNOTIC:
-	case GAME_ROGUE:
-	case GAME_QUOTH:
-	case GAME_NEHAHRA:
-	case GAME_DEFEATINDETAIL2:
+	case 1:
 		if (request-- == 0) return M_QuitMessage("Are you gonna quit","this game just like","everything else?",NULL,NULL,NULL,NULL,NULL);
 		if (request-- == 0) return M_QuitMessage("Milord, methinks that","thou art a lowly","quitter. Is this true?",NULL,NULL,NULL,NULL,NULL);
 		if (request-- == 0) return M_QuitMessage("Do I need to bust your","face open for trying","to quit?",NULL,NULL,NULL,NULL,NULL);
@@ -3209,7 +3211,7 @@ static int M_ChooseQuitMessage(int request)
 		if (request-- == 0) return M_QuitMessage("Um, Asmodeus dislikes","his children trying to","quit. Press Y to return","to your Tinkertoys.",NULL,NULL,NULL,NULL);
 		if (request-- == 0) return M_QuitMessage("If you quit now, I'll","throw a blanket-party","for you next time!",NULL,NULL,NULL,NULL,NULL);
 		break;
-	case GAME_GOODVSBAD2:
+	case 2:
 		if (request-- == 0) return M_QuitMessage("Press Yes To Quit","...","Yes",NULL,NULL,NULL,NULL,NULL);
 		if (request-- == 0) return M_QuitMessage("Do you really want to","Quit?","Play Good vs bad 3!",NULL,NULL,NULL,NULL,NULL);
 		if (request-- == 0) return M_QuitMessage("All your quit are","belong to long duck","dong",NULL,NULL,NULL,NULL,NULL);
@@ -3223,7 +3225,7 @@ static int M_ChooseQuitMessage(int request)
 		if (request-- == 0) return M_QuitMessage("you","want to quit?",NULL,NULL,NULL,NULL,NULL,NULL);
 		if (request-- == 0) return M_QuitMessage("Please stop playing","this stupid game",NULL,NULL,NULL,NULL,NULL,NULL);
 		break;
-	case GAME_BATTLEMECH:
+	case 3:
 		if (request-- == 0) return M_QuitMessage("? WHY ?","Press Y to quit, N to keep fraggin'",NULL,NULL,NULL,NULL,NULL,NULL);
 		if (request-- == 0) return M_QuitMessage("Leave now and your mech is scrap!","Press Y to quit, N to keep fraggin'",NULL,NULL,NULL,NULL,NULL,NULL);
 		if (request-- == 0) return M_QuitMessage("Accept Defeat?","Press Y to quit, N to keep fraggin'",NULL,NULL,NULL,NULL,NULL,NULL);
@@ -3232,7 +3234,7 @@ static int M_ChooseQuitMessage(int request)
 		if (request-- == 0) return M_QuitMessage("Your mech here is way more impressive","than your car out there...","Press Y to quit, N to keep fraggin'",NULL,NULL,NULL,NULL,NULL);
 		if (request-- == 0) return M_QuitMessage("Quitting won't reduce your debt","Press Y to quit, N to keep fraggin'",NULL,NULL,NULL,NULL,NULL,NULL);
 		break;
-	case GAME_OPENQUARTZ:
+	case 4:
 		if (request-- == 0) return M_QuitMessage("There is nothing like free beer!","Press Y to quit, N to stay",NULL,NULL,NULL,NULL,NULL,NULL);
 		if (request-- == 0) return M_QuitMessage("GNU is not Unix!","Press Y to quit, N to stay",NULL,NULL,NULL,NULL,NULL,NULL);
 		if (request-- == 0) return M_QuitMessage("You prefer free beer over free speech?","Press Y to quit, N to stay",NULL,NULL,NULL,NULL,NULL,NULL);
@@ -3922,25 +3924,27 @@ static gamelevels_t prydongame = {"Prydon Gate", prydonlevels, prydonepisodes, 2
 
 typedef struct gameinfo_s
 {
-	gamemode_t gameid;
+	int mode;
 	gamelevels_t *notregistered;
 	gamelevels_t *registered;
 }
 gameinfo_t;
 
+extern cvar_t menu_mode_maplist;
+
 static gameinfo_t gamelist[] =
 {
-	{GAME_NORMAL, &sharewarequakegame, &registeredquakegame},
-	{GAME_HIPNOTIC, &hipnoticgame, &hipnoticgame},
-	{GAME_ROGUE, &roguegame, &roguegame},
-	{GAME_QUOTH, &sharewarequakegame, &registeredquakegame},
-	{GAME_NEHAHRA, &nehahragame, &nehahragame},
-	{GAME_TRANSFUSION, &transfusiongame, &transfusiongame},
-	{GAME_GOODVSBAD2, &goodvsbad2game, &goodvsbad2game},
-	{GAME_BATTLEMECH, &battlemechgame, &battlemechgame},
-	{GAME_OPENQUARTZ, &openquartzgame, &openquartzgame},
-	{GAME_DEFEATINDETAIL2, &defeatindetail2game, &defeatindetail2game},
-	{GAME_PRYDON, &prydongame, &prydongame},
+	{0, &sharewarequakegame, &registeredquakegame},
+	{1, &hipnoticgame, &hipnoticgame},
+	{2, &roguegame, &roguegame},
+	{3, &sharewarequakegame, &registeredquakegame},
+	{4, &nehahragame, &nehahragame},
+	{5, &transfusiongame, &transfusiongame},
+	{6, &goodvsbad2game, &goodvsbad2game},
+	{7, &battlemechgame, &battlemechgame},
+	{8, &openquartzgame, &openquartzgame},
+	{9, &defeatindetail2game, &defeatindetail2game},
+	{10, &prydongame, &prydongame},
 };
 
 static gamelevels_t *gameoptions_levels  = NULL;
@@ -3964,7 +3968,7 @@ void M_Menu_GameOptions_f (void)
 	// pick game level list based on gamemode (use GAME_NORMAL if no matches)
 	gameoptions_levels = registered.integer ? gamelist[0].registered : gamelist[0].notregistered;
 	for (i = 0;i < (int)(sizeof(gamelist)/sizeof(gamelist[0]));i++)
-		if (gamelist[i].gameid == gamemode)
+		if (gamelist[i].mode == menu_mode_maplist.integer)
 			gameoptions_levels = registered.integer ? gamelist[i].registered : gamelist[i].notregistered;
 }
 
@@ -3991,10 +3995,10 @@ void M_GameOptions_Draw (void)
 	M_Print(0, 56, "      Max players");
 	M_Print(160, 56, va(vabuf, sizeof(vabuf), "%i", maxplayers) );
 
-	if (gamemode != GAME_GOODVSBAD2)
+	if (menu_mode.integer != 3)
 	{
 		M_Print(0, 64, "        Game Type");
-		if (gamemode == GAME_TRANSFUSION)
+		if (menu_mode.integer == 2)
 		{
 			if (!coop.integer && !deathmatch.integer)
 				Cvar_SetValue("deathmatch", 1);
@@ -4005,7 +4009,7 @@ void M_GameOptions_Draw (void)
 			else
 				M_Print(160, 64, "Blood Bath");
 		}
-		else if (gamemode == GAME_BATTLEMECH)
+		else if (menu_mode.integer == 4)
 		{
 			if (!deathmatch.integer)
 				Cvar_SetValue("deathmatch", 1);
@@ -4025,7 +4029,7 @@ void M_GameOptions_Draw (void)
 		}
 
 		M_Print(0, 72, "        Teamplay");
-		if (gamemode == GAME_ROGUE)
+		if (menu_mode.integer == 5)
 		{
 			const char *msg;
 
@@ -4054,7 +4058,7 @@ void M_GameOptions_Draw (void)
 			M_Print(160, 72, msg);
 		}
 		M_Print(0, 80, "            Skill");
-		if (gamemode == GAME_TRANSFUSION)
+		if (menu_mode.integer == 2)
 		{
 			if (skill.integer == 1)
 				M_Print(160, 80, "Still Kicking");
@@ -4101,7 +4105,7 @@ void M_GameOptions_Draw (void)
 	M_DrawTextBox (0, 132, 38, 1);
 	M_Print(8, 140, hostname.string);
 
-	if (gamemode != GAME_GOODVSBAD2)
+	if (menu_mode.integer != 3)
 	{
 		M_Print(0, 160, "         Episode");
 		M_Print(160, 160, gameoptions_levels->episodes[startepisode].description);
@@ -4154,9 +4158,9 @@ static void M_NetStart_Change (int dir)
 		break;
 
 	case 2:
-		if (gamemode == GAME_GOODVSBAD2)
+		if (menu_mode.integer == 3)
 			break;
-		if (gamemode == GAME_TRANSFUSION)
+		if (menu_mode.integer == 2)
 		{
 			switch (deathmatch.integer)
 			{
@@ -4179,7 +4183,7 @@ static void M_NetStart_Change (int dir)
 					Cvar_SetValueQuick (&deathmatch, 0);
 			}
 		}
-		else if (gamemode == GAME_BATTLEMECH)
+		else if (menu_mode.integer == 4)
 		{
 			if (deathmatch.integer == 2) // changing from Rambo to Deathmatch
 				Cvar_SetValueQuick (&deathmatch, 0);
@@ -4202,9 +4206,9 @@ static void M_NetStart_Change (int dir)
 		break;
 
 	case 3:
-		if (gamemode == GAME_GOODVSBAD2)
+		if (menu_mode.integer == 3)
 			break;
-		if (gamemode == GAME_ROGUE)
+		if (menu_mode.integer == 5)
 			count = 6;
 		else
 			count = 2;
@@ -4217,10 +4221,10 @@ static void M_NetStart_Change (int dir)
 		break;
 
 	case 4:
-		if (gamemode == GAME_GOODVSBAD2)
+		if (menu_mode.integer == 3)
 			break;
 		Cvar_SetValueQuick (&skill, skill.integer + dir);
-		if (gamemode == GAME_TRANSFUSION)
+		if (menu_mode.integer == 2)
 		{
 			if (skill.integer > 5)
 				Cvar_SetValueQuick (&skill, 1);
@@ -4237,7 +4241,7 @@ static void M_NetStart_Change (int dir)
 		break;
 
 	case 5:
-		if (gamemode == GAME_GOODVSBAD2)
+		if (menu_mode.integer == 3)
 			break;
 		Cvar_SetValueQuick (&fraglimit, fraglimit.integer + dir*10);
 		if (fraglimit.integer > 100)
@@ -4247,7 +4251,7 @@ static void M_NetStart_Change (int dir)
 		break;
 
 	case 6:
-		if (gamemode == GAME_GOODVSBAD2)
+		if (menu_mode.integer == 3)
 			break;
 		Cvar_SetValueQuick (&timelimit, timelimit.value + dir*5);
 		if (timelimit.value > 60)
@@ -4270,7 +4274,7 @@ static void M_NetStart_Change (int dir)
 		break;
 
 	case 10:
-		if (gamemode == GAME_GOODVSBAD2)
+		if (menu_mode.integer == 3)
 			break;
 		startepisode += dir;
 
@@ -4408,7 +4412,7 @@ static void M_ServerList_Draw (void)
 	char vabuf[1024];
 
 	// use as much vertical space as available
-	if (gamemode == GAME_TRANSFUSION)
+	if (menu_mode.integer == 2)
 		M_Background(640, vid_conheight.integer - 80);
 	else
 		M_Background(640, vid_conheight.integer);
@@ -4639,7 +4643,7 @@ static void M_ModList_Draw (void)
 	const char *s_enabled = "Enabled Mods";
 
 	// use as much vertical space as available
-	if (gamemode == GAME_TRANSFUSION)
+	if (menu_mode.integer == 2)
 		M_Background(640, vid_conheight.integer - 80);
 	else
 		M_Background(640, vid_conheight.integer);
@@ -4865,7 +4869,7 @@ void M_Draw (void)
 		break;
 	}
 
-	if (gamemode == GAME_TRANSFUSION && !m_missingdata) {
+	if (menu_mode.integer == 2 && !m_missingdata) {
 		if (m_state != m_credits) {
 			cachepic_t	*p, *drop1, *drop2, *drop3;
 			int g, scale_x, scale_y, scale_y_repeat, top_offset;

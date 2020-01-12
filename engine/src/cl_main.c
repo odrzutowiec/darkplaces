@@ -1158,7 +1158,7 @@ static void CL_UpdateNetworkEntity(entity_t *e, int recursionlimit, qboolean int
 	}
 
 	// tenebrae's sprites are all additive mode (weird)
-	if (gamemode == GAME_TENEBRAE && e->render.model && e->render.model->type == mod_sprite)
+	if (cl_gameplayfix_tenebrae_additivesprites.integer && e->render.model && e->render.model->type == mod_sprite)
 		e->render.flags |= RENDER_ADDITIVE;
 	// player model is only shown with chase_active on
 	if (e->state_current.number == cl.viewentity)
@@ -1365,6 +1365,8 @@ static void CL_UpdateNetworkEntities(void)
 	}
 }
 
+cvar_t cl_gameplayfix_transfusion_viewmodelalpha = {0,"cl_gameplayfix_transfusion_viewmodelalpha","0","description"};
+
 static void CL_UpdateViewModel(void)
 {
 	entity_t *ent;
@@ -1381,7 +1383,7 @@ static void CL_UpdateViewModel(void)
 		ent->state_current.modelindex = 0;
 	else if (cl.stats[STAT_ITEMS] & IT_INVISIBILITY)
 	{
-		if (gamemode == GAME_TRANSFUSION)
+		if (cl_gameplayfix_transfusion_viewmodelalpha.integer)
 			ent->state_current.alpha = 128;
 		else
 			ent->state_current.modelindex = 0;

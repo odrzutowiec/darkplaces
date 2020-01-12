@@ -347,7 +347,7 @@ cvar_t cl_gameplayfix_nehahra_fog = {0,"cl_gameplayfix_nehahra_fog","0","differe
 // FIXME: move this to client?
 void FOG_clear(void)
 {
-	if (gamemode == GAME_NEHAHRA)
+	if (cl_gameplayfix_nehahra_fog.integer)
 	{
 		Cvar_Set("gl_fogenable", "0");
 		Cvar_Set("gl_fogdensity", "0.2");
@@ -3178,7 +3178,7 @@ void GL_Main_Init(void)
 	Cmd_AddCommand("r_glsl_restart", R_GLSL_Restart_f, "unloads GLSL shaders, they will then be reloaded as needed");
 	Cmd_AddCommand("r_glsl_dumpshader", R_GLSL_DumpShader_f, "dumps the engine internal default.glsl shader into glsl/default.glsl");
 	// FIXME: the client should set up r_refdef.fog stuff including the fogmasktable
-	if (gamemode == GAME_NEHAHRA)
+	if (cl_gameplayfix_nehahra_fog.integer)
 	{
 		Cvar_RegisterVariable (&gl_fogenable);
 		Cvar_RegisterVariable (&gl_fogdensity);
@@ -3354,7 +3354,7 @@ void GL_Main_Init(void)
 	for (i = 0;i < R_BUFFERDATA_COUNT;i++)
 		Cvar_RegisterVariable(&r_buffermegs[i]);
 	Cvar_RegisterVariable(&r_batch_dynamicbuffer);
-	if (gamemode == GAME_NEHAHRA || gamemode == GAME_TENEBRAE)
+	if (cl_gameplayfix_fullbrights.integer)
 		Cvar_SetValue("r_fullbrights", 0); // TODO: Just add this to the cbuf stuff?
 #ifdef DP_MOBILETOUCH
 	// GLES devices have terrible depth precision in general, so...
@@ -5383,7 +5383,7 @@ matrix4x4_t r_waterscrollmatrix;
 void R_UpdateFog(void)
 {
 	// Nehahra fog
-	if (gamemode == GAME_NEHAHRA)
+	if (cl_gameplayfix_nehahra_fog.integer)
 	{
 		if (gl_fogenable.integer)
 		{

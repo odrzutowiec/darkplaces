@@ -920,7 +920,7 @@ static void IN_Move_TouchScreen_Quake(void)
 	cl.viewangles[1] -= aim[0] * cl_yawspeed.value * cl.realframetime;
 }
 
-cvar_t vid_gameplayfix_steelstorm_touch = {0,"vid_gameplayfix_steelstorm_touch","0","change touchscreen behavior for steelstorm"};
+extern cvar_t vid_gameplayfix_steelstorm_touch;
 
 void IN_Move( void )
 {
@@ -949,15 +949,10 @@ void IN_Move( void )
 
 	if (vid_touchscreen.integer)
 	{
-		switch(gamemode)
-		{
-		case GAME_STEELSTORM:
+		if (vid_gameplayfix_steelstorm_touch.integer)
 			IN_Move_TouchScreen_SteelStorm();
-			break;
-		default:
+		else
 			IN_Move_TouchScreen_Quake();
-			break;
-		}
 	}
 	else
 	{

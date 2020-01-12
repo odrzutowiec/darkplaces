@@ -656,7 +656,7 @@ void V_CalcRefdefUsing (const matrix4x4_t *entrendermatrix, const vec3_t clviewa
 			}
 			else
 			{
-				if (gamemode == GAME_GOODVSBAD2 && chase_stevie.integer)
+				if (cl_gameplayfix_goodvsbad2_chasecam.integer && chase_stevie.integer)
 				{
 					// look straight down from high above
 					viewangles[PITCH] = 90;
@@ -1095,7 +1095,7 @@ void V_CalcViewBlend(void)
 			cl.cshifts[CSHIFT_CONTENTS].percent = 0;
 		}
 
-		if (gamemode != GAME_TRANSFUSION)
+		if (!cl_gameplayfix_transfusion_viewblend.integer)
 		{
 			if (cl.stats[STAT_ITEMS] & IT_QUAD)
 			{

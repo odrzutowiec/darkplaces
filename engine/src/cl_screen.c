@@ -1894,7 +1894,7 @@ void SHOWLMP_decodeshow(void)
 	float x, y;
 	strlcpy (lmplabel,MSG_ReadString(&cl_message, cl_readstring, sizeof(cl_readstring)), sizeof (lmplabel));
 	strlcpy (picname, MSG_ReadString(&cl_message, cl_readstring, sizeof(cl_readstring)), sizeof (picname));
-	if (gamemode == GAME_NEHAHRA) // LordHavoc: nasty old legacy junk
+	if (cl_gameplayfix_nehahra_showlmpbyte.integer) // LordHavoc: nasty old legacy junk
 	{
 		x = MSG_ReadByte(&cl_message);
 		y = MSG_ReadByte(&cl_message);

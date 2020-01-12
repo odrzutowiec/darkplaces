@@ -523,6 +523,7 @@ static void Cmd_Exec(const char *filename)
 "r_shadow_bumpscale_basetexture 0\n"
 "maxplayers 1\n"
 "shareware 1\n"
+"menu_mode_quit 1\n"
 				);
 			break;
 		case GAME_NEHAHRA:
@@ -548,6 +549,14 @@ static void Cmd_Exec(const char *filename)
 "r_shadow_gloss 1\n"
 "r_shadow_bumpscale_basetexture 0\n"
 "maxplayers 1\n"
+"menu_mode 1\n"
+"menu_mode_quit 1\n"
+"menu_mode_maplist 4\n"
+"cl_gameplayfix_nehahra_demos 1\n"
+"cl_gameplayfix_nehahra_showlmpbyte 1\n"
+"cl_gameplayfix_nehahra_fog 1\n"
+"cl_gameplayfix_fullbrights 1\n"
+"host_gameplayfix_startmapmode 1\n"
 				);
 			break;
 		// hipnotic mission pack has issues in their 'friendly monster' ai, which seem to attempt to attack themselves for some reason when findradius() returns non-solid entities.
@@ -555,8 +564,34 @@ static void Cmd_Exec(const char *filename)
 		// hipnotic mission pack has issues in their proximity mine sticking code, which causes them to bounce off.
 		case GAME_HIPNOTIC:
 			Cbuf_InsertText("\n"
+"sbar_mode 4\n"
+"sv_gameplayfix_blowupfallenzombies 0\n"
+"sv_gameplayfix_findradiusdistancetobox 0\n"
+"sv_gameplayfix_grenadebouncedownslopes 0\n"
+"sv_gameplayfix_slidemoveprojectiles 0\n"
+"sv_gameplayfix_upwardvelocityclearsongroundflag 0\n"
+"sv_gameplayfix_setmodelrealbox 0\n"
+"sv_gameplayfix_droptofloorstartsolid 0\n"
+"sv_gameplayfix_droptofloorstartsolid_nudgetocorrect 0\n"
+"sv_gameplayfix_noairborncorpse 0\n"
+"sv_gameplayfix_noairborncorpse_allowsuspendeditems 0\n"
+"sv_gameplayfix_easierwaterjump 0\n"
+"sv_gameplayfix_delayprojectiles 0\n"
+"sv_gameplayfix_multiplethinksperframe 0\n"
+"sv_gameplayfix_fixedcheckwatertransition 0\n"
+"sv_gameplayfix_q1bsptracelinereportstexture 0\n"
+"sv_gameplayfix_swiminbmodels 0\n"
+"sv_gameplayfix_downtracesupportsongroundflag 0\n"
+"sys_ticrate 0.02\n"
+"r_shadow_gloss 1\n"
+"r_shadow_bumpscale_basetexture 0\n"
+"cl_gameplayfix_statbitshift 1\n"
 "shareware 1\n"
+"menu_mode_maplist 1\n"
+"menu_mode_quit 1\n"
+"host_give_mode 1\n"
 					);
+			break;
 		case GAME_QUOTH:
 			Cbuf_InsertText("\n"
 "sbar_mode 4\n"
@@ -581,6 +616,8 @@ static void Cmd_Exec(const char *filename)
 "r_shadow_gloss 1\n"
 "r_shadow_bumpscale_basetexture 0\n"
 "cl_gameplayfix_statbitshift 1\n"
+"menu_mode_quit 1\n"
+"menu_mode_maplist 3\n"
 				);
 			break;
 		// rogue mission pack has a guardian boss that does not wake up if findradius returns one of the entities around its spawn area
@@ -610,6 +647,10 @@ static void Cmd_Exec(const char *filename)
 "maxplayers 1\n"
 "cl_gameplayfix_statbitshift 1\n"
 "shareware 1\n"
+"menu_mode 5\n"
+"menu_mode_quit 1\n"
+"menu_mode_maplist 2\n"
+"host_give_mode 2\n"
 				);
 			break;
 		case GAME_TENEBRAE:
@@ -635,6 +676,11 @@ static void Cmd_Exec(const char *filename)
 "r_shadow_gloss 2\n"
 "r_shadow_bumpscale_basetexture 4\n"
 "maxplayers 1\n"
+"cl_gameplayfix_tenebrae_additivesprites 1\n"
+"cl_gameplayfix_tenebrae_repeatparticle 1\n"
+"cl_gameplayfix_fullbrights 1\n"
+"cl_gameplayfix_tenebrae_loadtextures 1\n"
+"sv_gameplayfix_tenebrae_fulldynamic 1\n"
 				);
 			break;
 		case GAME_VORETOURNAMENT:
@@ -645,6 +691,8 @@ static void Cmd_Exec(const char *filename)
 "cl_gameplayfix_nexuiz_notifyalign 1\n"
 "sv_gameplayfix_nexuiz_evilfrags 1\n"
 "cl_gameplayfix_statbitshift 1\n"
+"cl_gameplayfix_nexuiz_moveflag 1\n"
+"cl_gameplayfix_nexuiz_texturehack 1\n"
 				);
 			// No break - Xonotic and Nexuiz share the same options
 		case GAME_XONOTIC:
@@ -705,6 +753,7 @@ static void Cmd_Exec(const char *filename)
 "cl_csqc_generatemousemoveevents 0\n"
 "maxplayers 1\n"
 "shareware 1\n"
+"vid_gameplayfix_steelstorm_touch 1\n"
 				);
 			break;
 		default:
@@ -731,12 +780,46 @@ static void Cmd_Exec(const char *filename)
 				);
 			if (gamemode == (GAME_BLOODOMNICIDE || GAME_DELUXEQUAKE))
 				Cbuf_InsertText("\nsbar_mode 0\n");
+			if (gamemode == GAME_BLOODOMNICIDE)
+				Cbuf_InsertText("\ncl_gameplayfix_bloodomnicide_subtitles 1\n"
+				"cl_gameplayfix_bloodomnicide_fkeys 1\n");
+			if (gamemode == GAME_DELUXEQUAKE)
+				Cbuf_InsertText("\nhost_gameplayfix_deluxequake_clearwarpmark 1\n"
+				"cl_gameplayfix_deluxequake_loadtextures 1\n");
 			if (gamemode == GAME_ZYMOTIC)
 				Cbuf_InsertText("\nsbar_mode 2\n");
 			if (gamemode == GAME_GOODVSBAD2)
-				Cbuf_InsertText("\nsbar_mode 6\n");
+				Cbuf_InsertText("\nsbar_mode 6\n"
+				"menu_mode 3\n"
+				"menu_mode_quit 2\n"
+				"menu_mode_maplist 6\n"
+				"cl_gameplayfix_goodvsbad2_particlefallback 1\n"
+				"cl_gameplayfix_goodvsbad2_rain 1\n"
+				"cl_gameplayfix_goodvsbad2_chasecam 1\n");
 			if (gamemode == GAME_TRANSFUSION)
-				Cbuf_InsertText("\nsbar_mode 7\n");
+				Cbuf_InsertText("\nsbar_mode 7\n"
+				"menu_mode 2\n"
+				"menu_mode_maplist 5\n"
+				"cl_gameplayfix_transfusion_convertical 1\n"
+				"cl_gameplayfix_transfusion_viewmodelalpha 1\n"
+				"sv_gameplayfix_transfusion_loadedict 1\n"
+				"cl_gameplayfix_transfusion_viewblend 1\n"
+				"host_gameplayfix_startmapmode 2\n");
+			if (gamemode == GAME_BATTLEMECH)
+				Cbuf_InsertText("\nmenu_mode 4\n"
+				"menu_mode_quit 3\n"
+				"menu_mode_maplist 7\n");
+			if (gamemode == GAME_DEFEATINDETAIL2)
+				Cbuf_InsertText("\nmenu_mode_quit 1\n"
+				"menu_mode_maplist 9\n");
+			if (gamemode == GAME_OPENQUARTZ)
+				Cbuf_InsertText("\nmenu_mode_quit 4\n"
+				"menu_mode_maplist 8\n");
+			if (gamemode == GAME_PRYDON)
+				Cbuf_InsertText("\nmenu_mode_maplist 10\n"
+				"cl_gameplayfix_prydon_particles 1\n");
+			if (gamemode == GAME_TEU)
+				Cbuf_InsertText("\nhost_gameplayfix_startmapmode 3\n");
 			break;
 		}
 	}

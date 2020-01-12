@@ -122,7 +122,7 @@ static qboolean WakeVideo( clvideo_t * video )
 	return true;
 }
 
-cvar_t cl_gameplayfix_bloodomnicide_subtitles = {0,"cl_gameplayfix_bloodomnicide_subtitles","0"};
+cvar_t cl_gameplayfix_bloodomnicide_subtitles = {0,"cl_gameplayfix_bloodomnicide_subtitles","0","description"};
 
 static void LoadSubtitles( clvideo_t *video, const char *subtitlesfile )
 {
@@ -131,7 +131,7 @@ static void LoadSubtitles( clvideo_t *video, const char *subtitlesfile )
 	float subtime, sublen;
 	int numsubs = 0;
 
-	if (gamemode == GAME_BLOODOMNICIDE)
+	if (cl_gameplayfix_bloodomnicide_subtitles.integer)
 	{
 		char overridename[MAX_QPATH];
 		cvar_t *langcvar;

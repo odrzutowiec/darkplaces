@@ -1225,7 +1225,7 @@ static qboolean SV_PrepareEntityForSending (prvm_edict_t *ent, entity_state_t *c
 	lightstyle = (unsigned char)PRVM_serveredictfloat(ent, style);
 	lightpflags = (unsigned char)PRVM_serveredictfloat(ent, pflags);
 
-	if (gamemode == GAME_TENEBRAE)
+	if (sv_gameplayfix_tenebrae_fulldynamic.integer)
 	{
 		// tenebrae's EF_FULLDYNAMIC conflicts with Q2's EF_NODRAW
 		if (effects & 16)
@@ -3730,7 +3730,7 @@ cvar_t sv_gameplayfix_transfusion_loadedict = {0,"sv_gameplayfix_transfusion_loa
 static qboolean SVVM_load_edict(prvm_prog_t *prog, prvm_edict_t *ent)
 {
 	// remove things from different skill levels or deathmatch
-	if (gamemode != GAME_TRANSFUSION) //Transfusion does this in QC
+	if (!sv_gameplayfix_transfusion_loadedict.integer) //Transfusion does this in QC
 	{
 		if (deathmatch.integer)
 		{

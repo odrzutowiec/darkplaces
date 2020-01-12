@@ -1467,6 +1467,8 @@ static void CL_ClientMovement_PlayerMove(cl_clientmovement_state_t *s)
 }
 
 extern cvar_t slowmo;
+cvar_t cl_gameplayfix_nexuiz_moveflag = {0,"cl_gameplayfix_nexuiz_moveflag","0","description"};
+
 void CL_UpdateMoveVars(void)
 {
 	if (cls.protocol == PROTOCOL_QUAKEWORLD)
@@ -1550,7 +1552,7 @@ void CL_UpdateMoveVars(void)
 
 	if(!(cl.moveflags & MOVEFLAG_VALID))
 	{
-		if(gamemode == GAME_NEXUIZ)  // Legacy hack to work with old servers of Nexuiz.
+		if(cl_gameplayfix_nexuiz_moveflag.integer)  // Legacy hack to work with old servers of Nexuiz.
 			cl.moveflags = MOVEFLAG_Q2AIRACCELERATE;
 	}
 

@@ -1040,7 +1040,7 @@ imageformat_t imageformats_other[] =
 };
 
 cvar_t cl_gameplayfix_tenebrae_loadtextures = {0,"cl_gameplayfix_tenebrae_loadtextures","0","change texture loading behavior for tenebrae..."};
-cvar_t cl_gameplayfix_deluxequake_loadtextures = {0,"cl_gameplayfix_deluxequake_loadtextures","0"};
+cvar_t cl_gameplayfix_deluxequake_loadtextures = {0,"cl_gameplayfix_deluxequake_loadtextures","0","description"};
 
 int fixtransparentpixels(unsigned char *data, int w, int h);
 unsigned char *loadimagepixelsbgra (const char *filename, qboolean complain, qboolean allowFixtrans, qboolean convertsRGB, int *miplevel)
@@ -1070,9 +1070,9 @@ unsigned char *loadimagepixelsbgra (const char *filename, qboolean complain, qbo
 		path[i] = 0;
 		strlcpy(afterpath, basename + i + 1, sizeof(afterpath));
 	}
-	if (gamemode == GAME_TENEBRAE)
+	if (cl_gameplayfix_tenebrae_loadtextures.integer)
 		firstformat = imageformats_tenebrae;
-	else if (gamemode == GAME_DELUXEQUAKE)
+	else if (cl_gameplayfix_deluxequake_loadtextures.integer)
 		firstformat = imageformats_dq;
 	else if (!strcasecmp(path, "textures"))
 		firstformat = imageformats_textures;
