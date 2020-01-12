@@ -161,7 +161,7 @@ static void sbar_start(void)
 		for (i = 0;i < 10;i++)
 			sb_nums[0][i] = Draw_CachePic_Flags (va(vabuf, sizeof(vabuf), "gfx/num_%i",i), CACHEPICFLAG_QUIET);
 		sb_nums[0][10] = Draw_CachePic_Flags ("gfx/num_minus", CACHEPICFLAG_QUIET);
-		sb_colon = Draw_CachePic_Flags ("gfx/num_colon", CACHEPICFLAG_QUIET);
+		sb_colon = Draw_CachePic_Flags ("gfx/num_colon", CACHEPICFLAG_QUIET | CACHEPICFLAG_FAILONMISSING);
 
 		sb_ammo[0] = Draw_CachePic_Flags ("gfx/sb_shells", CACHEPICFLAG_QUIET);
 		sb_ammo[1] = Draw_CachePic_Flags ("gfx/sb_bullets", CACHEPICFLAG_QUIET);
@@ -219,7 +219,7 @@ static void sbar_start(void)
 		sb_nums[0][10] = Draw_CachePic_Flags ("gfx/num_minus", CACHEPICFLAG_QUIET);
 		sb_nums[1][10] = Draw_CachePic_Flags ("gfx/anum_minus", CACHEPICFLAG_QUIET);
 
-		sb_colon = Draw_CachePic_Flags ("gfx/num_colon", CACHEPICFLAG_QUIET);
+		sb_colon = Draw_CachePic_Flags ("gfx/num_colon", CACHEPICFLAG_QUIET | CACHEPICFLAG_FAILONMISSING);
 		sb_slash = Draw_CachePic_Flags ("gfx/num_slash", CACHEPICFLAG_QUIET);
 
 		sb_weapons[0][0] = Draw_CachePic_Flags ("gfx/inv_shotgun", CACHEPICFLAG_QUIET);
@@ -1105,6 +1105,7 @@ void Sbar_ShowFPS(void)
 	char blurstring[32];
 	char topspeedstring[48];
 	char texstring[MAX_QPATH];
+	char entstring[32];
 	qboolean red = false;
 	soundstring[0] = 0;
 	fpsstring[0] = 0;
@@ -1114,8 +1115,9 @@ void Sbar_ShowFPS(void)
 	datestring[0] = 0;
 	speedstring[0] = 0;
 	blurstring[0] = 0;
-	texstring[0] = 0;
 	topspeedstring[0] = 0;
+	texstring[0] = 0;
+	entstring[0] = 0;
 	if (showfps.integer)
 	{
 		red = (showfps_framerate < 1.0f);
@@ -1197,19 +1199,50 @@ void Sbar_ShowFPS(void)
 		vec3_t org;
 		vec3_t dest;
 		vec3_t temp;
-		trace_t trace;
+		trace_t svtrace, cltrace;
+		int hitnetentity = -1;
 
 		Matrix4x4_OriginFromMatrix(&r_refdef.view.matrix, org);
 		VectorSet(temp, 65536, 0, 0);
 		Matrix4x4_Transform(&r_refdef.view.matrix, temp, dest);
-		trace.hittexture = NULL; // to make sure
-		// TODO change this trace to be stopped by anything "visible" (i.e. with a drawsurface), but not stuff like weapclip
-		// probably needs adding a new SUPERCONTENTS type
-		trace = CL_TraceLine(org, dest, MOVE_NORMAL, NULL, SUPERCONTENTS_SOLID, 0, collision_extendmovelength.value, true, false, NULL, true, true);
-		if(trace.hittexture)
-			strlcpy(texstring, trace.hittexture->name, sizeof(texstring));
+		// clear the traces as we may or may not fill them out, and mark them with an invalid fraction so we know if we did
+		memset(&svtrace, 0, sizeof(svtrace));
+		memset(&cltrace, 0, sizeof(cltrace));
+		svtrace.fraction = 2.0;
+		cltrace.fraction = 2.0;
+		// ray hits models (even animated ones) and ignores translucent materials
+		if (SVVM_prog != NULL)
+			svtrace = SV_TraceLine(org, dest, MOVE_HITMODEL, NULL, SUPERCONTENTS_SOLID, 0, MATERIALFLAGMASK_TRANSLUCENT, collision_extendmovelength.value);
+		cltrace = CL_TraceLine(org, dest, MOVE_HITMODEL, NULL, SUPERCONTENTS_SOLID, 0, MATERIALFLAGMASK_TRANSLUCENT, collision_extendmovelength.value, true, false, &hitnetentity, true, true);
+		if (cltrace.hittexture)
+			strlcpy(texstring, cltrace.hittexture->name, sizeof(texstring));
 		else
 			strlcpy(texstring, "(no texture hit)", sizeof(texstring));
+		fps_strings++;
+		if (svtrace.fraction < cltrace.fraction)
+		{
+			if (svtrace.ent != NULL)
+			{
+				prvm_prog_t *prog = SVVM_prog;
+				dpsnprintf(entstring, sizeof(entstring), "server entity %i", (int)PRVM_EDICT_TO_PROG(svtrace.ent));
+			}
+			else
+				strlcpy(entstring, "(no entity hit)", sizeof(entstring));
+		}
+		else
+		{
+			if (CLVM_prog != NULL && cltrace.ent != NULL)
+			{
+				prvm_prog_t *prog = CLVM_prog;
+				dpsnprintf(entstring, sizeof(entstring), "client entity %i", (int)PRVM_EDICT_TO_PROG(cltrace.ent));
+			}
+			else if (hitnetentity > 0)
+				dpsnprintf(entstring, sizeof(entstring), "network entity %i", hitnetentity);
+			else if (hitnetentity == 0)
+				strlcpy(entstring, "world entity", sizeof(entstring));
+			else
+				strlcpy(entstring, "(no entity hit)", sizeof(entstring));
+		}
 		fps_strings++;
 	}
 	if (fps_strings)
@@ -1292,6 +1325,13 @@ void Sbar_ShowFPS(void)
 			fps_x = vid_conwidth.integer - DrawQ_TextWidth(texstring, 0, fps_scalex, fps_scaley, true, FONT_INFOBAR);
 			DrawQ_Fill(fps_x, fps_y, vid_conwidth.integer - fps_x, fps_scaley, 0, 0, 0, 0.5, 0);
 			DrawQ_String(fps_x, fps_y, texstring, 0, fps_scalex, fps_scaley, 1, 1, 1, 1, 0, NULL, true, FONT_INFOBAR);
+			fps_y += fps_scaley;
+		}
+		if (entstring[0])
+		{
+			fps_x = vid_conwidth.integer - DrawQ_TextWidth(entstring, 0, fps_scalex, fps_scaley, true, FONT_INFOBAR);
+			DrawQ_Fill(fps_x, fps_y, vid_conwidth.integer - fps_x, fps_scaley, 0, 0, 0, 0.5, 0);
+			DrawQ_String(fps_x, fps_y, entstring, 0, fps_scalex, fps_scaley, 1, 1, 1, 1, 0, NULL, true, FONT_INFOBAR);
 			fps_y += fps_scaley;
 		}
 	}
@@ -1734,7 +1774,7 @@ void Sbar_Draw (void)
 	if (cl.csqc_vidvars.drawcrosshair && crosshair.integer >= 1 && !cl.intermission && !r_letterbox.value)
 	{
 		pic = Draw_CachePic (va(vabuf, sizeof(vabuf), "gfx/crosshair%i", crosshair.integer));
-		DrawQ_Pic((vid_conwidth.integer - pic->width * crosshair_size.value) * 0.5f, (vid_conheight.integer - pic->height * crosshair_size.value) * 0.5f, pic, pic->width * crosshair_size.value, pic->height * crosshair_size.value, crosshair_color_red.value, crosshair_color_green.value, crosshair_color_blue.value, crosshair_color_alpha.value, 0);
+		DrawQ_Pic((vid_conwidth.integer - Draw_GetPicWidth(pic) * crosshair_size.value) * 0.5f, (vid_conheight.integer - Draw_GetPicHeight(pic) * crosshair_size.value) * 0.5f, pic, Draw_GetPicWidth(pic) * crosshair_size.value, Draw_GetPicHeight(pic) * crosshair_size.value, crosshair_color_red.value, crosshair_color_green.value, crosshair_color_blue.value, crosshair_color_alpha.value, 0);
 	}
 
 	if (cl_prydoncursor.integer > 0)
@@ -1874,7 +1914,7 @@ void Sbar_DeathmatchOverlay (void)
 	if(IS_OLDNEXUIZ_DERIVED(gamemode))
 		DrawQ_Pic (xmin - 8, ymin - 8, 0, xmax-xmin+1 + 2*8, ymax-ymin+1 + 2*8, 0, 0, 0, sbar_alpha_bg.value, 0);
 
-	DrawQ_Pic ((vid_conwidth.integer - sb_ranking->width)/2, 8, sb_ranking, 0, 0, 1, 1, 1, 1 * sbar_alpha_fg.value, 0);
+	DrawQ_Pic ((vid_conwidth.integer - Draw_GetPicWidth(sb_ranking))/2, 8, sb_ranking, 0, 0, 1, 1, 1, 1 * sbar_alpha_fg.value, 0);
 
 	// draw the text
 	y = 40;
@@ -2122,14 +2162,14 @@ void Sbar_Score (int margin)
 		if (minutes >= 5)
 		{
 			Sbar_DrawXNum(-12*6, 32, minutes,  3, 12, 1, 1, 1, 1, 0);
-			if(sb_colon && sb_colon->tex != r_texture_notexture)
+			if (Draw_IsPicLoaded(sb_colon))
 				DrawQ_Pic(sbar_x + -12*3, sbar_y + 32, sb_colon, 12, 12, 1, 1, 1, sbar_alpha_fg.value, 0);
 			Sbar_DrawXNum(-12*2, 32, seconds, -2, 12, 1, 1, 1, 1, 0);
 		}
 		else if (minutes >= 1)
 		{
 			Sbar_DrawXNum(-12*6, 32, minutes,  3, 12, 1, 1, 0, 1, 0);
-			if(sb_colon && sb_colon->tex != r_texture_notexture)
+			if (Draw_IsPicLoaded(sb_colon))
 				DrawQ_Pic(sbar_x + -12*3, sbar_y + 32, sb_colon, 12, 12, 1, 1, 0, sbar_alpha_fg.value, 0);
 			Sbar_DrawXNum(-12*2, 32, seconds, -2, 12, 1, 1, 0, 1, 0);
 		}
@@ -2143,7 +2183,7 @@ void Sbar_Score (int margin)
 		minutes = (int)floor(cl.time / 60);
 		seconds = (int)(floor(cl.time) - minutes * 60);
 		Sbar_DrawXNum(-12*6, 32, minutes,  3, 12, 1, 1, 1, 1, 0);
-		if(sb_colon && sb_colon->tex != r_texture_notexture)
+		if (Draw_IsPicLoaded(sb_colon))
 			DrawQ_Pic(sbar_x + -12*3, sbar_y + 32, sb_colon, 12, 12, 1, 1, 1, sbar_alpha_fg.value, 0);
 		Sbar_DrawXNum(-12*2, 32, seconds, -2, 12, 1, 1, 1, 1, 0);
 	}
@@ -2218,6 +2258,6 @@ Sbar_FinaleOverlay
 */
 void Sbar_FinaleOverlay (void)
 {
-	DrawQ_Pic((vid_conwidth.integer - sb_finale->width)/2, 16, sb_finale, 0, 0, 1, 1, 1, 1 * sbar_alpha_fg.value, 0);
+	DrawQ_Pic((vid_conwidth.integer - Draw_GetPicWidth(sb_finale))/2, 16, sb_finale, 0, 0, 1, 1, 1, 1 * sbar_alpha_fg.value, 0);
 }
 

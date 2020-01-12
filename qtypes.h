@@ -35,9 +35,12 @@ typedef bool qboolean;
 #define RESTRICT
 #endif
 
+typedef long long dpint64;
+typedef unsigned long long dpuint64;
+
 // LordHavoc: upgrade the prvm to double precision for better time values
 // LordHavoc: to be enabled when bugs are worked out...
-//#define PRVM_64
+#define PRVM_64
 #ifdef PRVM_64
 typedef double prvm_vec_t;
 typedef long long prvm_int_t;

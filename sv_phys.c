@@ -101,7 +101,7 @@ int SV_GenericHitSuperContentsMask(const prvm_edict_t *passedict)
 SV_TracePoint
 ==================
 */
-trace_t SV_TracePoint(const vec3_t start, int type, prvm_edict_t *passedict, int hitsupercontentsmask, int skipsupercontentsmask)
+trace_t SV_TracePoint(const vec3_t start, int type, prvm_edict_t *passedict, int hitsupercontentsmask, int skipsupercontentsmask, int skipmaterialflagsmask)
 {
 	prvm_prog_t *prog = SVVM_prog;
 	int i, bodysupercontents;
@@ -128,7 +128,7 @@ trace_t SV_TracePoint(const vec3_t start, int type, prvm_edict_t *passedict, int
 	static prvm_edict_t *touchedicts[MAX_EDICTS];
 	int clipgroup;
 
-	//return SV_TraceBox(start, vec3_origin, vec3_origin, end, type, passedict, hitsupercontentsmask, skipsupercontentsmask);
+	//return SV_TraceBox(start, vec3_origin, vec3_origin, end, type, passedict, hitsupercontentsmask, skipsupercontentsmask, skipmaterialflagsmask);
 
 	VectorCopy(start, clipstart);
 	VectorClear(clipmins2);
@@ -138,7 +138,7 @@ trace_t SV_TracePoint(const vec3_t start, int type, prvm_edict_t *passedict, int
 #endif
 
 	// clip to world
-	Collision_ClipPointToWorld(&cliptrace, sv.worldmodel, clipstart, hitsupercontentsmask, skipsupercontentsmask);
+	Collision_ClipPointToWorld(&cliptrace, sv.worldmodel, clipstart, hitsupercontentsmask, skipsupercontentsmask, skipmaterialflagsmask);
 	cliptrace.worldstartsolid = cliptrace.bmodelstartsolid = cliptrace.startsolid;
 	if (cliptrace.startsolid || cliptrace.fraction < 1)
 		cliptrace.ent = prog->edicts;
@@ -237,9 +237,9 @@ trace_t SV_TracePoint(const vec3_t start, int type, prvm_edict_t *passedict, int
 		VectorCopy(PRVM_serveredictvector(touch, mins), touchmins);
 		VectorCopy(PRVM_serveredictvector(touch, maxs), touchmaxs);
 		if (type == MOVE_MISSILE && (int)PRVM_serveredictfloat(touch, flags) & FL_MONSTER)
-			Collision_ClipToGenericEntity(&trace, model, touch->priv.server->frameblend, &touch->priv.server->skeleton, touchmins, touchmaxs, bodysupercontents, &matrix, &imatrix, clipstart, clipmins2, clipmaxs2, clipstart, hitsupercontentsmask, skipsupercontentsmask, 0.0f);
+			Collision_ClipToGenericEntity(&trace, model, touch->priv.server->frameblend, &touch->priv.server->skeleton, touchmins, touchmaxs, bodysupercontents, &matrix, &imatrix, clipstart, clipmins2, clipmaxs2, clipstart, hitsupercontentsmask, skipsupercontentsmask, skipmaterialflagsmask, 0.0f);
 		else
-			Collision_ClipPointToGenericEntity(&trace, model, touch->priv.server->frameblend, &touch->priv.server->skeleton, touchmins, touchmaxs, bodysupercontents, &matrix, &imatrix, clipstart, hitsupercontentsmask, skipsupercontentsmask);
+			Collision_ClipPointToGenericEntity(&trace, model, touch->priv.server->frameblend, &touch->priv.server->skeleton, touchmins, touchmaxs, bodysupercontents, &matrix, &imatrix, clipstart, hitsupercontentsmask, skipsupercontentsmask, skipmaterialflagsmask);
 
 		Collision_CombineTraces(&cliptrace, &trace, (void *)touch, PRVM_serveredictfloat(touch, solid) == SOLID_BSP);
 	}
@@ -253,7 +253,7 @@ finished:
 SV_TraceLine
 ==================
 */
-trace_t SV_TraceLine(const vec3_t start, const vec3_t end, int type, prvm_edict_t *passedict, int hitsupercontentsmask, int skipsupercontentsmask, float extend)
+trace_t SV_TraceLine(const vec3_t start, const vec3_t end, int type, prvm_edict_t *passedict, int hitsupercontentsmask, int skipsupercontentsmask, int skipmaterialflagsmask, float extend)
 {
 	prvm_prog_t *prog = SVVM_prog;
 	int i, bodysupercontents;
@@ -280,7 +280,7 @@ trace_t SV_TraceLine(const vec3_t start, const vec3_t end, int type, prvm_edict_
 	static prvm_edict_t *touchedicts[MAX_EDICTS];
 	int clipgroup;
 	if (VectorCompare(start, end))
-		return SV_TracePoint(start, type, passedict, hitsupercontentsmask, skipsupercontentsmask);
+		return SV_TracePoint(start, type, passedict, hitsupercontentsmask, skipsupercontentsmask, skipmaterialflagsmask);
 
 	//return SV_TraceBox(start, vec3_origin, vec3_origin, end, type, passedict, hitsupercontentsmask);
 
@@ -293,7 +293,7 @@ trace_t SV_TraceLine(const vec3_t start, const vec3_t end, int type, prvm_edict_
 #endif
 
 	// clip to world
-	Collision_ClipLineToWorld(&cliptrace, sv.worldmodel, clipstart, clipend, hitsupercontentsmask, skipsupercontentsmask, extend, false);
+	Collision_ClipLineToWorld(&cliptrace, sv.worldmodel, clipstart, clipend, hitsupercontentsmask, skipsupercontentsmask, skipmaterialflagsmask, extend, false);
 	cliptrace.worldstartsolid = cliptrace.bmodelstartsolid = cliptrace.startsolid;
 	if (cliptrace.startsolid || cliptrace.fraction < 1)
 		cliptrace.ent = prog->edicts;
@@ -392,9 +392,9 @@ trace_t SV_TraceLine(const vec3_t start, const vec3_t end, int type, prvm_edict_
 		VectorCopy(PRVM_serveredictvector(touch, mins), touchmins);
 		VectorCopy(PRVM_serveredictvector(touch, maxs), touchmaxs);
 		if (type == MOVE_MISSILE && (int)PRVM_serveredictfloat(touch, flags) & FL_MONSTER)
-			Collision_ClipToGenericEntity(&trace, model, touch->priv.server->frameblend, &touch->priv.server->skeleton, touchmins, touchmaxs, bodysupercontents, &matrix, &imatrix, clipstart, clipmins2, clipmaxs2, clipend, hitsupercontentsmask, skipsupercontentsmask, extend);
+			Collision_ClipToGenericEntity(&trace, model, touch->priv.server->frameblend, &touch->priv.server->skeleton, touchmins, touchmaxs, bodysupercontents, &matrix, &imatrix, clipstart, clipmins2, clipmaxs2, clipend, hitsupercontentsmask, skipsupercontentsmask, skipmaterialflagsmask, extend);
 		else
-			Collision_ClipLineToGenericEntity(&trace, model, touch->priv.server->frameblend, &touch->priv.server->skeleton, touchmins, touchmaxs, bodysupercontents, &matrix, &imatrix, clipstart, clipend, hitsupercontentsmask, skipsupercontentsmask, extend, false);
+			Collision_ClipLineToGenericEntity(&trace, model, touch->priv.server->frameblend, &touch->priv.server->skeleton, touchmins, touchmaxs, bodysupercontents, &matrix, &imatrix, clipstart, clipend, hitsupercontentsmask, skipsupercontentsmask, skipmaterialflagsmask, extend, false);
 
 		Collision_CombineTraces(&cliptrace, &trace, (void *)touch, PRVM_serveredictfloat(touch, solid) == SOLID_BSP);
 	}
@@ -409,9 +409,9 @@ SV_Move
 ==================
 */
 #if COLLISIONPARANOID >= 1
-trace_t SV_TraceBox_(const vec3_t start, const vec3_t mins, const vec3_t maxs, const vec3_t end, int type, prvm_edict_t *passedict, int hitsupercontentsmask, int skipsupercontentsmask, float extend)
+trace_t SV_TraceBox_(const vec3_t start, const vec3_t mins, const vec3_t maxs, const vec3_t end, int type, prvm_edict_t *passedict, int hitsupercontentsmask, int skipsupercontentsmask, int skipmaterialflagsmask, float extend)
 #else
-trace_t SV_TraceBox(const vec3_t start, const vec3_t mins, const vec3_t maxs, const vec3_t end, int type, prvm_edict_t *passedict, int hitsupercontentsmask, int skipsupercontentsmask, float extend)
+trace_t SV_TraceBox(const vec3_t start, const vec3_t mins, const vec3_t maxs, const vec3_t end, int type, prvm_edict_t *passedict, int hitsupercontentsmask, int skipsupercontentsmask, int skipmaterialflagsmask, float extend)
 #endif
 {
 	prvm_prog_t *prog = SVVM_prog;
@@ -448,9 +448,9 @@ trace_t SV_TraceBox(const vec3_t start, const vec3_t mins, const vec3_t maxs, co
 		VectorAdd(start, mins, shiftstart);
 		VectorAdd(end, mins, shiftend);
 		if (VectorCompare(start, end))
-			trace = SV_TracePoint(shiftstart, type, passedict, hitsupercontentsmask, skipsupercontentsmask);
+			trace = SV_TracePoint(shiftstart, type, passedict, hitsupercontentsmask, skipsupercontentsmask, skipmaterialflagsmask);
 		else
-			trace = SV_TraceLine(shiftstart, shiftend, type, passedict, hitsupercontentsmask, skipsupercontentsmask, extend);
+			trace = SV_TraceLine(shiftstart, shiftend, type, passedict, hitsupercontentsmask, skipsupercontentsmask, skipmaterialflagsmask, extend);
 		VectorSubtract(trace.endpos, mins, trace.endpos);
 		return trace;
 	}
@@ -466,7 +466,7 @@ trace_t SV_TraceBox(const vec3_t start, const vec3_t mins, const vec3_t maxs, co
 #endif
 
 	// clip to world
-	Collision_ClipToWorld(&cliptrace, sv.worldmodel, clipstart, clipmins, clipmaxs, clipend, hitsupercontentsmask, skipsupercontentsmask, extend);
+	Collision_ClipToWorld(&cliptrace, sv.worldmodel, clipstart, clipmins, clipmaxs, clipend, hitsupercontentsmask, skipsupercontentsmask, skipmaterialflagsmask, extend);
 	cliptrace.worldstartsolid = cliptrace.bmodelstartsolid = cliptrace.startsolid;
 	if (cliptrace.startsolid || cliptrace.fraction < 1)
 		cliptrace.ent = prog->edicts;
@@ -576,9 +576,9 @@ trace_t SV_TraceBox(const vec3_t start, const vec3_t mins, const vec3_t maxs, co
 		VectorCopy(PRVM_serveredictvector(touch, mins), touchmins);
 		VectorCopy(PRVM_serveredictvector(touch, maxs), touchmaxs);
 		if (type == MOVE_MISSILE && (int)PRVM_serveredictfloat(touch, flags) & FL_MONSTER)
-			Collision_ClipToGenericEntity(&trace, model, touch->priv.server->frameblend, &touch->priv.server->skeleton, touchmins, touchmaxs, bodysupercontents, &matrix, &imatrix, clipstart, clipmins2, clipmaxs2, clipend, hitsupercontentsmask, skipsupercontentsmask, extend);
+			Collision_ClipToGenericEntity(&trace, model, touch->priv.server->frameblend, &touch->priv.server->skeleton, touchmins, touchmaxs, bodysupercontents, &matrix, &imatrix, clipstart, clipmins2, clipmaxs2, clipend, hitsupercontentsmask, skipsupercontentsmask, skipmaterialflagsmask, extend);
 		else
-			Collision_ClipToGenericEntity(&trace, model, touch->priv.server->frameblend, &touch->priv.server->skeleton, touchmins, touchmaxs, bodysupercontents, &matrix, &imatrix, clipstart, clipmins, clipmaxs, clipend, hitsupercontentsmask, skipsupercontentsmask, extend);
+			Collision_ClipToGenericEntity(&trace, model, touch->priv.server->frameblend, &touch->priv.server->skeleton, touchmins, touchmaxs, bodysupercontents, &matrix, &imatrix, clipstart, clipmins, clipmaxs, clipend, hitsupercontentsmask, skipsupercontentsmask, skipmaterialflagsmask, extend);
 
 		Collision_CombineTraces(&cliptrace, &trace, (void *)touch, PRVM_serveredictfloat(touch, solid) == SOLID_BSP);
 	}
@@ -588,17 +588,17 @@ finished:
 }
 
 #if COLLISIONPARANOID >= 1
-trace_t SV_TraceBox(const vec3_t start, const vec3_t mins, const vec3_t maxs, const vec3_t end, int type, prvm_edict_t *passedict, int hitsupercontentsmask, int skipsupercontentsmask)
+trace_t SV_TraceBox(const vec3_t start, const vec3_t mins, const vec3_t maxs, const vec3_t end, int type, prvm_edict_t *passedict, int hitsupercontentsmask, int skipsupercontentsmask, int skipmaterialflagsmask)
 {
 	prvm_prog_t *prog = SVVM_prog;
 	int endstuck;
 	trace_t trace;
 	vec3_t temp;
-	trace = SV_TraceBox_(start, mins, maxs, end, type, passedict, hitsupercontentsmask, skipsupercontentsmask);
+	trace = SV_TraceBox_(start, mins, maxs, end, type, passedict, hitsupercontentsmask, skipsupercontentsmask, skipmaterialflagsmask);
 	if (passedict)
 	{
 		VectorCopy(trace.endpos, temp);
-		endstuck = SV_TraceBox_(temp, mins, maxs, temp, type, passedict, hitsupercontentsmask, skipsupercontentsmask).startsolid;
+		endstuck = SV_TraceBox_(temp, mins, maxs, temp, type, passedict, hitsupercontentsmask, skipsupercontentsmask, skipmaterialflagsmask).startsolid;
 #if COLLISIONPARANOID < 3
 		if (trace.startsolid || endstuck)
 #endif
@@ -773,26 +773,26 @@ static void RotateBBox(const vec3_t mins, const vec3_t maxs, const vec3_t angles
 	v[0] = mins[0]; v[1] = mins[1]; v[2] = mins[2]; Matrix4x4_Transform(&m, v, u);
 		VectorCopy(u, rotatedmins); VectorCopy(u, rotatedmaxs);
 	v[0] = maxs[0]; v[1] = mins[1]; v[2] = mins[2]; Matrix4x4_Transform(&m, v, u);
-		if(rotatedmins[0] > u[0]) rotatedmins[0] = u[0]; if(rotatedmins[1] > u[1]) rotatedmins[1] = u[1]; if(rotatedmins[2] > u[2]) rotatedmins[2] = u[2];
-		if(rotatedmaxs[0] < u[0]) rotatedmaxs[0] = u[0]; if(rotatedmaxs[1] < u[1]) rotatedmaxs[1] = u[1]; if(rotatedmaxs[2] < u[2]) rotatedmaxs[2] = u[2];
+		if(rotatedmins[0] > u[0]) { rotatedmins[0] = u[0]; } if(rotatedmins[1] > u[1]) { rotatedmins[1] = u[1]; } if(rotatedmins[2] > u[2]) { rotatedmins[2] = u[2]; }
+		if(rotatedmaxs[0] < u[0]) { rotatedmaxs[0] = u[0]; } if(rotatedmaxs[1] < u[1]) { rotatedmaxs[1] = u[1]; } if(rotatedmaxs[2] < u[2]) { rotatedmaxs[2] = u[2]; }
 	v[0] = mins[0]; v[1] = maxs[1]; v[2] = mins[2]; Matrix4x4_Transform(&m, v, u);
-		if(rotatedmins[0] > u[0]) rotatedmins[0] = u[0]; if(rotatedmins[1] > u[1]) rotatedmins[1] = u[1]; if(rotatedmins[2] > u[2]) rotatedmins[2] = u[2];
-		if(rotatedmaxs[0] < u[0]) rotatedmaxs[0] = u[0]; if(rotatedmaxs[1] < u[1]) rotatedmaxs[1] = u[1]; if(rotatedmaxs[2] < u[2]) rotatedmaxs[2] = u[2];
+		if(rotatedmins[0] > u[0]) { rotatedmins[0] = u[0]; } if(rotatedmins[1] > u[1]) { rotatedmins[1] = u[1]; } if(rotatedmins[2] > u[2]) { rotatedmins[2] = u[2]; }
+		if(rotatedmaxs[0] < u[0]) { rotatedmaxs[0] = u[0]; } if(rotatedmaxs[1] < u[1]) { rotatedmaxs[1] = u[1]; } if(rotatedmaxs[2] < u[2]) { rotatedmaxs[2] = u[2]; }
 	v[0] = maxs[0]; v[1] = maxs[1]; v[2] = mins[2]; Matrix4x4_Transform(&m, v, u);
-		if(rotatedmins[0] > u[0]) rotatedmins[0] = u[0]; if(rotatedmins[1] > u[1]) rotatedmins[1] = u[1]; if(rotatedmins[2] > u[2]) rotatedmins[2] = u[2];
-		if(rotatedmaxs[0] < u[0]) rotatedmaxs[0] = u[0]; if(rotatedmaxs[1] < u[1]) rotatedmaxs[1] = u[1]; if(rotatedmaxs[2] < u[2]) rotatedmaxs[2] = u[2];
+		if(rotatedmins[0] > u[0]) { rotatedmins[0] = u[0]; } if(rotatedmins[1] > u[1]) { rotatedmins[1] = u[1]; } if(rotatedmins[2] > u[2]) { rotatedmins[2] = u[2]; }
+		if(rotatedmaxs[0] < u[0]) { rotatedmaxs[0] = u[0]; } if(rotatedmaxs[1] < u[1]) { rotatedmaxs[1] = u[1]; } if(rotatedmaxs[2] < u[2]) { rotatedmaxs[2] = u[2]; }
 	v[0] = mins[0]; v[1] = mins[1]; v[2] = maxs[2]; Matrix4x4_Transform(&m, v, u);
-		if(rotatedmins[0] > u[0]) rotatedmins[0] = u[0]; if(rotatedmins[1] > u[1]) rotatedmins[1] = u[1]; if(rotatedmins[2] > u[2]) rotatedmins[2] = u[2];
-		if(rotatedmaxs[0] < u[0]) rotatedmaxs[0] = u[0]; if(rotatedmaxs[1] < u[1]) rotatedmaxs[1] = u[1]; if(rotatedmaxs[2] < u[2]) rotatedmaxs[2] = u[2];
+		if(rotatedmins[0] > u[0]) { rotatedmins[0] = u[0]; } if(rotatedmins[1] > u[1]) { rotatedmins[1] = u[1]; } if(rotatedmins[2] > u[2]) { rotatedmins[2] = u[2]; }
+		if(rotatedmaxs[0] < u[0]) { rotatedmaxs[0] = u[0]; } if(rotatedmaxs[1] < u[1]) { rotatedmaxs[1] = u[1]; } if(rotatedmaxs[2] < u[2]) { rotatedmaxs[2] = u[2]; }
 	v[0] = maxs[0]; v[1] = mins[1]; v[2] = maxs[2]; Matrix4x4_Transform(&m, v, u);
-		if(rotatedmins[0] > u[0]) rotatedmins[0] = u[0]; if(rotatedmins[1] > u[1]) rotatedmins[1] = u[1]; if(rotatedmins[2] > u[2]) rotatedmins[2] = u[2];
-		if(rotatedmaxs[0] < u[0]) rotatedmaxs[0] = u[0]; if(rotatedmaxs[1] < u[1]) rotatedmaxs[1] = u[1]; if(rotatedmaxs[2] < u[2]) rotatedmaxs[2] = u[2];
+		if(rotatedmins[0] > u[0]) { rotatedmins[0] = u[0]; } if(rotatedmins[1] > u[1]) { rotatedmins[1] = u[1]; } if(rotatedmins[2] > u[2]) { rotatedmins[2] = u[2]; }
+		if(rotatedmaxs[0] < u[0]) { rotatedmaxs[0] = u[0]; } if(rotatedmaxs[1] < u[1]) { rotatedmaxs[1] = u[1]; } if(rotatedmaxs[2] < u[2]) { rotatedmaxs[2] = u[2]; }
 	v[0] = mins[0]; v[1] = maxs[1]; v[2] = maxs[2]; Matrix4x4_Transform(&m, v, u);
-		if(rotatedmins[0] > u[0]) rotatedmins[0] = u[0]; if(rotatedmins[1] > u[1]) rotatedmins[1] = u[1]; if(rotatedmins[2] > u[2]) rotatedmins[2] = u[2];
-		if(rotatedmaxs[0] < u[0]) rotatedmaxs[0] = u[0]; if(rotatedmaxs[1] < u[1]) rotatedmaxs[1] = u[1]; if(rotatedmaxs[2] < u[2]) rotatedmaxs[2] = u[2];
+		if(rotatedmins[0] > u[0]) { rotatedmins[0] = u[0]; } if(rotatedmins[1] > u[1]) { rotatedmins[1] = u[1]; } if(rotatedmins[2] > u[2]) { rotatedmins[2] = u[2]; }
+		if(rotatedmaxs[0] < u[0]) { rotatedmaxs[0] = u[0]; } if(rotatedmaxs[1] < u[1]) { rotatedmaxs[1] = u[1]; } if(rotatedmaxs[2] < u[2]) { rotatedmaxs[2] = u[2]; }
 	v[0] = maxs[0]; v[1] = maxs[1]; v[2] = maxs[2]; Matrix4x4_Transform(&m, v, u);
-		if(rotatedmins[0] > u[0]) rotatedmins[0] = u[0]; if(rotatedmins[1] > u[1]) rotatedmins[1] = u[1]; if(rotatedmins[2] > u[2]) rotatedmins[2] = u[2];
-		if(rotatedmaxs[0] < u[0]) rotatedmaxs[0] = u[0]; if(rotatedmaxs[1] < u[1]) rotatedmaxs[1] = u[1]; if(rotatedmaxs[2] < u[2]) rotatedmaxs[2] = u[2];
+		if(rotatedmins[0] > u[0]) { rotatedmins[0] = u[0]; } if(rotatedmins[1] > u[1]) { rotatedmins[1] = u[1]; } if(rotatedmins[2] > u[2]) { rotatedmins[2] = u[2]; }
+		if(rotatedmaxs[0] < u[0]) { rotatedmaxs[0] = u[0]; } if(rotatedmaxs[1] < u[1]) { rotatedmaxs[1] = u[1]; } if(rotatedmaxs[2] < u[2]) { rotatedmaxs[2] = u[2]; }
 }
 
 /*
@@ -924,16 +924,17 @@ returns true if the entity is in solid currently
 static int SV_TestEntityPosition (prvm_edict_t *ent, vec3_t offset)
 {
 	prvm_prog_t *prog = SVVM_prog;
-	int contents;
+	int hitsupercontentsmask = SV_GenericHitSuperContentsMask(ent);
+	int skipsupercontentsmask = 0;
+	int skipmaterialflagsmask = 0;
 	vec3_t org, entorigin, entmins, entmaxs;
 	trace_t trace;
-	contents = SV_GenericHitSuperContentsMask(ent);
 	VectorAdd(PRVM_serveredictvector(ent, origin), offset, org);
 	VectorCopy(PRVM_serveredictvector(ent, origin), entorigin);
 	VectorCopy(PRVM_serveredictvector(ent, mins), entmins);
 	VectorCopy(PRVM_serveredictvector(ent, maxs), entmaxs);
-	trace = SV_TraceBox(org, entmins, entmaxs, entorigin, ((PRVM_serveredictfloat(ent, movetype) == MOVETYPE_FLY_WORLDONLY) ? MOVE_WORLDONLY : MOVE_NOMONSTERS), ent, contents, 0, collision_extendmovelength.value);
-	if (trace.startsupercontents & contents)
+	trace = SV_TraceBox(org, entmins, entmaxs, entorigin, ((PRVM_serveredictfloat(ent, movetype) == MOVETYPE_FLY_WORLDONLY) ? MOVE_WORLDONLY : MOVE_NOMONSTERS), ent, hitsupercontentsmask, skipsupercontentsmask, skipmaterialflagsmask, collision_extendmovelength.value);
+	if (trace.startsupercontents & hitsupercontentsmask)
 		return true;
 	else
 	{
@@ -957,7 +958,7 @@ static int SV_TestEntityPosition (prvm_edict_t *ent, vec3_t offset)
 				v[0] = (i & 1) ? m2[0] : m1[0];
 				v[1] = (i & 2) ? m2[1] : m1[1];
 				v[2] = (i & 4) ? m2[2] : m1[2];
-				if (SV_PointSuperContents(v) & contents)
+				if (SV_PointSuperContents(v) & hitsupercontentsmask)
 					return true;
 			}
 		}
@@ -971,7 +972,7 @@ static int SV_TestEntityPosition (prvm_edict_t *ent, vec3_t offset)
 #else
 		// verify if the endpos is REALLY outside solid
 		VectorCopy(trace.endpos, org);
-		trace = SV_TraceBox(org, entmins, entmaxs, org, MOVE_NOMONSTERS, ent, contents, 0, collision_extendmovelength.value);
+		trace = SV_TraceBox(org, entmins, entmaxs, org, MOVE_NOMONSTERS, ent, hitsupercontentsmask, skipsupercontentsmask, skipmaterialflagsmask, collision_extendmovelength.value);
 		if(trace.startsolid)
 			Con_Printf("SV_TestEntityPosition: trace.endpos detected to be in solid. NOT using it.\n");
 		else
@@ -1194,7 +1195,7 @@ If stepnormal is not NULL, the plane normal of any vertical wall hit will be sto
 static float SV_Gravity (prvm_edict_t *ent);
 static qboolean SV_PushEntity (trace_t *trace, prvm_edict_t *ent, vec3_t push, qboolean dolink);
 #define MAX_CLIP_PLANES 5
-static int SV_FlyMove (prvm_edict_t *ent, float time, qboolean applygravity, float *stepnormal, int hitsupercontentsmask, int skipsupercontentsmask, float stepheight)
+static int SV_FlyMove (prvm_edict_t *ent, float time, qboolean applygravity, float *stepnormal, int hitsupercontentsmask, int skipsupercontentsmask, int skipmaterialflagsmask, float stepheight)
 {
 	prvm_prog_t *prog = SVVM_prog;
 	int blocked, bumpcount;
@@ -1411,7 +1412,7 @@ static int SV_FlyMove (prvm_edict_t *ent, float time, qboolean applygravity, flo
 	{
 		// LordHavoc: fix the 'fall to your death in a wedge corner' glitch
 		// flag ONGROUND if there's ground under it
-		trace = SV_TraceBox(PRVM_serveredictvector(ent, origin), PRVM_serveredictvector(ent, mins), PRVM_serveredictvector(ent, maxs), end, MOVE_NORMAL, ent, hitsupercontentsmask, skipsupercontentsmask);
+		trace = SV_TraceBox(PRVM_serveredictvector(ent, origin), PRVM_serveredictvector(ent, mins), PRVM_serveredictvector(ent, maxs), end, MOVE_NORMAL, ent, hitsupercontentsmask, skipsupercontentsmask, skipmaterialflagsmask);
 	}
 	*/
 
@@ -1494,7 +1495,7 @@ static qboolean SV_NudgeOutOfSolid_PivotIsKnownGood(prvm_edict_t *ent, vec3_t pi
 				testorigin[coord] += stuckmins[coord] - goodmins[coord];
 			}
 
-			stucktrace = SV_TraceBox(stuckorigin, goodmins, goodmaxs, testorigin, MOVE_NOMONSTERS, ent, SV_GenericHitSuperContentsMask(ent), 0, collision_extendmovelength.value);
+			stucktrace = SV_TraceBox(stuckorigin, goodmins, goodmaxs, testorigin, MOVE_NOMONSTERS, ent, SV_GenericHitSuperContentsMask(ent), 0, 0, collision_extendmovelength.value);
 			if (stucktrace.bmodelstartsolid)
 			{
 				// BAD BAD, can't fix that
@@ -1564,7 +1565,7 @@ qboolean SV_NudgeOutOfSolid(prvm_edict_t *ent)
 		VectorCopy(PRVM_serveredictvector(ent, origin), stuckorigin);
 		for (bump = 0;bump < 10;bump++)
 		{
-			stucktrace = SV_TraceBox(stuckorigin, stuckmins, stuckmaxs, stuckorigin, pass ? MOVE_WORLDONLY : MOVE_NOMONSTERS, ent, SV_GenericHitSuperContentsMask(ent), 0, collision_extendmovelength.value);
+			stucktrace = SV_TraceBox(stuckorigin, stuckmins, stuckmaxs, stuckorigin, pass ? MOVE_WORLDONLY : MOVE_NOMONSTERS, ent, SV_GenericHitSuperContentsMask(ent), 0, 0, collision_extendmovelength.value);
 			if (!stucktrace.bmodelstartsolid || stucktrace.startdepth >= 0)
 			{
 				// found a good location, use it
@@ -1620,7 +1621,7 @@ static qboolean SV_PushEntity (trace_t *trace, prvm_edict_t *ent, vec3_t push, q
 	else
 		type = MOVE_NORMAL;
 
-	*trace = SV_TraceBox(start, mins, maxs, end, type, ent, SV_GenericHitSuperContentsMask(ent), 0, collision_extendmovelength.value);
+	*trace = SV_TraceBox(start, mins, maxs, end, type, ent, SV_GenericHitSuperContentsMask(ent), 0, 0, collision_extendmovelength.value);
 	// fail the move if stuck in world
 	if (trace->worldstartsolid)
 		return true;
@@ -1846,7 +1847,7 @@ static void SV_PushMove (prvm_edict_t *pusher, float movetime)
 			VectorCopy(PRVM_serveredictvector(check, origin), checkorigin);
 			VectorCopy(PRVM_serveredictvector(check, mins), checkmins);
 			VectorCopy(PRVM_serveredictvector(check, maxs), checkmaxs);
-			Collision_ClipToGenericEntity(&trace, pushermodel, pusher->priv.server->frameblend, &pusher->priv.server->skeleton, pushermins, pushermaxs, SUPERCONTENTS_BODY, &pusherfinalmatrix, &pusherfinalimatrix, checkorigin, checkmins, checkmaxs, checkorigin, checkcontents, 0, collision_extendmovelength.value);
+			Collision_ClipToGenericEntity(&trace, pushermodel, pusher->priv.server->frameblend, &pusher->priv.server->skeleton, pushermins, pushermaxs, SUPERCONTENTS_BODY, &pusherfinalmatrix, &pusherfinalimatrix, checkorigin, checkmins, checkmaxs, checkorigin, checkcontents, 0, 0, collision_extendmovelength.value);
 			//trace = SV_TraceBox(PRVM_serveredictvector(check, origin), PRVM_serveredictvector(check, mins), PRVM_serveredictvector(check, maxs), PRVM_serveredictvector(check, origin), MOVE_NOMONSTERS, check, checkcontents);
 			if (!trace.startsolid)
 			{
@@ -1913,7 +1914,7 @@ static void SV_PushMove (prvm_edict_t *pusher, float movetime)
 		VectorCopy(PRVM_serveredictvector(check, origin), checkorigin);
 		VectorCopy(PRVM_serveredictvector(check, mins), checkmins);
 		VectorCopy(PRVM_serveredictvector(check, maxs), checkmaxs);
-		Collision_ClipToGenericEntity(&trace, pushermodel, pusher->priv.server->frameblend, &pusher->priv.server->skeleton, pushermins, pushermaxs, SUPERCONTENTS_BODY, &pusherfinalmatrix, &pusherfinalimatrix, checkorigin, checkmins, checkmaxs, checkorigin, checkcontents, 0, collision_extendmovelength.value);
+		Collision_ClipToGenericEntity(&trace, pushermodel, pusher->priv.server->frameblend, &pusher->priv.server->skeleton, pushermins, pushermaxs, SUPERCONTENTS_BODY, &pusherfinalmatrix, &pusherfinalimatrix, checkorigin, checkmins, checkmaxs, checkorigin, checkcontents, 0, 0, collision_extendmovelength.value);
 		if (trace.startsolid)
 		{
 			vec3_t move2;
@@ -2171,7 +2172,7 @@ static qboolean SV_CheckWater (prvm_edict_t *ent)
 	// Acquire Super Contents Prior to Resets
 	cont = SV_PointSuperContents(point);
 	// Acquire Native Contents Here
-	nNativeContents = Mod_Q1BSP_NativeContentsFromSuperContents(NULL, cont);
+	nNativeContents = Mod_Q1BSP_NativeContentsFromSuperContents(cont);
 
 	// DRESK - Support for Entity Contents Transition Event
 	if(PRVM_serveredictfloat(ent, watertype))
@@ -2301,8 +2302,9 @@ static void SV_WalkMove (prvm_edict_t *ent)
 	//int originalmove_clip;
 	int originalmove_flags;
 	int originalmove_groundentity;
-	int hitsupercontentsmask;
-	int skipsupercontentsmask;
+	int hitsupercontentsmask = SV_GenericHitSuperContentsMask(ent);
+	int skipsupercontentsmask = 0;
+	int skipmaterialflagsmask = 0;
 	int type;
 	vec3_t upmove, downmove, start_origin, start_velocity, stepnormal, originalmove_origin, originalmove_velocity, entmins, entmaxs;
 	trace_t downtrace, trace;
@@ -2318,9 +2320,6 @@ static void SV_WalkMove (prvm_edict_t *ent)
 
 	applygravity = !SV_CheckWater (ent) && PRVM_serveredictfloat(ent, movetype) == MOVETYPE_WALK && ! ((int)PRVM_serveredictfloat(ent, flags) & FL_WATERJUMP);
 
-	hitsupercontentsmask = SV_GenericHitSuperContentsMask(ent);
-	skipsupercontentsmask = 0;
-
 	SV_CheckVelocity(ent);
 
 	// do a regular slide move unless it looks like you ran into a step
@@ -2329,7 +2328,7 @@ static void SV_WalkMove (prvm_edict_t *ent)
 	VectorCopy (PRVM_serveredictvector(ent, origin), start_origin);
 	VectorCopy (PRVM_serveredictvector(ent, velocity), start_velocity);
 
-	clip = SV_FlyMove (ent, sv.frametime, applygravity, NULL, hitsupercontentsmask, skipsupercontentsmask, sv_gameplayfix_stepmultipletimes.integer ? sv_stepheight.value : 0);
+	clip = SV_FlyMove (ent, sv.frametime, applygravity, NULL, hitsupercontentsmask, skipsupercontentsmask, skipmaterialflagsmask, sv_gameplayfix_stepmultipletimes.integer ? sv_stepheight.value : 0);
 
 	if(sv_gameplayfix_downtracesupportsongroundflag.integer)
 	if(!(clip & 1))
@@ -2349,7 +2348,7 @@ static void SV_WalkMove (prvm_edict_t *ent)
 			type = MOVE_NORMAL;
 		VectorCopy(PRVM_serveredictvector(ent, mins), entmins);
 		VectorCopy(PRVM_serveredictvector(ent, maxs), entmaxs);
-		trace = SV_TraceBox(upmove, entmins, entmaxs, downmove, type, ent, SV_GenericHitSuperContentsMask(ent), skipsupercontentsmask, collision_extendmovelength.value);
+		trace = SV_TraceBox(upmove, entmins, entmaxs, downmove, type, ent, SV_GenericHitSuperContentsMask(ent), skipsupercontentsmask, skipmaterialflagsmask, collision_extendmovelength.value);
 		if(trace.fraction < 1 && trace.plane.normal[2] > 0.7)
 			clip |= 1; // but we HAVE found a floor
 	}
@@ -2412,7 +2411,7 @@ static void SV_WalkMove (prvm_edict_t *ent)
 
 		// move forward
 		PRVM_serveredictvector(ent, velocity)[2] = 0;
-		clip = SV_FlyMove (ent, sv.frametime, applygravity, stepnormal, hitsupercontentsmask, skipsupercontentsmask, 0);
+		clip = SV_FlyMove (ent, sv.frametime, applygravity, stepnormal, hitsupercontentsmask, skipsupercontentsmask, skipmaterialflagsmask, 0);
 		PRVM_serveredictvector(ent, velocity)[2] += start_velocity[2];
 		if(clip & 8)
 		{
@@ -2559,7 +2558,7 @@ static void SV_CheckWaterTransition (prvm_edict_t *ent)
 	// LordHavoc: bugfixes in this function are keyed to the sv_gameplayfix_bugfixedcheckwatertransition cvar - if this cvar is 0 then all the original bugs should be reenabled for compatibility
 	int cont;
 	VectorCopy(PRVM_serveredictvector(ent, origin), entorigin);
-	cont = Mod_Q1BSP_NativeContentsFromSuperContents(NULL, SV_PointSuperContents(entorigin));
+	cont = Mod_Q1BSP_NativeContentsFromSuperContents(SV_PointSuperContents(entorigin));
 	if (!PRVM_serveredictfloat(ent, watertype))
 	{
 		// just spawned here
@@ -2785,7 +2784,7 @@ static void SV_Physics_Step (prvm_edict_t *ent)
 			{
 				PRVM_serveredictfloat(ent, flags) -= FL_ONGROUND;
 				SV_CheckVelocity(ent);
-				SV_FlyMove(ent, sv.frametime, true, NULL, SV_GenericHitSuperContentsMask(ent), 0, 0);
+				SV_FlyMove(ent, sv.frametime, true, NULL, SV_GenericHitSuperContentsMask(ent), 0, 0, 0);
 				SV_LinkEdict(ent);
 				SV_LinkEdict_TouchAreaGrid(ent);
 				ent->priv.server->waterposition_forceupdate = true;
@@ -2797,7 +2796,7 @@ static void SV_Physics_Step (prvm_edict_t *ent)
 			int hitsound = PRVM_serveredictvector(ent, velocity)[2] < sv_gravity.value * -0.1;
 
 			SV_CheckVelocity(ent);
-			SV_FlyMove(ent, sv.frametime, true, NULL, SV_GenericHitSuperContentsMask(ent), 0, 0);
+			SV_FlyMove(ent, sv.frametime, true, NULL, SV_GenericHitSuperContentsMask(ent), 0, 0, 0);
 			SV_LinkEdict(ent);
 			SV_LinkEdict_TouchAreaGrid(ent);
 

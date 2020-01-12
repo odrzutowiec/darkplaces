@@ -64,6 +64,8 @@ typedef enum r_stat_e
 	r_stat_bloom,
 	r_stat_bloom_copypixels,
 	r_stat_bloom_drawpixels,
+	r_stat_rendertargets_used,
+	r_stat_rendertargets_pixels,
 	r_stat_indexbufferuploadcount,
 	r_stat_indexbufferuploadsize,
 	r_stat_vertexbufferuploadcount,
@@ -78,9 +80,6 @@ typedef enum r_stat_e
 	r_stat_bufferdatasize_index16,
 	r_stat_bufferdatasize_index32,
 	r_stat_bufferdatasize_uniform,
-	r_stat_animcache_vertexmesh_count,
-	r_stat_animcache_vertexmesh_vertices,
-	r_stat_animcache_vertexmesh_maxvertices,
 	r_stat_animcache_skeletal_count,
 	r_stat_animcache_skeletal_bones,
 	r_stat_animcache_skeletal_maxbones,
@@ -159,10 +158,6 @@ typedef enum r_stat_e
 	r_stat_batch_dynamic_surfaces_because_tcmod_turbulent,
 	r_stat_batch_dynamic_vertices_because_tcmod_turbulent,
 	r_stat_batch_dynamic_triangles_because_tcmod_turbulent,
-	r_stat_batch_dynamic_batches_because_interleavedarrays,
-	r_stat_batch_dynamic_surfaces_because_interleavedarrays,
-	r_stat_batch_dynamic_vertices_because_interleavedarrays,
-	r_stat_batch_dynamic_triangles_because_interleavedarrays,
 	r_stat_batch_dynamic_batches_because_nogaps,
 	r_stat_batch_dynamic_surfaces_because_nogaps,
 	r_stat_batch_dynamic_vertices_because_nogaps,
@@ -269,8 +264,6 @@ rtlight_particle_t;
 
 typedef struct rtlight_s
 {
-	// shadow volumes are done entirely in model space, so there are no matrices for dealing with them...  they just use the origin
-
 	// note that the world to light matrices are inversely scaled (divided) by lightradius
 
 	// core properties
@@ -302,7 +295,7 @@ typedef struct rtlight_s
 	int flags;
 
 	// generated properties
-	/// used only for shadow volumes
+	/// used only for casting shadows
 	vec3_t shadoworigin;
 	/// culling
 	vec3_t cullmins;
@@ -358,9 +351,7 @@ typedef struct rtlight_s
 	int shadowmapatlasposition[2];
 	/// size of one side of this light in the shadowmap atlas (for omnidirectional shadowmaps this is the min corner of a 2x3 arrangement, or a 4x3 arrangement in the case of noselfshadow entities being present)
 	int shadowmapatlassidesize;
-	/// premade shadow volumes to render for world entity
-	shadowmesh_t *static_meshchain_shadow_zpass;
-	shadowmesh_t *static_meshchain_shadow_zfail;
+	/// optimized and culled mesh to render for world entity shadows
 	shadowmesh_t *static_meshchain_shadow_shadowmap;
 	/// used for visibility testing (more exact than bbox)
 	int static_numleafs;
@@ -560,10 +551,6 @@ typedef struct entity_render_s
 	float          *animcache_tvector3f;
 	r_meshbuffer_t *animcache_tvector3f_vertexbuffer;
 	int             animcache_tvector3f_bufferoffset;
-	// interleaved arrays for rendering and dynamic vertex buffers for them
-	r_vertexmesh_t *animcache_vertexmesh;
-	r_meshbuffer_t *animcache_vertexmesh_vertexbuffer;
-	int             animcache_vertexmesh_bufferoffset;
 	// gpu-skinning shader needs transforms in a certain format, we have to
 	// upload this to a uniform buffer for the shader to use, and also keep a
 	// backup copy in system memory for the dynamic batch fallback code
@@ -573,10 +560,37 @@ typedef struct entity_render_s
 	int animcache_skeletaltransform3x4offset;
 	int animcache_skeletaltransform3x4size;
 
-	// current lighting from map (updated ONLY by client code, not renderer)
-	vec3_t modellight_ambient;
-	vec3_t modellight_diffuse; // q3bsp
-	vec3_t modellight_lightdir; // q3bsp
+	// CL_UpdateEntityShading reads these fields
+	// used only if RENDER_CUSTOMIZEDMODELLIGHT is set
+	vec3_t custommodellight_ambient;
+	vec3_t custommodellight_diffuse;
+	vec3_t custommodellight_lightdir;
+	// CSQC entities get their shading from the root of their attachment chain
+	float custommodellight_origin[3];
+
+	// derived lighting parameters (CL_UpdateEntityShading)
+
+	// used by MATERIALFLAG_FULLBRIGHT which is MATERIALFLAG_MODELLIGHT with
+	// this as ambient color, along with MATERIALFLAG_NORTLIGHT
+	float render_fullbright[3];
+	// color tint for the base pass glow textures if any
+	float render_glowmod[3];
+	// MATERIALFLAG_MODELLIGHT uses these parameters
+	float render_modellight_ambient[3];
+	float render_modellight_diffuse[3];
+	float render_modellight_lightdir[3];
+	float render_modellight_specular[3];
+	// lightmap rendering (not MATERIALFLAG_MODELLIGHT)
+	float render_lightmap_ambient[3];
+	float render_lightmap_diffuse[3];
+	float render_lightmap_specular[3];
+	// rtlights use these colors for the materials on this entity
+	float render_rtlight_diffuse[3];
+	float render_rtlight_specular[3];
+	// ignore lightmap and use lightgrid on this entity (e.g. FULLBRIGHT)
+	qboolean render_modellight_forced;
+	// do not process per pixel lights on this entity at all (like MATERIALFLAG_NORTLIGHT)
+	qboolean render_rtlight_disabled;
 
 	// storage of decals on this entity
 	// (note: if allowdecals is set, be sure to call R_DecalSystem_Reset on removal!)
@@ -1726,10 +1740,6 @@ void CL_ParticleExplosion (const vec3_t org);
 void CL_ParticleExplosion2 (const vec3_t org, int colorStart, int colorLength);
 void R_NewExplosion(const vec3_t org);
 
-void Debug_PolygonBegin(const char *picname, int flags);
-void Debug_PolygonVertex(float x, float y, float z, float s, float t, float r, float g, float b, float a);
-void Debug_PolygonEnd(void);
-
 #include "cl_screen.h"
 
 extern qboolean sb_showscores;
@@ -1790,6 +1800,12 @@ typedef struct r_refdef_view_s
 	vec3_t frustumcorner[4];
 	// if turned off it renders an ortho view
 	int useperspective;
+	// allows visibility culling based on the view origin (e.g. pvs and R_CanSeeBox)
+	// this is turned off by:
+	// r_trippy
+	// !r_refdef.view.useperspective
+	// (sometimes) r_refdef.view.useclipplane
+	int usevieworiginculling;
 	float ortho_x, ortho_y;
 
 	// screen area to render in
@@ -1890,7 +1906,12 @@ typedef struct r_refdef_scene_s {
 	// controls intensity lightmap layers
 	unsigned short lightstylevalue[MAX_LIGHTSTYLES];	// 8.8 fraction of base light value
 
-	float ambient;
+	// adds brightness to the whole scene, separate from lightmapintensity
+	// see CL_UpdateEntityShading
+	float ambientintensity;
+	// brightness of lightmap and modellight lighting on materials
+	// see CL_UpdateEntityShading
+	float lightmapintensity;
 
 	qboolean rtworld;
 	qboolean rtworldshadows;
@@ -1960,14 +1981,9 @@ typedef struct r_refdef_s
 	// true during envmap command capture
 	qboolean envmap;
 
-	// brightness of world lightmaps and related lighting
-	// (often reduced when world rtlights are enabled)
-	float lightmapintensity;
 	// whether to draw world lights realtime, dlights realtime, and their shadows
 	float polygonfactor;
 	float polygonoffset;
-	float shadowpolygonfactor;
-	float shadowpolygonoffset;
 
 	// how long R_RenderView took on the previous frame
 	double lastdrawscreentime;
@@ -2020,10 +2036,29 @@ void CL_ClientMovement_PlayerMove_Frame(cl_clientmovement_state_t *s);
 // warpzone prediction hack (CSQC builtin)
 void CL_RotateMoves(const matrix4x4_t *m);
 
+typedef enum meshname_e {
+	MESH_DEBUG,
+	MESH_CSQCPOLYGONS,
+	MESH_PARTICLES,
+	MESH_UI,
+	NUM_MESHENTITIES,
+} meshname_t;
+extern entity_t cl_meshentities[NUM_MESHENTITIES];
+extern dp_model_t cl_meshentitymodels[NUM_MESHENTITIES];
+extern const char *cl_meshentitynames[NUM_MESHENTITIES];
+#define CL_Mesh_Debug() (&cl_meshentitymodels[MESH_DEBUG])
+#define CL_Mesh_CSQC() (&cl_meshentitymodels[MESH_CSQCPOLYGONS])
+#define CL_Mesh_Particles() (&cl_meshentitymodels[MESH_PARTICLES])
+#define CL_Mesh_UI() (&cl_meshentitymodels[MESH_UI])
+void CL_MeshEntities_AddToScene(void);
+void CL_MeshEntities_Reset(void);
+void CL_UpdateEntityShading(void);
+
 void CL_NewFrameReceived(int num);
 void CL_ParseEntityLump(char *entitystring);
 void CL_FindNonSolidLocation(const vec3_t in, vec3_t out, vec_t radius);
 void CL_RelinkLightFlashes(void);
+void CL_Beam_AddPolygons(const beam_t *b);
 void Sbar_ShowFPS(void);
 void Sbar_ShowFPS_Update(void);
 void Host_SaveConfig(void);

@@ -392,9 +392,15 @@ static void R_Model_Sprite_Draw_TransparentCallback(const entity_render_t *ent, 
 			frame = model->sprite.sprdata_frames + ent->frameblend[i].subframe;
 			texture = R_GetCurrentTexture(model->data_textures + ent->frameblend[i].subframe);
 		
-			// lit sprite by lightgrid if it is not fullbright, lit only ambient
+			// sprites are fullbright by default, but if this one is not fullbright we
+			// need to combine the lighting into ambient as sprite lighting is not
+			// directional
 			if (!(texture->currentmaterialflags & MATERIALFLAG_FULLBRIGHT))
-				VectorAdd(ent->modellight_ambient, ent->modellight_diffuse, rsurface.modellight_ambient); // sprites dont use lightdirection
+			{
+				VectorMAM(1.0f, texture->render_modellight_ambient, 0.25f, texture->render_modellight_diffuse, texture->render_modellight_ambient);
+				VectorClear(texture->render_modellight_diffuse);
+				VectorClear(texture->render_modellight_specular);
+			}
 
 			// SPR_LABEL should not use depth test AT ALL
 			if(model->sprite.sprnum_type == SPR_LABEL || model->sprite.sprnum_type == SPR_LABEL_SCALE)
@@ -409,6 +415,10 @@ static void R_Model_Sprite_Draw_TransparentCallback(const entity_render_t *ent, 
 			}
 
 			R_CalcSprite_Vertex3f(vertex3f, org, left, up, frame->left, frame->right, frame->down, frame->up);
+
+			if (r_showspriteedges.integer)
+				for (i = 0; i < 4; i++)
+					R_DebugLine(vertex3f + i * 3, vertex3f + ((i + 1) % 4) * 3);
 
 			R_DrawCustomSurface_Texture(texture, &identitymatrix, texture->currentmaterialflags, 0, 4, 0, 2, false, false);
 		}

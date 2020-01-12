@@ -92,6 +92,30 @@ cvar_t v_ipitch_level = {0, "v_ipitch_level", "0.3", "v_idlescale pitch amount"}
 
 cvar_t v_idlescale = {0, "v_idlescale", "0", "how much of the quake 'drunken view' effect to use"};
 
+cvar_t v_isometric = {0, "v_isometric", "0", "changes view to isometric (non-perspective)"};
+cvar_t v_isometric_verticalfov = { 0, "v_isometric_verticalfov", "512", "vertical field of view in game units (horizontal is computed using aspect ratio based on this)"};
+cvar_t v_isometric_xx = {0, "v_isometric_xx", "1", "camera matrix"};
+cvar_t v_isometric_xy = {0, "v_isometric_xy", "0", "camera matrix"};
+cvar_t v_isometric_xz = {0, "v_isometric_xz", "0", "camera matrix"};
+cvar_t v_isometric_yx = {0, "v_isometric_yx", "0", "camera matrix"};
+cvar_t v_isometric_yy = {0, "v_isometric_yy", "1", "camera matrix"};
+cvar_t v_isometric_yz = {0, "v_isometric_yz", "0", "camera matrix"};
+cvar_t v_isometric_zx = {0, "v_isometric_zx", "0", "camera matrix"};
+cvar_t v_isometric_zy = {0, "v_isometric_zy", "0", "camera matrix"};
+cvar_t v_isometric_zz = {0, "v_isometric_zz", "1", "camera matrix"};
+cvar_t v_isometric_tx = {0, "v_isometric_tx", "0", "camera position (player-relative)"};
+cvar_t v_isometric_ty = {0, "v_isometric_ty", "0", "camera position (player-relative)"};
+cvar_t v_isometric_tz = {0, "v_isometric_tz", "0", "camera position (player-relative)"};
+cvar_t v_isometric_rot_pitch = {0, "v_isometric_rot_pitch", "60", "camera rotation"};
+cvar_t v_isometric_rot_yaw = {0, "v_isometric_rot_yaw", "135", "camera rotation"};
+cvar_t v_isometric_rot_roll = {0, "v_isometric_rot_roll", "0", "camera rotation"};
+cvar_t v_isometric_relx = {0, "v_isometric_relx", "0", "camera position*forward"};
+cvar_t v_isometric_rely = {0, "v_isometric_rely", "0", "camera position*left"};
+cvar_t v_isometric_relz = {0, "v_isometric_relz", "0", "camera position*up"};
+cvar_t v_isometric_flipcullface = {0, "v_isometric_flipcullface", "0", "flips the backface culling"};
+cvar_t v_isometric_locked_orientation = {0, "v_isometric_locked_orientation", "1", "camera rotation is fixed"};
+cvar_t v_isometric_usevieworiginculling = {0, "v_isometric_usevieworiginculling", "0", "check visibility to the player location (can look pretty weird)"};
+
 cvar_t crosshair = {CVAR_SAVE, "crosshair", "0", "selects crosshair to use (0 is none)"};
 
 cvar_t v_centermove = {0, "v_centermove", "0.15", "how long before the view begins to center itself (if freelook/+mlook/+jlook/+klook are off)"};
@@ -589,20 +613,20 @@ void V_CalcRefdefUsing (const matrix4x4_t *entrendermatrix, const vec3_t clviewa
 				chase_dest[2] = vieworg[2] - forward[2] * camback + up[2] * camup;
 #if 0
 #if 1
-				//trace = CL_TraceLine(vieworg, eyeboxmins, eyeboxmaxs, chase_dest, MOVE_NOMONSTERS, NULL, SUPERCONTENTS_SOLID | SUPERCONTENTS_BODY | SUPERCONTENTS_SKY, 0, true, false, NULL, false);
-				trace = CL_TraceLine(vieworg, camboxmins, camboxmaxs, chase_dest, MOVE_NOMONSTERS, NULL, SUPERCONTENTS_SOLID | SUPERCONTENTS_BODY | SUPERCONTENTS_SKY, 0, true, false, NULL, false);
+				//trace = CL_TraceLine(vieworg, eyeboxmins, eyeboxmaxs, chase_dest, MOVE_NOMONSTERS, NULL, SUPERCONTENTS_SOLID | SUPERCONTENTS_SKY, 0, true, false, NULL, false);
+				trace = CL_TraceLine(vieworg, camboxmins, camboxmaxs, chase_dest, MOVE_NOMONSTERS, NULL, SUPERCONTENTS_SOLID | SUPERCONTENTS_SKY, 0, true, false, NULL, false);
 #else
-				//trace = CL_TraceBox(vieworg, eyeboxmins, eyeboxmaxs, chase_dest, MOVE_NOMONSTERS, NULL, SUPERCONTENTS_SOLID | SUPERCONTENTS_BODY | SUPERCONTENTS_SKY, 0, true, false, NULL, false);
-				trace = CL_TraceBox(vieworg, camboxmins, camboxmaxs, chase_dest, MOVE_NOMONSTERS, NULL, SUPERCONTENTS_SOLID | SUPERCONTENTS_BODY | SUPERCONTENTS_SKY, 0, true, false, NULL, false);
+				//trace = CL_TraceBox(vieworg, eyeboxmins, eyeboxmaxs, chase_dest, MOVE_NOMONSTERS, NULL, SUPERCONTENTS_SOLID | SUPERCONTENTS_SKY, 0, true, false, NULL, false);
+				trace = CL_TraceBox(vieworg, camboxmins, camboxmaxs, chase_dest, MOVE_NOMONSTERS, NULL, SUPERCONTENTS_SOLID | SUPERCONTENTS_SKY, 0, true, false, NULL, false);
 #endif
 				VectorCopy(trace.endpos, vieworg);
 				vieworg[2] -= 8;
 #else
 				// trace from first person view location to our chosen third person view location
 #if 1
-				trace = CL_TraceLine(vieworg, chase_dest, MOVE_NOMONSTERS, NULL, SUPERCONTENTS_SOLID | SUPERCONTENTS_BODY | SUPERCONTENTS_SKY, 0, collision_extendmovelength.value, true, false, NULL, false, true);
+				trace = CL_TraceLine(vieworg, chase_dest, MOVE_NOMONSTERS, NULL, SUPERCONTENTS_SOLID | SUPERCONTENTS_SKY, 0, MATERIALFLAGMASK_TRANSLUCENT, collision_extendmovelength.value, true, false, NULL, false, true);
 #else
-				trace = CL_TraceBox(vieworg, camboxmins, camboxmaxs, chase_dest, MOVE_NOMONSTERS, NULL, SUPERCONTENTS_SOLID | SUPERCONTENTS_BODY | SUPERCONTENTS_SKY, 0, collision_extendmovelength.value, true, false, NULL, false);
+				trace = CL_TraceBox(vieworg, camboxmins, camboxmaxs, chase_dest, MOVE_NOMONSTERS, NULL, SUPERCONTENTS_SOLID | SUPERCONTENTS_SKY, 0, MATERIALFLAGMASK_TRANSLUCENT, collision_extendmovelength.value, true, false, NULL, false);
 #endif
 				VectorCopy(trace.endpos, bestvieworg);
 				offset[2] = 0;
@@ -615,9 +639,9 @@ void V_CalcRefdefUsing (const matrix4x4_t *entrendermatrix, const vec3_t clviewa
 						chase_dest[1] = vieworg[1] - forward[1] * camback + up[1] * camup + offset[1];
 						chase_dest[2] = vieworg[2] - forward[2] * camback + up[2] * camup + offset[2];
 #if 1
-						trace = CL_TraceLine(vieworg, chase_dest, MOVE_NOMONSTERS, NULL, SUPERCONTENTS_SOLID | SUPERCONTENTS_BODY | SUPERCONTENTS_SKY, 0, collision_extendmovelength.value, true, false, NULL, false, true);
+						trace = CL_TraceLine(vieworg, chase_dest, MOVE_NOMONSTERS, NULL, SUPERCONTENTS_SOLID | SUPERCONTENTS_SKY, 0, MATERIALFLAGMASK_TRANSLUCENT, collision_extendmovelength.value, true, false, NULL, false, true);
 #else
-						trace = CL_TraceBox(vieworg, camboxmins, camboxmaxs, chase_dest, MOVE_NOMONSTERS, NULL, SUPERCONTENTS_SOLID | SUPERCONTENTS_BODY | SUPERCONTENTS_SKY, 0, collision_extendmovelength.value, true, false, NULL, false);
+						trace = CL_TraceBox(vieworg, camboxmins, camboxmaxs, chase_dest, MOVE_NOMONSTERS, NULL, SUPERCONTENTS_SOLID | SUPERCONTENTS_SKY, 0, MATERIALFLAGMASK_TRANSLUCENT, collision_extendmovelength.value, true, false, NULL, false);
 #endif
 						if (bestvieworg[2] > trace.endpos[2])
 							bestvieworg[2] = trace.endpos[2];
@@ -643,7 +667,7 @@ void V_CalcRefdefUsing (const matrix4x4_t *entrendermatrix, const vec3_t clviewa
 				chase_dest[0] = vieworg[0] + forward[0] * dist;
 				chase_dest[1] = vieworg[1] + forward[1] * dist;
 				chase_dest[2] = vieworg[2] + forward[2] * dist + camup;
-				trace = CL_TraceLine(vieworg, chase_dest, MOVE_NOMONSTERS, NULL, SUPERCONTENTS_SOLID | SUPERCONTENTS_BODY | SUPERCONTENTS_SKY, 0, collision_extendmovelength.value, true, false, NULL, false, true);
+				trace = CL_TraceLine(vieworg, chase_dest, MOVE_NOMONSTERS, NULL, SUPERCONTENTS_SOLID | SUPERCONTENTS_SKY, 0, MATERIALFLAGMASK_TRANSLUCENT, collision_extendmovelength.value, true, false, NULL, false, true);
 				VectorMAMAM(1, trace.endpos, 8, forward, 4, trace.plane.normal, vieworg);
 			}
 		}
@@ -743,13 +767,13 @@ void V_CalcRefdefUsing (const matrix4x4_t *entrendermatrix, const vec3_t clviewa
 						bob_height_check_dest[0] = vieworg[0];
 						bob_height_check_dest[1] = vieworg[1];
 						bob_height_check_dest[2] = vieworg[2] + cl_bob_limit.value * 1.1f;
-						trace = CL_TraceLine(vieworg, bob_height_check_dest, MOVE_NOMONSTERS, NULL, SUPERCONTENTS_SOLID | SUPERCONTENTS_BODY | SUPERCONTENTS_SKY | (cl_bob_limit_heightcheck_dontcrosswatersurface.integer ? SUPERCONTENTS_LIQUIDSMASK : 0), 0, collision_extendmovelength.value, true, false, NULL, false, true);
+						trace = CL_TraceLine(vieworg, bob_height_check_dest, MOVE_NOMONSTERS, NULL, SUPERCONTENTS_SOLID | SUPERCONTENTS_SKY | (cl_bob_limit_heightcheck_dontcrosswatersurface.integer ? SUPERCONTENTS_LIQUIDSMASK : 0), 0, MATERIALFLAGMASK_TRANSLUCENT, collision_extendmovelength.value, true, false, NULL, false, true);
 						trace1fraction = trace.fraction;
 
 						bob_height_check_dest[0] = vieworg[0];
 						bob_height_check_dest[1] = vieworg[1];
 						bob_height_check_dest[2] = vieworg[2] + cl_bob_limit.value * -0.5f;
-						trace = CL_TraceLine(vieworg, bob_height_check_dest, MOVE_NOMONSTERS, NULL, SUPERCONTENTS_SOLID | SUPERCONTENTS_BODY | SUPERCONTENTS_SKY | (cl_bob_limit_heightcheck_dontcrosswatersurface.integer ? SUPERCONTENTS_LIQUIDSMASK : 0), 0, collision_extendmovelength.value, true, false, NULL, false, true);
+						trace = CL_TraceLine(vieworg, bob_height_check_dest, MOVE_NOMONSTERS, NULL, SUPERCONTENTS_SOLID | SUPERCONTENTS_SKY | (cl_bob_limit_heightcheck_dontcrosswatersurface.integer ? SUPERCONTENTS_LIQUIDSMASK : 0), 0, MATERIALFLAGMASK_TRANSLUCENT, collision_extendmovelength.value, true, false, NULL, false, true);
 						trace2fraction = trace.fraction;
 
 						bob_limit *= min(trace1fraction, trace2fraction);
@@ -943,6 +967,66 @@ void V_CalcRefdef (void)
 	}
 }
 
+void V_MakeViewIsometric(void)
+{
+	// when using isometric view to play normal games we have to rotate the camera to make the Ortho matrix do the right thing (forward as up the screen, etc)
+	matrix4x4_t relative;
+	matrix4x4_t modifiedview;
+	matrix4x4_t modify;
+	vec3_t forward, left, up, org;
+	float t[4][4];
+
+	r_refdef.view.useperspective = false;
+	r_refdef.view.usevieworiginculling = !r_trippy.value && v_isometric_usevieworiginculling.integer;
+	r_refdef.view.frustum_y = v_isometric_verticalfov.value * cl.viewzoom;
+	r_refdef.view.frustum_x = r_refdef.view.frustum_y * (float)r_refdef.view.width / (float)r_refdef.view.height / vid_pixelheight.value;
+	r_refdef.view.frustum_x *= r_refdef.frustumscale_x;
+	r_refdef.view.frustum_y *= r_refdef.frustumscale_y;
+	r_refdef.view.ortho_x = r_refdef.view.frustum_x; // used by VM_CL_R_SetView
+	r_refdef.view.ortho_y = r_refdef.view.frustum_y; // used by VM_CL_R_SetView
+
+	t[0][0] = v_isometric_xx.value;
+	t[0][1] = v_isometric_xy.value;
+	t[0][2] = v_isometric_xz.value;
+	t[0][3] = 0.0f;
+	t[1][0] = v_isometric_yx.value;
+	t[1][1] = v_isometric_yy.value;
+	t[1][2] = v_isometric_yz.value;
+	t[1][3] = 0.0f;
+	t[2][0] = v_isometric_zx.value;
+	t[2][1] = v_isometric_zy.value;
+	t[2][2] = v_isometric_zz.value;
+	t[2][3] = 0.0f;
+	t[3][0] = 0.0f;
+	t[3][1] = 0.0f;
+	t[3][2] = 0.0f;
+	t[3][3] = 1.0f;
+	Matrix4x4_FromArrayFloatGL(&modify, t[0]);
+
+	// if the orientation is locked, extract the origin and create just a translate matrix to start with
+	if (v_isometric_locked_orientation.integer)
+	{
+		vec3_t vx, vy, vz, origin;
+		Matrix4x4_ToVectors(&r_refdef.view.matrix, vx, vy, vz, origin);
+		Matrix4x4_CreateTranslate(&r_refdef.view.matrix, origin[0], origin[1], origin[2]);
+	}
+
+	Matrix4x4_Concat(&modifiedview, &r_refdef.view.matrix, &modify);
+	Matrix4x4_CreateFromQuakeEntity(&relative, v_isometric_tx.value, v_isometric_ty.value, v_isometric_tz.value, v_isometric_rot_pitch.value, v_isometric_rot_yaw.value, v_isometric_rot_roll.value, 1.0f);
+	Matrix4x4_Concat(&r_refdef.view.matrix, &modifiedview, &relative);
+	Matrix4x4_ToVectors(&r_refdef.view.matrix, forward, left, up, org);
+	VectorMAMAMAM(1.0f, org, v_isometric_relx.value, forward, v_isometric_rely.value, left, v_isometric_relz.value, up, org);
+	Matrix4x4_FromVectors(&r_refdef.view.matrix, forward, left, up, org);
+
+	if (v_isometric_flipcullface.integer)
+	{
+		int a = r_refdef.view.cullface_front;
+		r_refdef.view.cullface_front = r_refdef.view.cullface_back;
+		r_refdef.view.cullface_back = a;
+	}
+}
+
+
 void V_FadeViewFlashs(void)
 {
 	// don't flash if time steps backwards
@@ -1124,6 +1208,30 @@ void V_Init (void)
 	Cvar_RegisterVariable (&v_iyaw_level);
 	Cvar_RegisterVariable (&v_iroll_level);
 	Cvar_RegisterVariable (&v_ipitch_level);
+
+	Cvar_RegisterVariable(&v_isometric);
+	Cvar_RegisterVariable(&v_isometric_verticalfov);
+	Cvar_RegisterVariable(&v_isometric_xx);
+	Cvar_RegisterVariable(&v_isometric_xy);
+	Cvar_RegisterVariable(&v_isometric_xz);
+	Cvar_RegisterVariable(&v_isometric_yx);
+	Cvar_RegisterVariable(&v_isometric_yy);
+	Cvar_RegisterVariable(&v_isometric_yz);
+	Cvar_RegisterVariable(&v_isometric_zx);
+	Cvar_RegisterVariable(&v_isometric_zy);
+	Cvar_RegisterVariable(&v_isometric_zz);
+	Cvar_RegisterVariable(&v_isometric_tx);
+	Cvar_RegisterVariable(&v_isometric_ty);
+	Cvar_RegisterVariable(&v_isometric_tz);
+	Cvar_RegisterVariable(&v_isometric_rot_pitch);
+	Cvar_RegisterVariable(&v_isometric_rot_yaw);
+	Cvar_RegisterVariable(&v_isometric_rot_roll);
+	Cvar_RegisterVariable(&v_isometric_relx);
+	Cvar_RegisterVariable(&v_isometric_rely);
+	Cvar_RegisterVariable(&v_isometric_relz);
+	Cvar_RegisterVariable(&v_isometric_flipcullface);
+	Cvar_RegisterVariable(&v_isometric_locked_orientation);
+	Cvar_RegisterVariable(&v_isometric_usevieworiginculling);
 
 	Cvar_RegisterVariable (&v_idlescale);
 	Cvar_RegisterVariable (&crosshair);

@@ -26,59 +26,24 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 extern int cl_available;
 
-#define MAX_TEXTUREUNITS 16
+#define MAX_TEXTUREUNITS 32
 
 typedef enum renderpath_e
 {
-	RENDERPATH_GL11,
-	RENDERPATH_GL13,
-	RENDERPATH_GL20,
-	RENDERPATH_D3D9,
-	RENDERPATH_D3D10,
-	RENDERPATH_D3D11,
-	RENDERPATH_SOFT,
-	RENDERPATH_GLES1,
+	RENDERPATH_GL32,
 	RENDERPATH_GLES2
 }
 renderpath_t;
 
 typedef struct viddef_support_s
 {
-	qboolean gl20shaders;
-	qboolean gl20shaders130; // indicates glBindFragDataLocation is available
-	int glshaderversion; // typical values: 100 110 120 130 140 ...
+	int glshaderversion; // this is at least 150 (GL 3.2)
 	qboolean amd_texture_texture4;
-	qboolean arb_depth_texture;
-	qboolean arb_draw_buffers;
-	qboolean arb_framebuffer_object;
-	qboolean arb_multitexture;
-	qboolean arb_occlusion_query;
-	qboolean arb_query_buffer_object;
-	qboolean arb_shadow;
-	qboolean arb_texture_compression;
-	qboolean arb_texture_cube_map;
-	qboolean arb_texture_env_combine;
 	qboolean arb_texture_gather;
-	qboolean arb_texture_non_power_of_two;
-	qboolean arb_vertex_buffer_object;
-	qboolean arb_uniform_buffer_object;
-	qboolean ati_separate_stencil;
-	qboolean ext_blend_minmax;
-	qboolean ext_blend_subtract;
-	qboolean ext_blend_func_separate;
-	qboolean ext_draw_range_elements;
-	qboolean ext_framebuffer_object;
-	qboolean ext_packed_depth_stencil;
-	qboolean ext_stencil_two_side;
-	qboolean ext_texture_3d;
 	qboolean ext_texture_compression_s3tc;
-	qboolean ext_texture_edge_clamp;
 	qboolean ext_texture_filter_anisotropic;
 	qboolean ext_texture_srgb;
-	qboolean arb_texture_float;
-	qboolean arb_half_float_pixel;
-	qboolean arb_half_float_vertex;
-	qboolean arb_multisample;
+	qboolean arb_debug_output;
 }
 viddef_support_t;
 
@@ -111,19 +76,11 @@ typedef struct viddef_s
 	qboolean stencil;
 	qboolean sRGB2D; // whether 2D rendering is sRGB corrected (based on sRGBcapable2D)
 	qboolean sRGB3D; // whether 3D rendering is sRGB corrected (based on sRGBcapable3D)
-	qboolean sRGBcapable2D; // whether 2D rendering can be sRGB corrected (renderpath, v_hwgamma)
-	qboolean sRGBcapable3D; // whether 3D rendering can be sRGB corrected (renderpath, v_hwgamma)
+	qboolean sRGBcapable2D; // whether 2D rendering can be sRGB corrected (renderpath)
+	qboolean sRGBcapable3D; // whether 3D rendering can be sRGB corrected (renderpath)
 
 	renderpath_t renderpath;
-	qboolean forcevbo; // some renderpaths can not operate without it
-	qboolean useinterleavedarrays; // required by some renderpaths
 	qboolean allowalphatocoverage; // indicates the GL_AlphaToCoverage function works on this renderpath and framebuffer
-
-	unsigned int texunits;
-	unsigned int teximageunits;
-	unsigned int texarrayunits;
-	unsigned int drawrangeelements_maxvertices;
-	unsigned int drawrangeelements_maxindices;
 
 	unsigned int maxtexturesize_2d;
 	unsigned int maxtexturesize_3d;
@@ -132,13 +89,6 @@ typedef struct viddef_s
 	unsigned int maxdrawbuffers;
 
 	viddef_support_t support;
-
-	// in RENDERPATH_SOFT this is a 32bpp native-endian ARGB framebuffer
-	// (native-endian ARGB meaning that in little endian it is BGRA bytes,
-	//  in big endian it is ARGB byte order, the format is converted during
-	//  blit to the window)
-	unsigned int *softpixels;
-	unsigned int *softdepthpixels;
 
 	int forcetextype; // always use GL_BGRA for D3D, always use GL_RGBA for GLES, etc
 } viddef_t;
@@ -177,13 +127,7 @@ void VID_EnableJoystick(qboolean enable);
 
 extern qboolean vid_hidden;
 extern qboolean vid_activewindow;
-extern cvar_t vid_hardwaregammasupported;
-extern qboolean vid_usinghwgamma;
 extern qboolean vid_supportrefreshrate;
-
-extern cvar_t vid_soft;
-extern cvar_t vid_soft_threads;
-extern cvar_t vid_soft_interlace;
 
 extern cvar_t vid_fullscreen;
 extern cvar_t vid_width;
@@ -224,7 +168,6 @@ extern cvar_t v_color_grey_b;
 extern cvar_t v_color_white_r;
 extern cvar_t v_color_white_g;
 extern cvar_t v_color_white_b;
-extern cvar_t v_hwgamma;
 
 // brand of graphics chip
 extern const char *gl_vendor;
@@ -236,21 +179,18 @@ extern const char *gl_version;
 extern const char *gl_extensions;
 // WGL, GLX, or AGL
 extern const char *gl_platform;
-// another extensions list, containing platform-specific extensions that are
-// not in the main list
-extern const char *gl_platformextensions;
 // name of driver library (opengl32.dll, libGL.so.1, or whatever)
 extern char gl_driver[256];
 
 void *GL_GetProcAddress(const char *name);
-qboolean GL_CheckExtension(const char *minglver_or_ext, const dllfunction_t *funcs, const char *disableparm, int silent);
+qboolean GL_CheckExtension(const char *name, const char *disableparm, int silent);
+qboolean GL_ExtensionSupported(const char *name);
 
 void VID_Shared_Init(void);
 
-void GL_Init (void);
+void GL_Setup(void);
 
 void VID_ClearExtensions(void);
-void VID_CheckExtensions(void);
 
 void VID_Init (void);
 // Called at startup
@@ -266,20 +206,9 @@ qboolean VID_InitMode(viddef_mode_t *mode);
 // allocates and opens an appropriate OpenGL context (and its window)
 
 
-// sets hardware gamma correction, returns false if the device does not
-// support gamma control
-// (ONLY called by VID_UpdateGamma and VID_RestoreSystemGamma)
-int VID_SetGamma(unsigned short *ramps, int rampsize);
-// gets hardware gamma correction, returns false if the device does not
-// support gamma control
-// (ONLY called by VID_UpdateGamma and VID_RestoreSystemGamma)
-int VID_GetGamma(unsigned short *ramps, int rampsize);
-// makes sure ramp arrays are big enough and calls VID_GetGamma/VID_SetGamma
+// updates cachegamma variables and bumps vid_gammatables_serial if anything changed
 // (ONLY to be called from VID_Finish!)
-void VID_UpdateGamma(qboolean force, int rampsize);
-// turns off hardware gamma ramps immediately
-// (called from various shutdown/deactivation functions)
-void VID_RestoreSystemGamma(void);
+void VID_UpdateGamma(void);
 
 qboolean VID_HasScreenKeyboardSupport(void);
 void VID_ShowKeyboard(qboolean show);

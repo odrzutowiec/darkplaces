@@ -771,7 +771,7 @@ particle_t *CL_NewParticle(const vec3_t sortorigin, unsigned short ptypeindex, i
 		part->typeindex = pt_spark;
 		part->bounce = 0;
 		VectorMA(part->org, lifetime, part->vel, endvec);
-		trace = CL_TraceLine(part->org, endvec, MOVE_NOMONSTERS, NULL, SUPERCONTENTS_SOLID | SUPERCONTENTS_BODY | SUPERCONTENTS_LIQUIDSMASK, 0, collision_extendmovelength.value, true, false, NULL, false, false);
+		trace = CL_TraceLine(part->org, endvec, MOVE_NOMONSTERS, NULL, SUPERCONTENTS_SOLID | SUPERCONTENTS_LIQUIDSMASK, 0, 0, collision_extendmovelength.value, true, false, NULL, false, false);
 		part->die = cl.time + lifetime * trace.fraction;
 		part2 = CL_NewParticle(endvec, pt_raindecal, pcolor1, pcolor2, tex_rainsplash, part->size, part->size * 20, part->alpha, part->alpha / 0.4, 0, 0, trace.endpos[0] + trace.plane.normal[0], trace.endpos[1] + trace.plane.normal[1], trace.endpos[2] + trace.plane.normal[2], trace.plane.normal[0], trace.plane.normal[1], trace.plane.normal[2], 0, 0, 0, 0, pqualityreduction, 0, 1, PBLEND_ADD, PARTICLE_ORIENTED_DOUBLESIDED, -1, -1, -1, 1, 1, 0, 0, NULL);
 		if (part2)
@@ -912,7 +912,7 @@ void CL_SpawnDecalParticleForPoint(const vec3_t org, float maxdist, float size, 
 	{
 		VectorRandom(org2);
 		VectorMA(org, maxdist, org2, org2);
-		trace = CL_TraceLine(org, org2, MOVE_NOMONSTERS, NULL, SUPERCONTENTS_SOLID | SUPERCONTENTS_SKY, 0, collision_extendmovelength.value, true, false, &hitent, false, true);
+		trace = CL_TraceLine(org, org2, MOVE_NOMONSTERS, NULL, SUPERCONTENTS_SOLID | SUPERCONTENTS_SKY, 0, 0, collision_extendmovelength.value, true, false, &hitent, false, true);
 		// take the closest trace result that doesn't end up hitting a NOMARKS
 		// surface (sky for example)
 		if (bestfrac > trace.fraction && !(trace.hitq3surfaceflags & Q3SURFACEFLAG_NOMARKS))
@@ -1876,7 +1876,7 @@ void CL_ParticleExplosion (const vec3_t org)
 					{
 						VectorRandom(v2);
 						VectorMA(org, 128, v2, v);
-						trace = CL_TraceLine(org, v, MOVE_NOMONSTERS, NULL, SUPERCONTENTS_SOLID, 0, collision_extendmovelength.value, true, false, NULL, false, false);
+						trace = CL_TraceLine(org, v, MOVE_NOMONSTERS, NULL, SUPERCONTENTS_SOLID, 0, 0, collision_extendmovelength.value, true, false, NULL, false, false);
 					}
 					while (k < 16 && trace.fraction < 0.1f);
 					VectorSubtract(trace.endpos, org, v2);
@@ -2180,7 +2180,7 @@ static void R_InitParticleTexture (void)
 	// we invert it again during the blendfunc to make it work...
 
 #ifndef DUMPPARTICLEFONT
-	decalskinframe = R_SkinFrame_LoadExternal("particles/particlefont.tga", TEXF_ALPHA | TEXF_FORCELINEAR | TEXF_RGBMULTIPLYBYALPHA, false);
+	decalskinframe = R_SkinFrame_LoadExternal("particles/particlefont.tga", TEXF_ALPHA | TEXF_FORCELINEAR | TEXF_RGBMULTIPLYBYALPHA, false, false);
 	if (decalskinframe)
 	{
 		particlefonttexture = decalskinframe->base;
@@ -2325,7 +2325,7 @@ static void R_InitParticleTexture (void)
 		Image_WriteTGABGRA ("particles/particlefont.tga", PARTICLEFONTSIZE, PARTICLEFONTSIZE, particletexturedata);
 #endif
 
-		decalskinframe = R_SkinFrame_LoadInternalBGRA("particlefont", TEXF_ALPHA | TEXF_FORCELINEAR | TEXF_RGBMULTIPLYBYALPHA, particletexturedata, PARTICLEFONTSIZE, PARTICLEFONTSIZE, false);
+		decalskinframe = R_SkinFrame_LoadInternalBGRA("particlefont", TEXF_ALPHA | TEXF_FORCELINEAR | TEXF_RGBMULTIPLYBYALPHA, particletexturedata, PARTICLEFONTSIZE, PARTICLEFONTSIZE, 0, 0, 0, false);
 		particlefonttexture = decalskinframe->base;
 
 		Mem_Free(particletexturedata);
@@ -2427,12 +2427,7 @@ static void R_InitParticleTexture (void)
 				Con_Printf("particles/particlefont.txt: texnum %i outside valid range (0 to %i)\n", i, MAX_PARTICLETEXTURES);
 				continue;
 			}
-			sf = R_SkinFrame_LoadExternal(texturename, TEXF_ALPHA | TEXF_FORCELINEAR | TEXF_RGBMULTIPLYBYALPHA, true); // note: this loads as sRGB if sRGB is active!
-			if(!sf)
-			{
-				// R_SkinFrame_LoadExternal already complained
-				continue;
-			}
+			sf = R_SkinFrame_LoadExternal(texturename, TEXF_ALPHA | TEXF_FORCELINEAR | TEXF_RGBMULTIPLYBYALPHA, true, true); // note: this loads as sRGB if sRGB is active!
 			particletexture[i].texture = sf->base;
 			particletexture[i].s1 = s1;
 			particletexture[i].t1 = t1;
@@ -2500,7 +2495,7 @@ static void R_DrawDecal_TransparentCallback(const entity_render_t *ent, const rt
 	vec_t right[3], up[3], size, ca;
 	float alphascale = (1.0f / 65536.0f) * cl_particles_alpha.value;
 
-	RSurf_ActiveWorldEntity();
+	RSurf_ActiveModelEntity(r_refdef.scene.worldentity, false, false, false);
 
 	r_refdef.stats[r_stat_drawndecals] += numsurfaces;
 //	R_Mesh_ResetTextureState();
@@ -2559,7 +2554,7 @@ static void R_DrawDecal_TransparentCallback(const entity_render_t *ent, const rt
 	// now render the decals all at once
 	// (this assumes they all use one particle font texture!)
 	GL_BlendFunc(GL_ZERO, GL_ONE_MINUS_SRC_COLOR);
-	R_SetupShader_Generic(particletexture[63].texture, NULL, GL_MODULATE, 1, false, false, true);
+	R_SetupShader_Generic(particletexture[63].texture, false, false, true);
 	R_Mesh_PrepareVertices_Generic_Arrays(numsurfaces * 4, particle_vertex3f, particle_color4f, particle_texcoord2f);
 	R_Mesh_Draw(0, numsurfaces * 4, 0, numsurfaces * 2, NULL, NULL, 0, particle_elements, NULL, 0);
 }
@@ -2617,7 +2612,7 @@ void R_DrawDecals (void)
 		if (!drawdecals)
 			continue;
 
-		if (DotProduct(r_refdef.view.origin, decal->normal) > DotProduct(decal->org, decal->normal) && VectorDistance2(decal->org, r_refdef.view.origin) < drawdist2 * (decal->size * decal->size))
+		if (!r_refdef.view.useperspective || (DotProduct(r_refdef.view.origin, decal->normal) > DotProduct(decal->org, decal->normal) && VectorDistance2(decal->org, r_refdef.view.origin) < drawdist2 * (decal->size * decal->size)))
 			R_MeshQueue_AddTransparent(TRANSPARENTSORT_DISTANCE, decal->org, R_DrawDecal_TransparentCallback, NULL, i, NULL);
 		continue;
 killdecal:
@@ -2659,7 +2654,7 @@ static void R_DrawParticle_TransparentCallback(const entity_render_t *ent, const
 	float minparticledist_start, minparticledist_end;
 	qboolean dofade;
 
-	RSurf_ActiveWorldEntity();
+	RSurf_ActiveModelEntity(r_refdef.scene.worldentity, false, false, false);
 
 	Vector4Set(colormultiplier, r_refdef.view.colorscale * (1.0 / 256.0f), r_refdef.view.colorscale * (1.0 / 256.0f), r_refdef.view.colorscale * (1.0 / 256.0f), cl_particles_alpha.value * (1.0 / 256.0f));
 
@@ -2723,10 +2718,14 @@ static void R_DrawParticle_TransparentCallback(const entity_render_t *ent, const
 			// note: lighting is not cheap!
 			if (particletype[p->typeindex].lighting)
 			{
+				float a[3], c[3], dir[3];
 				vecorg[0] = p->org[0];
 				vecorg[1] = p->org[1];
 				vecorg[2] = p->org[2];
-				R_LightPoint(c4f, vecorg, LP_LIGHTMAP | LP_RTWORLD | LP_DYNLIGHT);
+				R_CompleteLightPoint(a, c, dir, vecorg, LP_LIGHTMAP | LP_RTWORLD | LP_DYNLIGHT, r_refdef.scene.lightmapintensity, r_refdef.scene.ambientintensity);
+				c4f[0] = p->color[0] * colormultiplier[0] * (a[0] + 0.25f * c[0]);
+				c4f[1] = p->color[1] * colormultiplier[1] * (a[1] + 0.25f * c[1]);
+				c4f[2] = p->color[2] * colormultiplier[2] * (a[2] + 0.25f * c[2]);
 			}
 			// mix in the fog color
 			if (r_refdef.fogenabled)
@@ -2863,6 +2862,13 @@ static void R_DrawParticle_TransparentCallback(const entity_render_t *ent, const
 			t2f[6] = v[1];t2f[7] = tex->t1;
 			break;
 		}
+		if (r_showparticleedges.integer)
+		{
+			R_DebugLine(v3f, v3f + 3);
+			R_DebugLine(v3f + 3, v3f + 6);
+			R_DebugLine(v3f + 6, v3f + 9);
+			R_DebugLine(v3f + 9, v3f);
+		}
 	}
 
 	// now render batches of particles based on blendmode and texture
@@ -2878,7 +2884,7 @@ static void R_DrawParticle_TransparentCallback(const entity_render_t *ent, const
 		if (texture != particletexture[p->texnum].texture)
 		{
 			texture = particletexture[p->texnum].texture;
-			R_SetupShader_Generic(texture, NULL, GL_MODULATE, 1, false, false, false);
+			R_SetupShader_Generic(texture, false, false, false);
 		}
 
 		if (p->blendmode == PBLEND_INVMOD)
@@ -2985,7 +2991,7 @@ void R_DrawParticles (void)
 //				if (p->bounce && cl.time >= p->delayedcollisions)
 				if (p->bounce && cl_particles_collisions.integer && VectorLength(p->vel))
 				{
-					trace = CL_TraceLine(oldorg, p->org, MOVE_NOMONSTERS, NULL, SUPERCONTENTS_SOLID | SUPERCONTENTS_BODY | ((p->typeindex == pt_rain || p->typeindex == pt_snow) ? SUPERCONTENTS_LIQUIDSMASK : 0), 0, collision_extendmovelength.value, true, false, &hitent, false, false);
+					trace = CL_TraceLine(oldorg, p->org, MOVE_NORMAL, NULL, SUPERCONTENTS_SOLID | ((p->typeindex == pt_rain || p->typeindex == pt_snow) ? SUPERCONTENTS_LIQUIDSMASK : 0), 0, 0, collision_extendmovelength.value, true, false, &hitent, false, false);
 					// if the trace started in or hit something of SUPERCONTENTS_NODROP
 					// or if the trace hit something flagged as NOIMPACT
 					// then remove the particle
@@ -3089,7 +3095,7 @@ void R_DrawParticles (void)
 					break;
 				case pt_rain:
 					a = CL_PointSuperContents(p->org);
-					if (a & (SUPERCONTENTS_SOLID | SUPERCONTENTS_BODY | SUPERCONTENTS_LIQUIDSMASK))
+					if (a & (SUPERCONTENTS_SOLID | SUPERCONTENTS_LIQUIDSMASK))
 						goto killparticle;
 					break;
 				case pt_snow:
@@ -3101,7 +3107,7 @@ void R_DrawParticles (void)
 						p->vel[1] = p->vel[0] * 0.9f + lhrandom(-32, 32);
 					}
 					a = CL_PointSuperContents(p->org);
-					if (a & (SUPERCONTENTS_SOLID | SUPERCONTENTS_BODY | SUPERCONTENTS_LIQUIDSMASK))
+					if (a & (SUPERCONTENTS_SOLID | SUPERCONTENTS_LIQUIDSMASK))
 						goto killparticle;
 					break;
 				default:
@@ -3133,7 +3139,7 @@ void R_DrawParticles (void)
 								continue;
 					}
 			// anything else just has to be in front of the viewer and visible at this distance
-			if (DotProduct(p->org, r_refdef.view.forward) >= minparticledist_start && VectorDistance2(p->org, r_refdef.view.origin) < drawdist2 * (p->size * p->size))
+			if (!r_refdef.view.useperspective || (DotProduct(p->org, r_refdef.view.forward) >= minparticledist_start && VectorDistance2(p->org, r_refdef.view.origin) < drawdist2 * (p->size * p->size)))
 				R_MeshQueue_AddTransparent(TRANSPARENTSORT_DISTANCE, p->sortorigin, R_DrawParticle_TransparentCallback, NULL, i, NULL);
 			break;
 		}

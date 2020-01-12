@@ -59,16 +59,6 @@ void VID_Finish (void)
 {
 }
 
-int VID_SetGamma(unsigned short *ramps, int rampsize)
-{
-	return FALSE;
-}
-
-int VID_GetGamma(unsigned short *ramps, int rampsize)
-{
-	return FALSE;
-}
-
 void VID_Init(void)
 {
 	InitSig(); // trap evil signals
@@ -104,4 +94,9 @@ vid_mode_t *VID_GetDesktopMode(void)
 size_t VID_ListModes(vid_mode_t *modes, size_t maxcount)
 {
 	return 0;
+}
+
+qboolean GL_ExtensionSupported(const char *name)
+{
+	return false;
 }
