@@ -920,6 +920,8 @@ static void IN_Move_TouchScreen_Quake(void)
 	cl.viewangles[1] -= aim[0] * cl_yawspeed.value * cl.realframetime;
 }
 
+cvar_t vid_gameplayfix_steelstorm_touch = {0,"vid_gameplayfix_steelstorm_touch","0","change touchscreen behavior for steelstorm"};
+
 void IN_Move( void )
 {
 	static int old_x = 0, old_y = 0;

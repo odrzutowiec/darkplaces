@@ -1668,6 +1668,8 @@ static void CL_SignonReply (void)
 	}
 }
 
+cvar_t cl_gameplayfix_nehahra_demos = {0,"cl_gameplayfix_nehahra_demos","0","indicates if the protocol should be changed for unmarked Nehahra demos"};
+
 /*
 ==================
 CL_ParseServerInfo
@@ -3385,6 +3387,8 @@ static void CL_NetworkTimeReceived(double newtime)
 }
 
 #define SHOWNET(x) if(cl_shownet.integer==2)Con_Printf("%3i:%s(%i)\n", cl_message.readcount-1, x, cmd);
+
+cvar_t cl_gameplayfix_tenebrae_repeatparticle = {0,"cl_gameplayfix_tenebrae_repeatparticle","0","tenebrae spams netmessages for particles for some reason?"};
 
 /*
 =====================

@@ -3182,6 +3182,8 @@ static int M_QuitMessage(const char *line1, const char *line2, const char *line3
 	return 1;
 }
 
+cvar_t menu_mode_quit = {0, "menu_mode_quit", "0", "0 = Default, 1 = Quake and mods, 2 = Good vs Bad 2, 3 = Battlemech, 4 = Openquartz"};
+
 static int M_ChooseQuitMessage(int request)
 {
 	if (m_missingdata)

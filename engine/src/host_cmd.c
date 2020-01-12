@@ -344,6 +344,8 @@ SERVER TRANSITIONS
 ===============================================================================
 */
 
+cvar_t host_gameplayfix_deluxequake_clearwarpmark = {0,"host_gameplayfix_deluxequake_clearwarpmark","0"};
+
 /*
 ======================
 Host_Map_f
@@ -2134,6 +2136,8 @@ DEBUGGING TOOLS
 
 ===============================================================================
 */
+
+cvar_t host_give_mode = {0,"host_give_mode","0","0 = default, 1 = Hipnotic and Quoth, 2 = Rogue"};
 
 /*
 ==================

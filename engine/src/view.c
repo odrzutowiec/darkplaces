@@ -497,6 +497,8 @@ static void highpass3_limited(vec3_t value, vec_t fracx, vec_t limitx, vec_t fra
  *   viewmodelmatrix_nobob
  *   viewmodelmatrix_withbob
  */
+cvar_t cl_gameplayfix_goodvsbad2_chasecam = {0,"cl_gameplayfix_goodvsbad2_chasecam","0","change chasecam behavior for goodvsbad2"};
+
 void V_CalcRefdefUsing (const matrix4x4_t *entrendermatrix, const vec3_t clviewangles, qboolean teleported, qboolean clonground, qboolean clcmdjump, float clstatsviewheight, qboolean cldead, qboolean clintermission, const vec3_t clvelocity)
 {
 	float vieworg[3], viewangles[3], smoothtime;
@@ -1041,6 +1043,8 @@ void V_FadeViewFlashs(void)
 	if (cl.cshifts[CSHIFT_BONUS].percent <= 0)
 		cl.cshifts[CSHIFT_BONUS].percent = 0;
 }
+
+cvar_t cl_gameplayfix_transfusion_viewblend = {0,"cl_gameplayfix_transfusion_viewblend","0","change viewblend behavior for transfusion"};
 
 void V_CalcViewBlend(void)
 {

@@ -122,6 +122,8 @@ static qboolean WakeVideo( clvideo_t * video )
 	return true;
 }
 
+cvar_t cl_gameplayfix_bloodomnicide_subtitles = {0,"cl_gameplayfix_bloodomnicide_subtitles","0"};
+
 static void LoadSubtitles( clvideo_t *video, const char *subtitlesfile )
 {
 	char *subtitle_text;

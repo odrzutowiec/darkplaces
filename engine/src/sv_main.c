@@ -1168,6 +1168,8 @@ crosses a waterline.
 =============================================================================
 */
 
+cvar_t sv_gameplayfix_tenebrae_fulldynamic = {0,"sv_gameplayfix_tenebrae_fulldynamic","0","sigh"};
+
 static qboolean SV_PrepareEntityForSending (prvm_edict_t *ent, entity_state_t *cs, int enumber)
 {
 	prvm_prog_t *prog = SVVM_prog;
@@ -3722,6 +3724,8 @@ static void SVVM_count_edicts(prvm_prog_t *prog)
 	Con_Printf("touch     :%3i\n", solid);
 	Con_Printf("step      :%3i\n", step);
 }
+
+cvar_t sv_gameplayfix_transfusion_loadedict = {0,"sv_gameplayfix_transfusion_loadedict","0","don't try to load_edict for transfusion, it already does this in QC"};
 
 static qboolean SVVM_load_edict(prvm_prog_t *prog, prvm_edict_t *ent)
 {

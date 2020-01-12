@@ -915,6 +915,8 @@ matrix4x4_t viewmodelmatrix_nobob;
 
 static const vec3_t muzzleflashorigin = {18, 0, 0};
 
+cvar_t cl_gameplayfix_tenebrae_additivesprites = {0,"cl_gameplayfix_tenebrae_additivesprites","0","tenebrae sprites are additive"};
+
 void CL_SetEntityColormapColors(entity_render_t *ent, int colormap)
 {
 	const unsigned char *cbcolor;

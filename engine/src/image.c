@@ -1039,6 +1039,9 @@ imageformat_t imageformats_other[] =
 	{NULL, NULL}
 };
 
+cvar_t cl_gameplayfix_tenebrae_loadtextures = {0,"cl_gameplayfix_tenebrae_loadtextures","0","change texture loading behavior for tenebrae..."};
+cvar_t cl_gameplayfix_deluxequake_loadtextures = {0,"cl_gameplayfix_deluxequake_loadtextures","0"};
+
 int fixtransparentpixels(unsigned char *data, int w, int h);
 unsigned char *loadimagepixelsbgra (const char *filename, qboolean complain, qboolean allowFixtrans, qboolean convertsRGB, int *miplevel)
 {

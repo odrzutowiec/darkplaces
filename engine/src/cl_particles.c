@@ -927,6 +927,9 @@ void CL_SpawnDecalParticleForPoint(const vec3_t org, float maxdist, float size, 
 		CL_SpawnDecalParticleForSurface(besthitent, bestorg, bestnormal, color1, color2, texnum, size, alpha);
 }
 
+cvar_t cl_gameplayfix_goodvsbad2_particlefallback = {0,"cl_gameplayfix_goodvsbad2_particlefallback","0","change particle fallback behavior for goodvsbad2"};
+cvar_t cl_gameplayfix_prydon_particles = {0,"cl_gameplayfix_prydon_particles","0"};
+
 static void CL_Sparks(const vec3_t originmins, const vec3_t originmaxs, const vec3_t velocitymins, const vec3_t velocitymaxs, float sparkcount);
 static void CL_Smoke(const vec3_t originmins, const vec3_t originmaxs, const vec3_t velocitymins, const vec3_t velocitymaxs, float smokecount);
 static void CL_NewParticlesFromEffectinfo(int effectnameindex, float pcount, const vec3_t originmins, const vec3_t originmaxs, const vec3_t velocitymins, const vec3_t velocitymaxs, entity_t *ent, int palettecolor, qboolean spawndlight, qboolean spawnparticles, float tintmins[4], float tintmaxs[4], float fade, qboolean wanttrail);
@@ -1950,6 +1953,8 @@ void CL_ParticleCube (const vec3_t mins, const vec3_t maxs, const vec3_t dir, in
 		CL_NewParticle(center, pt_alphastatic, k, k, tex_particle, 2, 0, 255, 128, gravity, 0, lhrandom(mins[0], maxs[0]), lhrandom(mins[1], maxs[1]), lhrandom(mins[2], maxs[2]), dir[0], dir[1], dir[2], 0, 0, 0, randomvel, true, 0, 1, PBLEND_ALPHA, PARTICLE_BILLBOARD, -1, -1, -1, 1, 1, 0, 0, NULL);
 	}
 }
+
+cvar_t cl_gameplayfix_goodvsbad2_rain = {0,"cl_gameplayfix_goodvsbad2_rain","0","change rain behavior for goodvsbad2"};
 
 void CL_ParticleRain (const vec3_t mins, const vec3_t maxs, const vec3_t dir, int count, int colorbase, int type)
 {

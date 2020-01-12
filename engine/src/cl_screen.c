@@ -1885,6 +1885,8 @@ void SHOWLMP_decodehide(void)
 		}
 }
 
+cvar_t cl_gameplayfix_nehahra_showlmpbyte = {0,"cl_gameplayfix_nehahra_showlmpbyte","0","switch to reading a byte for... something, for nehahra"};
+
 void SHOWLMP_decodeshow(void)
 {
 	int k;

@@ -113,7 +113,7 @@ void Mod_BrushInit(void)
 
 	// these games were made for older DP engines and are no longer
 	// maintained; use this hack to show their textures properly
-	if(gamemode == GAME_NEXUIZ)
+	if(gamemode == GAME_NEXUIZ) // TODO: Just add this to the cbuf thing
 		Cvar_SetQuick(&mod_q3shader_force_addalpha, "1");
 
 	memset(&mod_q1bsp_texture_solid, 0, sizeof(mod_q1bsp_texture_solid));
@@ -1641,6 +1641,8 @@ static void R_Q1BSP_LoadSplitSky (unsigned char *src, int width, int height, int
 	Mem_Free(solidpixels);
 	Mem_Free(alphapixels);
 }
+
+extern cvar_t cl_gameplayfix_tenebrae_loadtextures;
 
 static void Mod_Q1BSP_LoadTextures(sizebuf_t *sb)
 {

@@ -1734,6 +1734,7 @@ static int Con_DrawNotifyRect(int mask_must, int mask_mustnot, float maxage, flo
 }
 
 extern cvar_t cl_gameplayfix_nexuiz_notifyalign;
+cvar_t cl_gameplayfix_transfusion_convertical = {0,"cl_gameplayfix_transfusion_convertical","0","vertical offset for console(?), for transfusion"};
 
 /*
 ================

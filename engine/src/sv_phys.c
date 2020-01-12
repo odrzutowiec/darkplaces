@@ -44,9 +44,12 @@ solid_edge items only clip against bsp models.
 
 void SV_Physics_Toss (prvm_edict_t *ent);
 
+extern cvar_t sv_gameplayfix_tenebrae_fulldynamic;
+
 int SV_GetPitchSign(prvm_prog_t *prog, prvm_edict_t *ent)
 {
 	dp_model_t *model;
+	// Cloudwalk: This speaks to me. It sounds like free-form jazz.
 	if (
 			(model = SV_GetModelFromEdict(ent))
 			?

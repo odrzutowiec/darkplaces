@@ -1739,6 +1739,8 @@ void Key_EventQueue_Unblock(void)
 	eventqueue_idx = 0;
 }
 
+cvar_t cl_gameplayfix_bloodomnicide_fkeys = {0,"cl_gameplayfix_bloodomnicide_fkeys","0"};
+
 void
 Key_Event (int key, int ascii, qboolean down)
 {

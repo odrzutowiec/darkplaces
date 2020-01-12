@@ -342,6 +342,8 @@ void R_FillColors(float *out, int verts, float r, float g, float b, float a)
 	}
 }
 
+cvar_t cl_gameplayfix_nehahra_fog = {0,"cl_gameplayfix_nehahra_fog","0","different working fog for nehahra"};
+
 // FIXME: move this to client?
 void FOG_clear(void)
 {
@@ -3165,6 +3167,8 @@ static void gl_main_newmap(void)
 	R_BufferData_Reset();
 }
 
+cvar_t cl_gameplayfix_fullbrights = {0,"cl_gameplayfix_fullbrights","0","set mat_fullbrights to 0 for nehahra and tenebrae, for some reason..."};
+
 void GL_Main_Init(void)
 {
 	int i;
@@ -3351,7 +3355,7 @@ void GL_Main_Init(void)
 		Cvar_RegisterVariable(&r_buffermegs[i]);
 	Cvar_RegisterVariable(&r_batch_dynamicbuffer);
 	if (gamemode == GAME_NEHAHRA || gamemode == GAME_TENEBRAE)
-		Cvar_SetValue("r_fullbrights", 0);
+		Cvar_SetValue("r_fullbrights", 0); // TODO: Just add this to the cbuf stuff?
 #ifdef DP_MOBILETOUCH
 	// GLES devices have terrible depth precision in general, so...
 	Cvar_SetValueQuick(&r_nearclip, 4);
