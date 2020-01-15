@@ -990,7 +990,7 @@ static void CL_ClientMovement_Move(cl_clientmovement_state_t *s)
 		VectorCopy(primalvelocity, s->velocity);
 }
 
-extern cvar_t cl_gameplayfix_xonotic_swimvelocity;
+cvar_t cl_gameplayfix_xonotic_swimvelocity = {0,"cl_gameplayfix_xonotic_swimvelocity","0","change swim velocity to 200 for xonotic"};
 
 static void CL_ClientMovement_Physics_Swim(cl_clientmovement_state_t *s)
 {

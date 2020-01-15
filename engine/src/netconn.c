@@ -2502,7 +2502,7 @@ static void NetConn_BuildChallengeString(char *buffer, int bufferlength)
 	buffer[i] = 0;
 }
 
-extern cvar_t sv_gameplayfix_xonotic_teamplay;
+cvar_t sv_gameplayfix_xonotic_teamplay = {0,"sv_gameplayfix_xonotic_teamplay","0","change team colors for xonotic"};
 
 /// (div0) build the full response only if possible; better a getinfo response than no response at all if getstatus won't fit
 static qboolean NetConn_BuildStatusResponse(const char* challenge, char* out_msg, size_t out_size, qboolean fullstatus)

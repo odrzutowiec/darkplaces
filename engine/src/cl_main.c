@@ -96,7 +96,7 @@ cvar_t cl_locs_show = {0, "locs_show", "0", "shows defined locations for editing
 client_static_t	cls;
 client_state_t	cl;
 
-extern cvar_t cl_gameplayfix_xonotic_playerbbox;
+cvar_t cl_gameplayfix_xonotic_playerbbox = {0,"cl_gameplayfix_xonotic_playerbbox","0","change player bounding box for xonotic"};
 
 /*
 =====================
@@ -1193,7 +1193,7 @@ static void CL_UpdateNetworkEntity(entity_t *e, int recursionlimit, qboolean int
 	CL_UpdateRenderEntity(&e->render);
 }
 
-extern cvar_t cl_gameplayfix_xonotic_plasmatrail;
+cvar_t cl_gameplayfix_xonotic_plasmatrail = {0,"cl_gameplayfix_xonotic_plasmatrail","0","change trail type for xonotic"};
 
 // creates light and trails from an entity
 static void CL_UpdateNetworkEntityTrail(entity_t *e)

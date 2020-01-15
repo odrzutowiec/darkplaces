@@ -91,20 +91,7 @@ cvar_t timeformat = {CVAR_SAVE, "timeformat", "[%Y-%m-%d %H:%M:%S] ", "time form
 cvar_t sessionid = {CVAR_READONLY, "sessionid", "", "ID of the current session (use the -sessionid parameter to set it); this is always either empty or begins with a dot (.)"};
 cvar_t locksession = {0, "locksession", "0", "Lock the session? 0 = no, 1 = yes and abort on failure, 2 = yes and continue on failure"};
 
-cvar_t cl_gameplayfix_xonotic_swimvelocity = {0,"cl_gameplayfix_xonotic_swimvelocity","0","change swim velocity to 200 for xonotic"};
-cvar_t cl_gameplayfix_xonotic_playerbbox = {0,"cl_gameplayfix_xonotic_playerbbox","0","change player bounding box for xonotic"};
-cvar_t cl_gameplayfix_xonotic_plasmatrail = {0,"cl_gameplayfix_xonotic_plasmatrail","0","change trail type for xonotic"};
-cvar_t cl_gameplayfix_xonotic_brokendownload = {0,"cl_gameplayfix_xonotic_brokendownload","0","don't use broken download protocol for xonotic"};
-cvar_t cl_gameplayfix_xonotic_dlsave = {0,"cl_gameplayfix_xonotic_dlsave","0","save downloads to disk for xonotic(?)"};
-cvar_t cl_gameplayfix_xonotic_rainbowclothes = {0,"cl_gameplayfix_xonotic_rainbowclothes","0","play with the color palette on pants and shirt for xonotic"};
-cvar_t cl_gameplayfix_xonotic_chatsound = {0,"cl_gameplayfix_xonotic_chatsound","0","change the chat sound trigger for xonotic"};
-cvar_t sv_gameplayfix_xonotic_teamplay = {0,"sv_gameplayfix_xonotic_teamplay","0","change team colors for xonotic"};
-cvar_t showspeed_conversion_ms = {0,"showspeed_conversion_ms","0.0381","Meters/sec - 0.0254 for Xonotic, 0.0381 for everything else"};
-cvar_t showspeed_conversion_kmh = {0,"showspeed_conversion_kmh","0.13716","Kilometers/hour - 0.09144 for Xonotic, 0.13716 for everything else"};
-cvar_t showspeed_conversion_mph = {0,"showspeed_conversion_mph","0.085227273","Miles/hour - 0.056818182 for Xonotic, 0.085227273 for everything else"};
-cvar_t showspeed_conversion_kts = {0,"showspeed_conversion_kts","","Knots - 0.04937365 for Xonotic, 0.074060475 for everything else"};
-
-
+cvar_t host_gameplayfix_startmapmode = {0,"host_gameplayfix_startmapmode","0","0 = default, 1 = nehahra, 2 = transfusion, 3 = teu"};
 
 /*
 ================
@@ -247,6 +234,14 @@ void Host_LoadConfig_f(void);
 extern cvar_t sv_writepicture_quality;
 extern cvar_t r_texture_jpeg_fastpicmip;
 
+extern cvar_t cl_gameplayfix_xonotic_swimvelocity;
+extern cvar_t cl_gameplayfix_xonotic_playerbbox;
+extern cvar_t cl_gameplayfix_xonotic_plasmatrail;
+extern cvar_t cl_gameplayfix_xonotic_brokendownload;
+extern cvar_t cl_gameplayfix_xonotic_dlsave;
+extern cvar_t cl_gameplayfix_xonotic_rainbowclothes;
+extern cvar_t cl_gameplayfix_xonotic_chatsound;
+extern cvar_t sv_gameplayfix_xonotic_teamplay;
 extern cvar_t shareware;
 extern cvar_t cl_gameplayfix_nehahra_demos;
 extern cvar_t cl_gameplayfix_nehahra_showlmpbyte;
@@ -263,11 +258,10 @@ extern cvar_t cl_gameplayfix_nexuiz_notifyalign;
 extern cvar_t sv_gameplayfix_nexuiz_evilfrags;
 extern cvar_t cl_gameplayfix_nexuiz_moveflag;
 extern cvar_t cl_gameplayfix_nexuiz_texturehack;
-cvar_t vid_gameplayfix_steelstorm_touch = {0,"vid_gameplayfix_steelstorm_touch","0","change touchscreen behavior for steelstorm"};
-cvar_t menu_mode = {0,"menu_mode","0","0 = quake, 1 = nehahra,"};
-cvar_t menu_mode_maplist = {0,"menu_mode_maplist","0","description"};
-cvar_t menu_mode_quit = {0, "menu_mode_quit", "0", "0 = Default, 1 = Quake and mods, 2 = Good vs Bad 2, 3 = Battlemech, 4 = Openquartz"};
-cvar_t host_gameplayfix_startmapmode = {0,"host_gameplayfix_startmapmode","0","0 = default, 1 = nehahra, 2 = transfusion, 3 = teu"};
+extern cvar_t vid_gameplayfix_steelstorm_touch;
+extern cvar_t menu_mode;
+extern cvar_t menu_mode_maplist;
+extern cvar_t menu_mode_quit;
 extern cvar_t cl_gameplayfix_bloodomnicide_subtitles;
 extern cvar_t cl_gameplayfix_bloodomnicide_fkeys;
 extern cvar_t host_gameplayfix_deluxequake_clearwarpmark;
@@ -280,6 +274,10 @@ extern cvar_t cl_gameplayfix_transfusion_viewmodelalpha;
 extern cvar_t sv_gameplayfix_transfusion_loadedict;
 extern cvar_t cl_gameplayfix_transfusion_viewblend;
 extern cvar_t cl_gameplayfix_prydon_particles;
+extern cvar_t showspeed_conversion_ms;
+extern cvar_t showspeed_conversion_kmh;
+extern cvar_t showspeed_conversion_mph;
+extern cvar_t showspeed_conversion_kts;
 
 static void Host_InitLocal (void)
 {

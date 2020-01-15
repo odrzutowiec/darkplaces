@@ -30,7 +30,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 static cvar_t forceqmenu = { 0, "forceqmenu", "0", "enables the quake menu instead of the quakec menu.dat (if present)" };
 static cvar_t menu_progs = { 0, "menu_progs", "menu.dat", "name of quakec menu.dat file" };
-extern cvar_t menu_mode;
+cvar_t menu_mode = {0,"menu_mode","0","0 = quake, 1 = nehahra,"};
 static int NehGameType;
 
 enum m_state_e m_state;
@@ -3182,7 +3182,7 @@ static int M_QuitMessage(const char *line1, const char *line2, const char *line3
 	return 1;
 }
 
-extern cvar_t menu_mode_quit;
+cvar_t menu_mode_quit = {0, "menu_mode_quit", "0", "0 = Default, 1 = Quake and mods, 2 = Good vs Bad 2, 3 = Battlemech, 4 = Openquartz"};
 
 // default = 0
 // normal, hipnotic, rogue, quoth, nehahra, defeatindetail2 = 1
@@ -3930,7 +3930,7 @@ typedef struct gameinfo_s
 }
 gameinfo_t;
 
-extern cvar_t menu_mode_maplist;
+cvar_t menu_mode_maplist = {0,"menu_mode_maplist","0","description"};
 
 static gameinfo_t gamelist[] =
 {

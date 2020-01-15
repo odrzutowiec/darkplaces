@@ -1118,7 +1118,7 @@ static char Sys_Con_NearestColor(const unsigned char _r, const unsigned char _g,
 		return '1';
 }
 
-extern cvar_t cl_gameplayfix_xonotic_chatsound;
+cvar_t cl_gameplayfix_xonotic_chatsound = {0,"cl_gameplayfix_xonotic_chatsound","0","change the chat sound trigger for xonotic"};
 
 /*
 ================

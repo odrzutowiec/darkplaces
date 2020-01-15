@@ -2683,7 +2683,9 @@ extern cvar_t cl_minfps_qualitymultiply;
 extern cvar_t cl_minfps_qualityhysteresis;
 extern cvar_t cl_minfps_qualitystepmax;
 extern cvar_t cl_minfps_force;
-extern cvar_t cl_gameplayfix_xonotic_rainbowclothes;
+
+cvar_t cl_gameplayfix_xonotic_rainbowclothes = {0,"cl_gameplayfix_xonotic_rainbowclothes","0","play with the color palette on pants and shirt for xonotic"};
+
 static double cl_updatescreen_quality = 1;
 void CL_UpdateScreen(void)
 {

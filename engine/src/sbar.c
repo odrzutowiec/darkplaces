@@ -1031,10 +1031,10 @@ time_t current_time = 3;
 time_t top_time = 0;
 time_t topxy_time = 0;
 
-extern cvar_t showspeed_conversion_ms;
-extern cvar_t showspeed_conversion_kmh;
-extern cvar_t showspeed_conversion_mph;
-extern cvar_t showspeed_conversion_kts;
+cvar_t showspeed_conversion_ms = {0,"showspeed_conversion_ms","0.0381","Meters/sec - 0.0254 for Xonotic, 0.0381 for everything else"};
+cvar_t showspeed_conversion_kmh = {0,"showspeed_conversion_kmh","0.13716","Kilometers/hour - 0.09144 for Xonotic, 0.13716 for everything else"};
+cvar_t showspeed_conversion_mph = {0,"showspeed_conversion_mph","0.085227273","Miles/hour - 0.056818182 for Xonotic, 0.085227273 for everything else"};
+cvar_t showspeed_conversion_kts = {0,"showspeed_conversion_kts","","Knots - 0.04937365 for Xonotic, 0.074060475 for everything else"};
 
 static void get_showspeed_unit(int unitnumber, double *conversion_factor, const char **unit)
 {

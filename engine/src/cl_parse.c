@@ -1078,7 +1078,7 @@ static void CL_UpdateItemsAndWeapon(void)
 #define LOADPROGRESSWEIGHT_WORLDMODEL      30.0
 #define LOADPROGRESSWEIGHT_WORLDMODEL_INIT  2.0
 
-extern cvar_t cl_gameplayfix_xonotic_brokendownload;
+cvar_t cl_gameplayfix_xonotic_brokendownload = {0,"cl_gameplayfix_xonotic_brokendownload","0","don't use broken download protocol for xonotic"};
 
 static void CL_BeginDownloads(qboolean aborteddownload)
 {
@@ -1378,7 +1378,7 @@ static void CL_BeginDownloads_f(void)
 		CL_BeginDownloads(false);
 }
 
-extern cvar_t cl_gameplayfix_xonotic_dlsave;
+cvar_t cl_gameplayfix_xonotic_dlsave = {0,"cl_gameplayfix_xonotic_dlsave","0","save downloads to disk for xonotic(?)"};
 
 static void CL_StopDownload(int size, int crc)
 {
