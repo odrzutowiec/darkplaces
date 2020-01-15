@@ -21,7 +21,7 @@
 
 */
 
-// LordHavoc: adapted to not require stdint.h as this is not available on MSVC++, using unsigned char instead of uint8_t and fs_offset_t instead of int64_t.
+// LadyHavoc: adapted to not require stdint.h as this is not available on MSVC++, using unsigned char instead of uint8_t and fs_offset_t instead of int64_t.
 
 #include "quakedef.h"
 #include "cl_video.h"

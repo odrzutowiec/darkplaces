@@ -293,7 +293,7 @@ static void print_help (cvar_t *var, qboolean full)
 	Con_Printf("- %s\n", var->description);
 }
 
-// written by LordHavoc
+// written by LadyHavoc
 void Cvar_CompleteCvarPrint (const char *partial)
 {
 	cvar_t *cvar;
@@ -385,7 +385,7 @@ static void Cvar_SetQuick_Internal (cvar_t *var, const char *value)
 	float value_check, value_min, value_max;
 
 	changed = strcmp(var->string, value) != 0;
-	// LordHavoc: don't reallocate when there is no change
+	// LadyHavoc: don't reallocate when there is no change
 	if (!changed)
 		return;
 
@@ -404,7 +404,7 @@ static void Cvar_SetQuick_Internal (cvar_t *var, const char *value)
 	if (var->check_ex)
 		value = var->check_ex(value);
 
-	// LordHavoc: don't reallocate when the buffer is the same size
+	// LadyHavoc: don't reallocate when the buffer is the same size
 	valuelen = strlen(value);
 	if (!var->string || strlen(var->string) != valuelen)
 	{
