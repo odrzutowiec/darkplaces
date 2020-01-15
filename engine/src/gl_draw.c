@@ -270,17 +270,17 @@ cachepic_t *Draw_NewPic(const char *picname, int width, int height, unsigned cha
 			pic->lastusedframe = draw_frame;
 			return pic;
 		}
-		Con_Printf("Draw_NewPic(\"%s\"): frame %i: reloading pic because flags/size changed\n", picname, draw_frame);
+		Con_DPrintf("Draw_NewPic(\"%s\"): frame %i: reloading pic because flags/size changed\n", picname, draw_frame);
 	}
 	else
 	{
 		if (numcachepics == MAX_CACHED_PICS)
 		{
-			Con_Printf ("Draw_NewPic(\"%s\"): frame %i: numcachepics == MAX_CACHED_PICS\n", picname, draw_frame);
+			Con_DPrintf ("Draw_NewPic(\"%s\"): frame %i: numcachepics == MAX_CACHED_PICS\n", picname, draw_frame);
 			// FIXME: support NULL in callers?
 			return cachepics; // return the first one
 		}
-		Con_Printf("Draw_NewPic(\"%s\"): frame %i: creating new cachepic\n", picname, draw_frame);
+		Con_DPrintf("Draw_NewPic(\"%s\"): frame %i: creating new cachepic\n", picname, draw_frame);
 		pic = cachepics + (numcachepics++);
 		memset(pic, 0, sizeof(*pic));
 		strlcpy (pic->name, picname, sizeof(pic->name));
