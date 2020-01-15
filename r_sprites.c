@@ -381,7 +381,7 @@ static void R_Model_Sprite_Draw_TransparentCallback(const entity_render_t *ent, 
 		break;
 	}
 
-	// LordHavoc: interpolated sprite rendering
+	// LadyHavoc: interpolated sprite rendering
 	for (i = 0;i < MAX_FRAMEBLENDS;i++)
 	{
 		if (ent->frameblend[i].lerp >= 0.01f)
@@ -420,7 +420,7 @@ static void R_Model_Sprite_Draw_TransparentCallback(const entity_render_t *ent, 
 				for (i = 0; i < 4; i++)
 					R_DebugLine(vertex3f + i * 3, vertex3f + ((i + 1) % 4) * 3);
 
-			R_DrawCustomSurface_Texture(texture, &identitymatrix, texture->currentmaterialflags, 0, 4, 0, 2, false, false);
+			R_DrawCustomSurface_Texture(texture, &identitymatrix, texture->currentmaterialflags, 0, 4, 0, 2, false, false, false);
 		}
 	}
 
