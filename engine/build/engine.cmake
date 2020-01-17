@@ -18,7 +18,9 @@
 
 ### VARIABLES ###
 
-set(ENGINE_PLATFLAGS "-Wall -Wno-pointer-sign -Wno-unknown-pragmas -Wno-format-zero-length -Wno-strict-aliasing -Dstrnicmp=strncasecmp -Dstricmp=strcasecmp")
+set(ENGINE_PLATFLAGS "-Wall -Wold-style-definition -Wstrict-prototypes -Wdeclaration-after-statement -Wmissing-prototypes -Wsign-compare -Wno-pointer-sign -Wno-unknown-pragmas -Wno-format-zero-length -Wno-strict-aliasing -Dstrnicmp=strncasecmp -Dstricmp=strcasecmp")
+
+set(ENGINE_FLAGS "${ENGINE_FLAGS} -MMD -DCONFIG_VIDEO_CAPTURE")
 
 if(ENGINE_VERSION)
 	set(ENGINE_FLAGS "${ENGINE_FLAGS} -DSVNREVISION='${ENGINE_VERSION}'")
@@ -150,8 +152,8 @@ set(OBJ_MENU
 set(OBJ_SV
 	${ENGINE_DIR}/sys_linux.c
 	${ENGINE_DIR}/vid_null.c
-	${ENGINE_DIR}/thread_null.c
 	${ENGINE_DIR}/snd_null.c
+	${ENGINE_DIR}/thread_sdl.c
 )
 
 set(OBJ_CL

@@ -378,6 +378,7 @@ extern char engineversion[128];
 #include "sys.h"
 #include "vid.h"
 #include "mathlib.h"
+#include "thread.h"
 
 #include "r_textures.h"
 
