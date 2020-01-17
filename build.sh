@@ -523,7 +523,7 @@ build_start_config() {
 }
 
 build_start_compile() {
-	local cmd_cmake_build="cmake --build $option_build_dir --parallel $option_build_threads"
+	local cmd_cmake_build="cmake --build $option_build_dir -- -j$option_build_threads"
 
 	printf "* CMake build commandline: %s\n\n" "$cmd_cmake_build"
 	if ! eval "$cmd_cmake_build"; then
