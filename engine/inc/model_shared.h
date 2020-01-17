@@ -1232,7 +1232,9 @@ texture_t *Mod_Mesh_GetTexture(dp_model_t *mod, const char *name, int defaultdra
 msurface_t *Mod_Mesh_AddSurface(dp_model_t *mod, texture_t *tex, qboolean batchwithprevioussurface);
 int Mod_Mesh_IndexForVertex(dp_model_t *mod, msurface_t *surf, float x, float y, float z, float nx, float ny, float nz, float s, float t, float u, float v, float r, float g, float b, float a);
 void Mod_Mesh_AddTriangle(dp_model_t *mod, msurface_t *surf, int e0, int e1, int e2);
+void Mod_Mesh_ComputeBounds(dp_model_t *mod);
 void Mod_Mesh_Validate(dp_model_t *mod);
+void Mod_Mesh_UploadDynamicBuffers(dp_model_t *mod);
 void Mod_Mesh_Finalize(dp_model_t *mod);
 
 // Collision optimization using Bounding Interval Hierarchy

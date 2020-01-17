@@ -144,6 +144,7 @@ void R_Shadow_RenderMode_ActiveLight(const rtlight_t *rtlight);
 void R_Shadow_RenderMode_Reset(void);
 void R_Shadow_RenderMode_Lighting(qboolean transparent, qboolean shadowmapping, qboolean noselfshadowpass);
 void R_Shadow_RenderMode_DrawDeferredLight(qboolean shadowmapping);
+void R_Shadow_BounceGrid_ClearTex_Task(taskqueue_task_t *t);
 void R_Shadow_RenderMode_VisibleLighting(qboolean transparent);
 void R_Shadow_RenderMode_End(void);
 void R_Shadow_ClearStencil(void);
@@ -166,6 +167,7 @@ void R_RTLight_Uncompile(rtlight_t *rtlight);
 void R_Shadow_PrepareLights(void);
 void R_Shadow_ClearShadowMapTexture(void);
 void R_Shadow_DrawPrepass(void);
+qboolean R_Shadow_PrepareLights_AddSceneLight(rtlight_t *rtlight);
 void R_Shadow_DrawLights(void);
 void R_Shadow_DrawCoronas(void);
 

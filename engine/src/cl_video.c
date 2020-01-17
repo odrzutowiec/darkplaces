@@ -1,6 +1,7 @@
 
 #include "quakedef.h"
 #include "cl_video.h"
+#include "cl_video_libavw.h"
 
 // cvars
 cvar_t cl_video_subtitles = {CVAR_SAVE, "cl_video_subtitles", "0", "show subtitles for videos (if they are present)"};

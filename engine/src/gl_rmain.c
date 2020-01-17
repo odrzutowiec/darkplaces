@@ -993,7 +993,6 @@ static char *R_ShaderStrCat(const char **strings)
 	return string;
 }
 
-static char *R_ShaderStrCat(const char **strings);
 static void R_InitShaderModeInfo(void)
 {
 	int i, language;
@@ -2248,7 +2247,6 @@ skinframe_t *R_SkinFrame_LoadExternal(const char *name, int textureflags, qboole
 	return R_SkinFrame_LoadExternal_SkinFrame(skinframe, name, textureflags, complain, fallbacknotexture);
 }
 
-extern cvar_t gl_picmip;
 skinframe_t *R_SkinFrame_LoadExternal_SkinFrame(skinframe_t *skinframe, const char *name, int textureflags, qboolean complain, qboolean fallbacknotexture)
 {
 	int j;
@@ -3892,12 +3890,14 @@ void R_AnimCache_CacheVisibleEntities(void)
 qboolean R_CanSeeBox(int numsamples, vec_t eyejitter, vec_t entboxenlarge, vec_t entboxexpand, vec_t pad, vec3_t eye, vec3_t entboxmins, vec3_t entboxmaxs)
 {
 	int i;
+	long unsigned int j;
 	vec3_t eyemins, eyemaxs;
 	vec3_t boxmins, boxmaxs;
 	vec3_t padmins, padmaxs;
 	vec3_t start;
 	vec3_t end;
 	dp_model_t *model = r_refdef.scene.worldmodel;
+	trace_t trace;
 	static vec3_t positions[] = {
 		{ 0.5f, 0.5f, 0.5f },
 		{ 0.0f, 0.0f, 0.0f },
@@ -3950,14 +3950,14 @@ qboolean R_CanSeeBox(int numsamples, vec_t eyejitter, vec_t entboxenlarge, vec_t
 	// try specific positions in the box first - note that these can be cached
 	if (r_cullentities_trace_entityocclusion.integer)
 	{
-		for (i = 0; i < sizeof(positions) / sizeof(positions[0]); i++)
+		for (j = 0; j < sizeof(positions) / sizeof(positions[0]); j++)
 		{
 			VectorCopy(eye, start);
-			end[0] = boxmins[0] + (boxmaxs[0] - boxmins[0]) * positions[i][0];
-			end[1] = boxmins[1] + (boxmaxs[1] - boxmins[1]) * positions[i][1];
-			end[2] = boxmins[2] + (boxmaxs[2] - boxmins[2]) * positions[i][2];
+			end[0] = boxmins[0] + (boxmaxs[0] - boxmins[0]) * positions[j][0];
+			end[1] = boxmins[1] + (boxmaxs[1] - boxmins[1]) * positions[j][1];
+			end[2] = boxmins[2] + (boxmaxs[2] - boxmins[2]) * positions[j][2];
 			//trace_t trace = CL_TraceLine(start, end, MOVE_NORMAL, NULL, SUPERCONTENTS_SOLID, SUPERCONTENTS_SKY, MATERIALFLAGMASK_TRANSLUCENT, 0.0f, true, false, NULL, true, true);
-			trace_t trace = CL_Cache_TraceLineSurfaces(start, end, MOVE_NORMAL, SUPERCONTENTS_SOLID, 0, MATERIALFLAGMASK_TRANSLUCENT);
+			trace = CL_Cache_TraceLineSurfaces(start, end, MOVE_NORMAL, SUPERCONTENTS_SOLID, 0, MATERIALFLAGMASK_TRANSLUCENT);
 			// not picky - if the trace ended anywhere in the box we're good
 			if (BoxesOverlap(trace.endpos, trace.endpos, padmins, padmaxs))
 				return true;

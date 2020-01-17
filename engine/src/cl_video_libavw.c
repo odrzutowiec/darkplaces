@@ -25,6 +25,7 @@
 
 #include "quakedef.h"
 #include "cl_video.h"
+#include "cl_video_libavw.h"
 
 // scaler type
 #define LIBAVW_SCALER_BILINEAR  0
@@ -98,23 +99,6 @@ const char* dllnames_libavw[] =
 };
 
 static dllhandle_t libavw_dll = NULL;
-
-// DP videostream
-typedef struct libavwstream_s
-{
-	qfile_t     *file;
-	double       info_framerate;
-	unsigned int info_imagewidth;
-	unsigned int info_imageheight;
-	double       info_aspectratio;
-	void        *stream;
-
-	// channel the sound file is being played on
-	sfx_t *sfx;
-	int    sndchan;
-	int    sndstarted;
-}
-libavwstream_t;
 
 cvar_t cl_video_libavw_minwidth  = {CVAR_SAVE, "cl_video_libavw_minwidth", "0", "if videos width is lesser than minimal, thay will be upscaled"};
 cvar_t cl_video_libavw_minheight = {CVAR_SAVE, "cl_video_libavw_minheight", "0", "if videos height is lesser than minimal, thay will be upscaled"};

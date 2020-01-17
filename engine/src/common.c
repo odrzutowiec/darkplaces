@@ -2059,6 +2059,7 @@ void InfoString_SetValue(char *buffer, size_t bufferlength, const char *key, con
 {
 	int pos = 0, pos2;
 	size_t keylength;
+	char tempbuffer[MAX_INPUTLINE];
 	if (!key)
 		key = "";
 	if (!value)
@@ -2103,8 +2104,6 @@ void InfoString_SetValue(char *buffer, size_t bufferlength, const char *key, con
 		Con_Printf("InfoString_SetValue: no room for \"%s\" \"%s\" in infostring\n", key, value);
 		return;
 	}
-	
-	char tempbuffer[MAX_INPUTLINE];
 	
 	strlcpy(tempbuffer, buffer + pos2, sizeof(tempbuffer));
 	

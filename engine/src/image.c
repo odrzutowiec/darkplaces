@@ -1047,6 +1047,7 @@ unsigned char *loadimagepixelsbgra (const char *filename, qboolean complain, qbo
 	unsigned char *f, *data = NULL, *data2 = NULL;
 	char basename[MAX_QPATH], name[MAX_QPATH], name2[MAX_QPATH], path[MAX_QPATH], afterpath[MAX_QPATH], *c;
 	char vabuf[1024];
+	int mymiplevel;
 	//if (developer_memorydebug.integer)
 	//	Mem_CheckSentinelsGlobal();
 	if (developer_texturelogging.integer)
@@ -1152,7 +1153,7 @@ unsigned char *loadimagepixelsbgra (const char *filename, qboolean complain, qbo
 			if (developer_loading.integer)
 				Con_Printf("loading gfx.wad lump \"%s\"\n", afterpath);
 
-			int mymiplevel = miplevel ? *miplevel : 0;
+			mymiplevel = miplevel ? *miplevel : 0;
 			if (!strcmp(afterpath, "conchars"))
 			{
 				// conchars is a raw image and with color 0 as transparent instead of 255
@@ -1885,13 +1886,13 @@ static unsigned char *Image_GenerateDitherPattern(void)
 // also used in R_SkinFrame code
 unsigned char *Image_GenerateNoTexture(void)
 {
+	unsigned char black[4] = {0,0,0,255};
+	unsigned char pink[4] = {255,0,255,255};
 	int x = 0; int y = x;
 	unsigned char *data = (unsigned char *)Mem_Alloc(tempmempool, 16 * 16 * 4);
 	image_width = 16;
 	image_height = 16;
 	// This makes a bright pink/black checkerboard texture
-	unsigned char black[4] = {0,0,0,255};
-	unsigned char pink[4] = {255,0,255,255};
 
 	for (y = 0; y < 16; y++) {
 		for (x = 0; x < 16; x++) {

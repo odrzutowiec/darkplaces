@@ -2651,7 +2651,7 @@ void Mod_LoadCustomMaterial(mempool_t *mempool, texture_t *texture, const char *
 
 void Mod_UnloadCustomMaterial(texture_t *texture, qboolean purgeskins)
 {
-	int i, j;
+	unsigned int i, j;
 	for (i = 0; i < sizeof(texture->shaderpasses) / sizeof(texture->shaderpasses[0]); i++)
 	{
 		if (texture->shaderpasses[i])

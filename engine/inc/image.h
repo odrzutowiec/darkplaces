@@ -38,6 +38,8 @@ qboolean LoadPCX_PaletteOnly(const unsigned char *f, int filesize, unsigned char
 // get the metadata from a Quake2 wal file
 qboolean LoadWAL_GetMetadata(const unsigned char *f, int filesize, int *retwidth, int *retheight, int *retflags, int *retvalue, int *retcontents, char *retanimname32c);
 
+unsigned char *LoadConChars_BGRA(const unsigned char *f, int filesize, int *miplevel);
+
 // loads a texture, as a texture
 rtexture_t *loadtextureimage (rtexturepool_t *pool, const char *filename, qboolean complain, int flags, qboolean allowFixtrans, qboolean sRGB);
 
