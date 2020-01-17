@@ -741,6 +741,8 @@ void Host_Main(void)
 			}
 		}
 
+		TaskQueue_Frame(false);
+
 		// keep the random time dependent, but not when playing demos/benchmarking
 		if(!*sv_random_seed.string && !cls.demoplayback)
 			rand();
