@@ -29,6 +29,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "csprogs.h"
 #include "sv_demo.h"
 #include "snd_main.h"
+#include "taskqueue.h"
+#include "thread.h"
 #include "utf8lib.h"
 
 /*
@@ -1267,6 +1269,7 @@ static void Host_Init (void)
 	Host_ServerOptions();
 
 	Thread_Init();
+	TaskQueue_Init();
 
 	if (cls.state == ca_dedicated)
 		Cmd_AddCommand ("disconnect", CL_Disconnect_f, "disconnect from server (or disconnect all clients if running a server)");
@@ -1438,6 +1441,7 @@ void Host_Shutdown(void)
 	}
 
 	SV_StopThread();
+	TaskQueue_Shutdown();
 	Thread_Shutdown();
 	Cmd_Shutdown();
 	Key_Shutdown();

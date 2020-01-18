@@ -137,6 +137,7 @@ set(OBJ_COMMON
 	${ENGINE_DIR}/svbsp.c
 	${ENGINE_DIR}/svvm_cmds.c
 	${ENGINE_DIR}/sys_shared.c
+	${ENGINE_DIR}/taskqueue.c
 	${ENGINE_DIR}/vid_shared.c
 	${ENGINE_DIR}/view.c
 	${ENGINE_DIR}/wad.c
@@ -153,7 +154,7 @@ set(OBJ_SV
 	${ENGINE_DIR}/sys_linux.c
 	${ENGINE_DIR}/vid_null.c
 	${ENGINE_DIR}/snd_null.c
-	${ENGINE_DIR}/thread_sdl.c
+	${ENGINE_DIR}/thread_null.c
 )
 
 set(OBJ_CL

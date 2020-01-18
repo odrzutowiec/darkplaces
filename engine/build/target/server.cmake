@@ -24,10 +24,8 @@ add_executable(${ENGINE_EXE_NAME}-sv
 			   "${OBJ_VIDEO_CAPTURE}"
 )
 
-find_package(SDL2 REQUIRED)
-
 set_target_properties(${ENGINE_EXE_NAME}-sv PROPERTIES LINKER_LANGUAGE C
 											COMPILE_FLAGS "${ENGINE_PLATFLAGS} ${ENGINE_FLAGS} ${ENGINE_SV_FLAGS}")
-target_link_libraries(${ENGINE_EXE_NAME}-sv ${ENGINE_PLATLIBS} ${SDL2_LIBRARY})
+target_link_libraries(${ENGINE_EXE_NAME}-sv ${ENGINE_PLATLIBS})
 
-target_include_directories(${ENGINE_EXE_NAME}-sv PRIVATE "${HP_DIR}/inc" "${SDL2_INCLUDE_DIR}")
+target_include_directories(${ENGINE_EXE_NAME}-sv PRIVATE "${HP_DIR}/inc")
