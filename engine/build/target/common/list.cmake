@@ -1,0 +1,118 @@
+set(OBJ_SND_COMMON
+	${SRC_DIR}/snd_main.c
+	${SRC_DIR}/snd_mem.c
+	${SRC_DIR}/snd_mix.c
+	${SRC_DIR}/snd_ogg.c
+	${SRC_DIR}/snd_wav.c
+)
+
+set(OBJ_VIDEO_CAPTURE
+	${SRC_DIR}/cap_avi.c
+	${SRC_DIR}/cap_ogg.c
+)
+
+set(OBJ_COMMON
+	${SRC_DIR}/bih.c
+	${SRC_DIR}/builddate.c
+	${SRC_DIR}/cd_shared.c
+	${SRC_DIR}/crypto.c
+	${SRC_DIR}/cl_collision.c
+	${SRC_DIR}/cl_demo.c
+	${SRC_DIR}/cl_input.c
+	${SRC_DIR}/cl_main.c
+	${SRC_DIR}/cl_parse.c
+	${SRC_DIR}/cl_particles.c
+	${SRC_DIR}/cl_screen.c
+	${SRC_DIR}/cl_video.c
+	${SRC_DIR}/cl_video_libavw.c
+	${SRC_DIR}/clvm_cmds.c
+	${SRC_DIR}/cmd.c
+	${SRC_DIR}/collision.c
+	${SRC_DIR}/common.c
+	${SRC_DIR}/console.c
+	${SRC_DIR}/csprogs.c
+	${SRC_DIR}/curves.c
+	${SRC_DIR}/cvar.c
+	${SRC_DIR}/dpvsimpledecode.c
+	${SRC_DIR}/filematch.c
+	${SRC_DIR}/fractalnoise.c
+	${SRC_DIR}/fs.c
+	${SRC_DIR}/ft2.c
+	${SRC_DIR}/utf8lib.c
+	${SRC_DIR}/gl_backend.c
+	${SRC_DIR}/gl_draw.c
+	${SRC_DIR}/gl_rmain.c
+	${SRC_DIR}/gl_rsurf.c
+	${SRC_DIR}/gl_textures.c
+	${SRC_DIR}/hmac.c
+	${SRC_DIR}/host.c
+	${SRC_DIR}/host_cmd.c
+	${SRC_DIR}/image.c
+	${SRC_DIR}/image_png.c
+	${SRC_DIR}/jpeg.c
+	${SRC_DIR}/keys.c
+	${SRC_DIR}/lhnet.c
+	${SRC_DIR}/libcurl.c
+	${SRC_DIR}/mathlib.c
+	${SRC_DIR}/matrixlib.c
+	${SRC_DIR}/mdfour.c
+	${SRC_DIR}/meshqueue.c
+	${SRC_DIR}/mod_skeletal_animatevertices_sse.c
+	${SRC_DIR}/mod_skeletal_animatevertices_generic.c
+	${SRC_DIR}/model_alias.c
+	${SRC_DIR}/model_brush.c
+	${SRC_DIR}/model_shared.c
+	${SRC_DIR}/model_sprite.c
+	${SRC_DIR}/netconn.c
+	${SRC_DIR}/palette.c
+	${SRC_DIR}/polygon.c
+	${SRC_DIR}/portals.c
+	${SRC_DIR}/protocol.c
+	${SRC_DIR}/prvm_cmds.c
+	${SRC_DIR}/prvm_edict.c
+	${SRC_DIR}/prvm_exec.c
+	${SRC_DIR}/r_explosion.c
+	${SRC_DIR}/r_lightning.c
+	${SRC_DIR}/r_modules.c
+	${SRC_DIR}/r_shadow.c
+	${SRC_DIR}/r_sky.c
+	${SRC_DIR}/r_sprites.c
+	${SRC_DIR}/sbar.c
+	${SRC_DIR}/sv_demo.c
+	${SRC_DIR}/sv_main.c
+	${SRC_DIR}/sv_move.c
+	${SRC_DIR}/sv_phys.c
+	${SRC_DIR}/sv_user.c
+	${SRC_DIR}/svbsp.c
+	${SRC_DIR}/svvm_cmds.c
+	${SRC_DIR}/sys_shared.c
+	${SRC_DIR}/taskqueue.c
+	${SRC_DIR}/vid_shared.c
+	${SRC_DIR}/view.c
+	${SRC_DIR}/wad.c
+	${SRC_DIR}/world.c
+	${SRC_DIR}/zone.c
+)
+
+set(OBJ_MENU
+	${SRC_DIR}/menu.c
+	${SRC_DIR}/mvm_cmds.c
+)
+
+set(OBJ_SV
+	${SRC_DIR}/sys_linux.c
+	${SRC_DIR}/vid_null.c
+	${SRC_DIR}/snd_null.c
+	${SRC_DIR}/thread_null.c
+)
+
+set(OBJ_CL
+	${SRC_DIR}/snd_sdl.c
+	${SRC_DIR}/sys_sdl.c
+	${SRC_DIR}/vid_sdl.c
+	${SRC_DIR}/thread_sdl.c
+)
+
+set(OBJ_RC
+	${ENGINE_BUILD_WINRC}
+)

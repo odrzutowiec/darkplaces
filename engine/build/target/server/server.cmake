@@ -15,45 +15,26 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.      #
 #------------------------------------------------------------------------------#
 
-
-### BUILD - CLIENT ###
-
-if(ENGINE_CONFIG_MENU)
-	set(ENGINE_CL_FLAGS "${ENGINE_CL_FLAGS} -DCONFIG_MENU")
-endif()
-
-if(ENGINE_CONFIG_CD)
-	set(ENGINE_CL_FLAGS "${ENGINE_CL_FLAGS} -DCONFIG_CD")
-endif()
-
-set(ENGINE_CL_FLAGS "${ENGINE_CL_FLAGS} -DLINK_TO_LIBJPEG -DLINK_TO_LIBVORBIS")
-
-# Dependencies
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${MODULE_DIR}/libs)
-
-find_package(JPEG REQUIRED)
-find_package(PNG REQUIRED)
-find_package(CURL REQUIRED)
-find_package(SDL2 REQUIRED)
-find_package(Vorbis REQUIRED)
+### BUILD - SERVER ###
 
 # Targets
-add_executable(${ENGINE_EXE_NAME}
-			   "${OBJ_CL}"
-			   "${OBJ_MENU}"
-			   "${OBJ_SND_COMMON}"
-			   "${OBJ_CD_COMMON}"
-			   "${OBJ_VIDEO_CAPTURE}"
-			   "${OBJ_COMMON}"
+add_executable(darkplaces-sv
+	"${OBJ_SV}"
+	"${OBJ_COMMON}"
+	"${OBJ_VIDEO_CAPTURE}"
 )
-set_target_properties(${ENGINE_EXE_NAME} PROPERTIES LINKER_LANGUAGE C
-								         COMPILE_FLAGS "${ENGINE_PLATFLAGS} ${ENGINE_FLAGS} ${ENGINE_CL_FLAGS}")
-target_link_libraries(${ENGINE_EXE_NAME} ${SDL2_LIBRARY} ${JPEG_LIBRARY} ${PNG_LIBRARY} ${CURL_LIBRARY} ${VORBIS_LIBRARIES} ${ENGINE_PLATLIBS})
 
-target_include_directories(${ENGINE_EXE_NAME} PRIVATE 
-	${HP_DIR}/inc
-	${SDL2_INCLUDE_DIR}
-	${JPEG_INCLUDE_DIR}
-	${PNG_INCLUDE_DIR}
-	${VORBIS_INCLUDE_DIRS}
+if(WIN32)
+	target_sources(darkplaces-sv PRIVATE ${ENGINE_BUILD_WINRC})
+endif()
+
+add_dependencies(darkplaces d0_blind_id)
+
+set_target_properties(darkplaces-sv PROPERTIES
+	OUTPUT_NAME ${ENGINE_BUILD_NAME}-sv
+	COMPILE_FLAGS "${ENGINE_FLAGS}"
 )
+
+target_link_libraries(darkplaces-sv ${ENGINE_LIBS})
+
+target_include_directories(darkplaces-sv PRIVATE "${INC_DIR}")

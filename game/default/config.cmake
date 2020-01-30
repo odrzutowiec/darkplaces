@@ -1,15 +1,17 @@
-set(CMAKE_BUILD_TYPE "Debug")
+set(ENGINE_BUILD_CLIENT ON)
+set(ENGINE_BUILD_SERVER ON)
+set(ENGINE_BUILD_EXE_NAME "darkplaces")
+set(ENGINE_BUILD_WINRC "${GAME_PROJECT_DIR}/res/darkplaces.rc")
+set(GAME_BUILD_CUSTOM_COMMAND "")
+set(GAME_BUILD_EXTERNAL_PROJECT "")
+set(ENGINE_CONFIG_MENU ON)
+set(ENGINE_CONFIG_CD ON)
+set(ENGINE_CONFIG_VIDEO_CAPTURE ON)
+set(ENGINE_CONFIG_BUILD_TIMESTAMPS ON)
+set(ENGINE_CONFIG_BUILD_REVISION ON)
 
-set(GAME_BUILD_TOOL "" CACHE STRING "Which tool(s) to build the game?")
-
-set(ENGINE_EXE_NAME "${option_project}" CACHE STRING "What do you want to name the engine executable? If unsure, leave this default. Default = horsepower")
-
-set(ENGINE_VERSION "${HP_REV}" CACHE STRING "Set engine version string. If unsure, leave this blank. Default = SHA of HEAD")
-
-set(ENGINE_WINRC "" CACHE STRING "Location of Windows resource file. If unsure, leave this blank. Default = <blank>")
-
-option(ENGINE_CONFIG_MENU "Compile the engine with legacy menu support. Required for Quake and any mods that use the legacy menu. If unsure or you're gonna play Quake or mods built for Quake, turn this on. Default = ON" ON)
-
-option(ENGINE_CONFIG_CD "Compile the engine with CD audio support. Required if you intend to have in-game music at all, even if you don't use CDs. Default = ON" ON)
-
-option(ENGINE_NO_BUILD_TIMESTAMPS "Disable build timestamps in the version string. Default = OFF" OFF)
+set(ENGINE_LINK_TO_CRYPTO ON)
+set(ENGINE_LINK_TO_CRYPTO_RIJNDAEL ON)
+set(ENGINE_LINK_TO_ZLIB ON)
+set(ENGINE_LINK_TO_LIBJPEG ON)
+set(ENGINE_LINK_TO_LIBODE OFF)

@@ -15,17 +15,42 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.      #
 #------------------------------------------------------------------------------#
 
-### BUILD - SERVER ###
+find_package(JPEG REQUIRED)
+find_package(PNG REQUIRED)
+find_package(CURL REQUIRED)
+find_package(SDL2 REQUIRED)
+find_package(Vorbis REQUIRED)
+find_package(Crypto)
 
-# Targets
-add_executable(${ENGINE_EXE_NAME}-sv
-               "${OBJ_SV}"
-			   "${OBJ_COMMON}"
-			   "${OBJ_VIDEO_CAPTURE}"
+include("${TGT_DIR}/client/flags.cmake")
+
+add_executable(darkplaces
+	"${OBJ_CL}"
+	"${OBJ_MENU}"
+	"${OBJ_SND_COMMON}"
+	"${OBJ_CD_COMMON}"
+	"${OBJ_VIDEO_CAPTURE}"
+	"${OBJ_COMMON}"
 )
 
-set_target_properties(${ENGINE_EXE_NAME}-sv PROPERTIES LINKER_LANGUAGE C
-											COMPILE_FLAGS "${ENGINE_PLATFLAGS} ${ENGINE_FLAGS} ${ENGINE_SV_FLAGS}")
-target_link_libraries(${ENGINE_EXE_NAME}-sv ${ENGINE_PLATLIBS})
+if(WIN32)
+	target_sources(darkplaces PRIVATE ${ENGINE_BUILD_WINRC})
+endif()
 
-target_include_directories(${ENGINE_EXE_NAME}-sv PRIVATE "${HP_DIR}/inc")
+add_dependencies(darkplaces d0_blind_id)
+
+set_target_properties(darkplaces PROPERTIES
+	OUTPUT_NAME "${ENGINE_BUILD_NAME}"
+	COMPILE_FLAGS "${ENGINE_CL_FLAGS}"
+)
+
+target_link_libraries(darkplaces "${ENGINE_CL_LIBS}")
+
+target_include_directories(darkplaces PRIVATE 
+	"${INC_DIR}"
+	"${SDL2_INCLUDE_DIR}"
+	"${JPEG_INCLUDE_DIR}"
+	"${PNG_INCLUDE_DIR}"
+	"${VORBIS_INCLUDE_DIRS}"
+	"${d0_blind_id_INCLUDE_DIR}"
+)
