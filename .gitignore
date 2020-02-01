@@ -43,3 +43,4 @@ Makefile
 .externalToolBuilders/
 /.temp.cmake
 /.tmp
+/.prefix
