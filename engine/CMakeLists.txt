@@ -27,6 +27,7 @@ include(${UTIL_DIR}/callback.cmake)
 # Initial options
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${LIB_DIR})
 set(CMAKE_BUILD_TYPE "")
+set(ENGINE_DOWNLOAD_DEPENDS OFF CACHE BOOL "Download all dependencies, compile, and link against them, instead of using system libraries.")
 set(ENGINE_BUILD_CLIENT ON CACHE BOOL "Build the client")
 set(ENGINE_BUILD_SERVER ON CACHE BOOL "Build the server")
 set(ENGINE_BUILD_NAME "darkplaces" CACHE STRING "Engine binary name")
