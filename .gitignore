@@ -42,5 +42,4 @@ Makefile
 .buildconfig
 .externalToolBuilders/
 /.temp.cmake
-/.tmp
 /.prefix
