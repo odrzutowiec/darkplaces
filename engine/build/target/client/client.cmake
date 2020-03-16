@@ -52,5 +52,5 @@ target_include_directories(darkplaces PRIVATE
 	"${JPEG_INCLUDE_DIR}"
 	"${PNG_INCLUDE_DIR}"
 	"${VORBIS_INCLUDE_DIRS}"
-	"${d0_blind_id_INCLUDE_DIR}"
+	"${CRYPTO_INCLUDE_DIR}"
 )

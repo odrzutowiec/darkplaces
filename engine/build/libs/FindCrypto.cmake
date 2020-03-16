@@ -1,17 +1,21 @@
-include(ExternalProject)
+#
+# Try to find d0_blind_id and d0_blind_id_rijndael libraries and include paths
+# Once done this will define
+#
+# CRYPTO_FOUND
+# CRYPTO_INCLUDE_DIRS
+# CRYPTO_LIBRARIES
+#
 
-set(d0_blind_id_URL "https://gitlab.com/xonotic/d0_blind_id/-/archive/master/d0_blind_id-master.tar.gz")
-set(d0_blind_id_HASH "SHA256=a195d1a34a341874a86f8abdb5b847ff2e692c0e0faf9d0e45f1cbc5ea351520")
-set(d0_blind_id_INCLUDE_DIR "${DEP_PREFIX_DIR}/include")
-set(d0_blind_id_LIBRARY "${DEP_PREFIX_DIR}/lib/${CMAKE_SHARED_MODULE_PREFIX}d0_blind_id${CMAKE_SHARED_LIBRARY_SUFFIX}")
-set(d0_rijndael_LIBRARY "${DEP_PREFIX_DIR}/lib/${CMAKE_SHARED_MODULE_PREFIX}d0_rijndael${CMAKE_SHARED_LIBRARY_SUFFIX}")
+find_path(CRYPTO_INCLUDE_DIR d0_blind_id/d0_blind_id.h d0_blind_id/d0_rijndael.h d0_blind_id/d0.h)
 
-ExternalProject_Add(d0_blind_id
-	BUILD_IN_SOURCE 1
-	URL "${d0_blind_id_URL}"
-	URL_HASH "${d0_blind_id_HASH}"
-	EXCLUDE_FROM_ALL TRUE
-	CONFIGURE_COMMAND <SOURCE_DIR>/autogen.sh
-	COMMAND ./configure --prefix=${DEP_PREFIX_DIR}
-	BUILD_COMMAND "make"
-)
+find_library(d0_blind_id_LIBRARY NAMES d0_blind_id)
+find_library(d0_rijndael_LIBRARY NAMES d0_rijndael)
+
+set(CRYPTO_LIBRARIES ${d0_blind_id_LIBRARY} ${d0_rijndael_LIBRARY})
+
+include(FindPackageHandleStandardArgs)
+
+find_package_handle_standard_args(Crypto DEFAULT_MSG CRYPTO_LIBRARIES CRYPTO_INCLUDE_DIR)
+
+mark_as_advanced(CRYPTO_INCLUDE_DIR CRYPTO_LIBRARIES)
