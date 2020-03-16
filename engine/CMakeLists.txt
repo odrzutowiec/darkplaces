@@ -40,11 +40,11 @@ set(ENGINE_CONFIG_VIDEO_CAPTURE ON CACHE BOOL "Enable video capture support")
 set(ENGINE_CONFIG_BUILD_TIMESTAMP ON CACHE BOOL "Add the git commit timestamp to the version string")
 set(ENGINE_CONFIG_BUILD_REVISION ON CACHE BOOL "Add the git revision to the version string")
 
-set(ENGINE_LINK_TO_CRYPTO ON CACHE BOOL "blah")
-set(ENGINE_LINK_TO_CRYPTO_RIJNDAEL ON CACHE BOOL "blah")
-set(ENGINE_LINK_TO_ZLIB ON CACHE BOOL "blah")
-set(ENGINE_LINK_TO_LIBJPEG ON CACHE BOOL "blah")
-set(ENGINE_LINK_TO_LIBODE OFF CACHE BOOL "blah")
+set(ENGINE_LINK_TO_CRYPTO ON CACHE BOOL "Link to d0_blind_id dynamically")
+set(ENGINE_LINK_TO_CRYPTO_RIJNDAEL ON CACHE BOOL "Link to d0_blind_id_rijndael dynamically")
+set(ENGINE_LINK_TO_ZLIB ON CACHE BOOL "Link to zlib dynamically")
+set(ENGINE_LINK_TO_LIBJPEG ON CACHE BOOL "Link to libjpeg dynamically")
+set(ENGINE_LINK_TO_LIBODE OFF CACHE BOOL "Link to ODE dynamically")
 
 include(${TGT_DIR}/build.cmake)
 
