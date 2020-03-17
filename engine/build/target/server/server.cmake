@@ -18,23 +18,25 @@
 ### BUILD - SERVER ###
 
 # Targets
-add_executable(darkplaces-sv
+add_executable(server)
+
+target_sources(server PRIVATE
 	"${OBJ_SV}"
 	"${OBJ_COMMON}"
 	"${OBJ_VIDEO_CAPTURE}"
 )
 
 if(WIN32)
-	target_sources(darkplaces-sv PRIVATE ${ENGINE_BUILD_WINRC})
+	target_sources(server PRIVATE ${ENGINE_BUILD_WINRC})
 endif()
 
-add_dependencies(darkplaces d0_blind_id)
+#add_dependencies(server d0_blind_id)
 
-set_target_properties(darkplaces-sv PROPERTIES
-	OUTPUT_NAME ${ENGINE_BUILD_NAME}-sv
+set_target_properties(server PROPERTIES
+	OUTPUT_NAME ${ENGINE_BUILD_NAME}-dedicated
 	COMPILE_FLAGS "${ENGINE_FLAGS}"
 )
 
-target_link_libraries(darkplaces-sv ${ENGINE_LIBS})
+target_link_libraries(server ${ENGINE_LIBS})
 
-target_include_directories(darkplaces-sv PRIVATE "${INC_DIR}")
+target_include_directories(server PRIVATE "${INC_DIR}")

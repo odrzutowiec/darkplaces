@@ -15,6 +15,8 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.      #
 #------------------------------------------------------------------------------#
 
+add_executable(client)
+
 find_package(JPEG REQUIRED)
 find_package(PNG REQUIRED)
 find_package(CURL REQUIRED)
@@ -24,7 +26,7 @@ find_package(Crypto)
 
 include("${TGT_DIR}/client/flags.cmake")
 
-add_executable(darkplaces
+target_sources(client PRIVATE
 	"${OBJ_CL}"
 	"${OBJ_MENU}"
 	"${OBJ_SND_COMMON}"
@@ -34,19 +36,19 @@ add_executable(darkplaces
 )
 
 if(WIN32)
-	target_sources(darkplaces PRIVATE ${ENGINE_BUILD_WINRC})
+	target_sources(client PRIVATE ${ENGINE_BUILD_WINRC})
 endif()
 
-add_dependencies(darkplaces d0_blind_id)
+#add_dependencies(client d0_blind_id SDL2 zlib PNG JPEG curl)
 
-set_target_properties(darkplaces PROPERTIES
+set_target_properties(client PROPERTIES
 	OUTPUT_NAME "${ENGINE_BUILD_NAME}"
 	COMPILE_FLAGS "${ENGINE_CL_FLAGS}"
 )
 
-target_link_libraries(darkplaces "${ENGINE_CL_LIBS}")
+target_link_libraries(client "${ENGINE_CL_LIBS}")
 
-target_include_directories(darkplaces PRIVATE 
+target_include_directories(client PRIVATE
 	"${INC_DIR}"
 	"${SDL2_INCLUDE_DIR}"
 	"${JPEG_INCLUDE_DIR}"
