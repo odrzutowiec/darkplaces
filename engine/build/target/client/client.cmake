@@ -17,13 +17,6 @@
 
 add_executable(client)
 
-find_package(JPEG REQUIRED)
-find_package(PNG REQUIRED)
-find_package(CURL REQUIRED)
-find_package(SDL2 REQUIRED)
-find_package(Vorbis REQUIRED)
-find_package(Crypto)
-
 include("${TGT_DIR}/client/flags.cmake")
 
 target_sources(client PRIVATE
@@ -48,11 +41,4 @@ set_target_properties(client PROPERTIES
 
 target_link_libraries(client "${ENGINE_CL_LIBS}")
 
-target_include_directories(client PRIVATE
-	"${INC_DIR}"
-	"${SDL2_INCLUDE_DIR}"
-	"${JPEG_INCLUDE_DIR}"
-	"${PNG_INCLUDE_DIR}"
-	"${VORBIS_INCLUDE_DIRS}"
-	"${CRYPTO_INCLUDE_DIR}"
-)
+target_include_directories(client PRIVATE ${ENGINE_CL_INCLUDES})
