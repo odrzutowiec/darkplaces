@@ -8,7 +8,7 @@ function(hp_build_get_version)
 	execute_process(
 		COMMAND git rev-parse --short HEAD
 		WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-		OUTPUT_VARIABLE commit
+		OUTPUT_VARIABLE revision
 		OUTPUT_STRIP_TRAILING_WHITESPACE
 	)
 
