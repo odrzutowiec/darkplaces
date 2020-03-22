@@ -27,33 +27,3 @@ endmacro()
 macro(pfatal text)
 	message(FATAL_ERROR "${text}")
 endmacro()
-
-function(hp_downloadfile url save hashtype _hash)
-	pstatus("Downloading '${save}' from '${url}'...")
-
-	if(${_hash} AND ${hashtype})
-		set(hash_args "EXPECTED_HASH ${hashtype}=${_hash}")
-	endif()
-
-	file(DOWNLOAD ${url} "${save}"
-		SHOW_PROGRESS
-		TIMEOUT 60
-		${hash_args}
-	)
-
-	file(${hashtype} "${save}" hash_compare)
-
-	if(NOT ${hash_compare} STREQUAL ${_hash})
-		pfatal("The ${hashtype} hash for ${_hashtype} did not match what was expected.")
-	endif()
-endfunction()
-
-function(hp_extract archive outdir)
-	execute_process(COMMAND ${CMAKE_COMMAND} -E tar xf "${archive}"
-		WORKING_DIRECTORY ${outdir}
-		RESULT_VARIABLE estatus
-	)
-	if(${estatus})
-		pfatal("Failed to extract ${archive}")
-	endif()
-endfunction()
