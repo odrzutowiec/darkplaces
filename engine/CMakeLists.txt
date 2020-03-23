@@ -25,7 +25,7 @@ include(${UTIL_DIR}/check_config.cmake)
 include(${UTIL_DIR}/callback.cmake)
 
 # Initial options
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${LIB_DIR})
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${MODULE_DIR})
 set(CMAKE_BUILD_TYPE "")
 
 set(ENGINE_BUILD_CLIENT ON CACHE BOOL "Build the client")
