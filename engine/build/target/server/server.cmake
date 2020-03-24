@@ -30,8 +30,6 @@ if(WIN32)
 	target_sources(server PRIVATE ${ENGINE_BUILD_WINRC})
 endif()
 
-#add_dependencies(server d0_blind_id)
-
 set_target_properties(server PROPERTIES
 	OUTPUT_NAME ${ENGINE_BUILD_NAME}-dedicated
 	COMPILE_FLAGS "${ENGINE_FLAGS}"
