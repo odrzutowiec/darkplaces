@@ -24,6 +24,8 @@ include(${UTIL_DIR}/utils.cmake)
 include(${UTIL_DIR}/check_config.cmake)
 include(${UTIL_DIR}/callback.cmake)
 
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/target)
+
 # Initial options
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${MODULE_DIR})
 set(CMAKE_BUILD_TYPE "")
