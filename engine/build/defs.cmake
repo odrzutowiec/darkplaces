@@ -5,7 +5,7 @@ set(HP_DIR "${CMAKE_SOURCE_DIR}")			# Shorthand because I'm lazy
 set(ROOT_DIR "${HP_DIR}/..")				# Repository root (hopefully!)
 set(DEP_PREFIX_DIR "${ROOT_DIR}/.prefix")	# Install prefix for dependencies
 set(SRC_DIR "${HP_DIR}/src")				# Darkplaces source
-set(INC_DIR "${HP_DIR}/inc")				# Darkplaces include
+set(INC_DIR "${HP_DIR}/include")			# Darkplaces include
 set(CM_DIR "${HP_DIR}/build")				# Build system scripts
 set(UTIL_DIR "${CM_DIR}/utility")			# Utility libraries for the build system
 set(MODULE_DIR "${CM_DIR}/module")			# Find dependency libraries for the engine
