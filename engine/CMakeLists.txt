@@ -1,59 +1,118 @@
-#------------------------------------------------------------------------------#
-#   Copyright (c) 2020 Cloudwalk                                               #
-#                                                                              #
-#   This program is free software: you can redistribute it and/or modify       #
-#   it under the terms of the GNU General Public License as published by       #
-#   the Free Software Foundation, either version 3 of the License, or          #
-#   (at your option) any later version.                                        #
-#                                                                              #
-#   This program is distributed in the hope that it will be useful,            #
-#   but WITHOUT ANY WARRANTY; without even the implied warranty of             #
-#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the              #
-#   GNU General Public License for more details.                               #
-#                                                                              #
-#   You should have received a copy of the GNU General Public License          #
-#   along with this program.  If not, see <http://www.gnu.org/licenses/>.      #
-#------------------------------------------------------------------------------#
+set(OBJ_SND_COMMON
+	src/snd_main.c
+	src/snd_mem.c
+	src/snd_mix.c
+	src/snd_ogg.c
+	src/snd_wav.c
+)
 
-cmake_minimum_required(VERSION 3.10.2 FATAL_ERROR)
+set(OBJ_VIDEO_CAPTURE
+	src/cap_avi.c
+	src/cap_ogg.c
+)
 
-project(darkplaces C)
+set(OBJ_COMMON
+	src/bih.c
+	src/builddate.c
+	src/cd_shared.c
+	src/crypto.c
+	src/cl_collision.c
+	src/cl_demo.c
+	src/cl_input.c
+	src/cl_main.c
+	src/cl_parse.c
+	src/cl_particles.c
+	src/cl_screen.c
+	src/cl_video.c
+	src/cl_video_libavw.c
+	src/clvm_cmds.c
+	src/cmd.c
+	src/collision.c
+	src/common.c
+	src/console.c
+	src/csprogs.c
+	src/curves.c
+	src/cvar.c
+	src/dpvsimpledecode.c
+	src/filematch.c
+	src/fractalnoise.c
+	src/fs.c
+	src/ft2.c
+	src/utf8lib.c
+	src/gl_backend.c
+	src/gl_draw.c
+	src/gl_rmain.c
+	src/gl_rsurf.c
+	src/gl_textures.c
+	src/hmac.c
+	src/host.c
+	src/host_cmd.c
+	src/image.c
+	src/image_png.c
+	src/jpeg.c
+	src/keys.c
+	src/lhnet.c
+	src/libcurl.c
+	src/mathlib.c
+	src/matrixlib.c
+	src/mdfour.c
+	src/meshqueue.c
+	src/mod_skeletal_animatevertices_sse.c
+	src/mod_skeletal_animatevertices_generic.c
+	src/model_alias.c
+	src/model_brush.c
+	src/model_shared.c
+	src/model_sprite.c
+	src/netconn.c
+	src/palette.c
+	src/polygon.c
+	src/portals.c
+	src/protocol.c
+	src/prvm_cmds.c
+	src/prvm_edict.c
+	src/prvm_exec.c
+	src/r_explosion.c
+	src/r_lightning.c
+	src/r_modules.c
+	src/r_shadow.c
+	src/r_sky.c
+	src/r_sprites.c
+	src/sbar.c
+	src/sv_demo.c
+	src/sv_main.c
+	src/sv_move.c
+	src/sv_phys.c
+	src/sv_user.c
+	src/svbsp.c
+	src/svvm_cmds.c
+	src/sys_shared.c
+	src/taskqueue.c
+	src/vid_shared.c
+	src/view.c
+	src/wad.c
+	src/world.c
+	src/zone.c
+)
 
-include(${CMAKE_SOURCE_DIR}/build/defs.cmake)
-include(${UTIL_DIR}/utils.cmake)
-include(${UTIL_DIR}/check_config.cmake)
-include(${UTIL_DIR}/callback.cmake)
+set(OBJ_MENU
+	src/menu.c
+	src/mvm_cmds.c
+)
 
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/target)
+set(OBJ_SV
+	src/sys_linux.c
+	src/vid_null.c
+	src/snd_null.c
+	src/thread_null.c
+)
 
-# Initial options
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${MODULE_DIR})
-set(CMAKE_BUILD_TYPE "")
+set(OBJ_CL
+	src/snd_sdl.c
+	src/sys_sdl.c
+	src/vid_sdl.c
+	src/thread_sdl.c
+)
 
-set(ENGINE_BUILD_CLIENT ON CACHE BOOL "Build the client")
-set(ENGINE_BUILD_SERVER ON CACHE BOOL "Build the server")
-set(ENGINE_BUILD_NAME "darkplaces" CACHE STRING "Engine binary name")
-set(ENGINE_BUILD_WINRC "${PROJ_DEFAULT_DIR}/res/darkplaces.rc" CACHE STRING "Location of Windows .rc, usually for icon")
-set(GAME_BUILD_CUSTOM_COMMAND "" CACHE STRING "Custom tool to bootstrap. Enter what you would with execute_process")
-set(GAME_BUILD_EXTERNAL_PROJECT "" CACHE STRING "External cmake project to add. Enter what you would with ExternalProject_Add")
-set(ENGINE_CONFIG_MENU ON CACHE BOOL "Enable menu support")
-set(ENGINE_CONFIG_CD ON CACHE BOOL "Enable CD and music support. Actual CDs no longer play with SDL2.")
-set(ENGINE_CONFIG_VIDEO_CAPTURE ON CACHE BOOL "Enable video capture support")
-set(ENGINE_CONFIG_BUILD_TIMESTAMP ON CACHE BOOL "Add the git commit timestamp to the version string")
-set(ENGINE_CONFIG_BUILD_REVISION ON CACHE BOOL "Add the git revision to the version string")
-
-set(ENGINE_LINK_TO_CRYPTO ON CACHE BOOL "Link to d0_blind_id dynamically")
-set(ENGINE_LINK_TO_CRYPTO_RIJNDAEL ON CACHE BOOL "Link to d0_blind_id_rijndael dynamically")
-set(ENGINE_LINK_TO_ZLIB ON CACHE BOOL "Link to zlib dynamically")
-set(ENGINE_LINK_TO_LIBJPEG ON CACHE BOOL "Link to libjpeg dynamically")
-set(ENGINE_LINK_TO_LIBODE OFF CACHE BOOL "Link to ODE dynamically")
-
-include(${TGT_DIR}/build.cmake)
-
-hp_build_parse_config()
-
-hp_build_check_config()
-
-hp_build()
-
-#hp_build_callback()
+set(OBJ_RC
+	${ENGINE_BUILD_WINRC}
+)

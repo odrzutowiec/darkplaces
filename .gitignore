@@ -29,7 +29,6 @@ cmake_install.cmake
 .classpath
 Makefile
 .settings/*
-/build/
 /game/*
 !/game/readme.txt
 !/game/default/config.cmake
