@@ -1,6 +1,6 @@
 #!/bin/bash
 #------------------------------------------------------------------------------#
-#   build.sh (Horsepower/Darkplaces Build Script)                              #
+#   build.sh (Darkplaces Build Script)                                         #
 #                                                                              #
 #   Copyright (c) 2020 Cloudwalk                                               #
 #                                                                              #
@@ -598,7 +598,7 @@ reset_cache() { # It resets the cache.
 	exit 0
 }
 #------------------------------------------------------------------------------#
-printf "\n\e[1;34m---Horsepower Build Wizard---\e[0m\n\n"
+printf "\n\e[1;34m---Darkplaces Build Wizard---\e[0m\n\n"
 
 declare -g args=("$@") # Put cmdline in separate array to be read in functions
 declare -g me=$0 # Script can refer to itself regardless of filename in global scope
@@ -608,7 +608,7 @@ declare -g config_template; config_template="$(pwd)/game/default"
 
 ### Default options ###
 # These are changed by the cache (if it exists) and compared with user input.
-declare -g cache_project="horsepower"
+declare -g cache_project="darkplaces"
 declare -g cache_project_dir="" # Defined later
 declare -g cache_build_dir="" # Defined later
 declare -g cache_build_cc=""
@@ -647,4 +647,4 @@ option_get_check		# Check that input and ask for new input
 build_start				# Start build with options
 option_cache_write		# Write to cache
 
-psuccess "* The Horsepower Build Wizard has completed the requested operations\n successfully.\n\n"
+psuccess "* The Darkplaces Build Wizard has completed the requested operations\n successfully.\n\n"
